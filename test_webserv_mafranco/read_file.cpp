@@ -1,3 +1,6 @@
+#ifndef READ_FILE_CPP
+# define READ_FILE_CPP
+
 #include <iostream>
 #include <fstream>
 #include <sstream>
@@ -23,3 +26,5 @@ std::string readFileToString(const std::string& filename) {
     // Return the contents of the file as a std::string
     return buffer.str();
 }
+
+#endif
