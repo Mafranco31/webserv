@@ -1,13 +1,3 @@
-/*#include <string>
-#include <iostream>
-#include <sys/types.h>
-#include <dirent.h>
-#include <sys/stat.h>
-#include <unistd.h>
-#include <sys/socket.h>
-#include "../conf/webserv.conf"
-#include <map>
-#include <fcntl.h>*/
 #include "../inc/header.hpp"
 
 int get_file(int fd) {
@@ -83,7 +73,7 @@ int get_file(int fd) {
     if (outfile.is_open()) {
         int pos_start_file = buff.find("\r\n\r\n") + 4;
         int pos_end_file = buff.find(boundid, pos_start_file);
-        std::string file_content = buff.substr(pos_start_file, pos_end_file - pos_start_file - 2);
+        std::string file_content = buff.substr(pos_start_file, pos_end_file - pos_start_file - 3);
         std::cout << "BUFF IV FOUND: " << file_content << "$" << std::endl;
         outfile << file_content;
         outfile.close();
@@ -93,17 +83,6 @@ int get_file(int fd) {
         std::cout << "Error creating " << filename << std::endl;
         return (-1);
     }
-
-    /*int fd_new_file = open(filename.c_str(), O_CREAT, S_IRWXU);
-    if (fd_new_file == -1) {
-        std::cout << "Error creating " << filename << std::endl;
-        return (-1);
-    }
-    int pos_start_file = buff.find("\r\n\r\n") + 4;
-    int pos_end_file = buff.find(boundid, pos_start_file);
-    std::string file_content = buff.substr(pos_start_file, pos_end_file - pos_start_file - 2);
-    std::cout << "BUFF IV FOUND: " << file_content << "$" << std::endl;
-    write(fd_new_file, file_content.c_str(), file_content.length());*/
 
     if (chdir("..") == -1){
         std::cout << "Error trying to go to directory: .. from " <<  dir_uploads << std::endl;

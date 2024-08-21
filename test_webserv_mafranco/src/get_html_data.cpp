@@ -1,13 +1,3 @@
-/*#include <map>
-#include <string>
-#include <iostream>
-#include "../conf/webserv.conf"
-#include <sys/types.h>
-#include <dirent.h>
-#include <unistd.h>
-#include "read_file.cpp"*/
-//#include "read_file.cpp"
-
 #include "../inc/header.hpp"
 
 
@@ -21,8 +11,6 @@ int    read_path_content(char *path, std::map<std::string, std::string> *map) {
     DIR *dir = opendir(".");
 
     struct dirent   *dirent;
-
-    //int f_redirect = 0;
 
     std::string s_path(path);
     if (s_path.at(s_path.length() - 1) != '/')

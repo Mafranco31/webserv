@@ -1,11 +1,3 @@
-/*#ifndef READ_FILE_CPP
-# define READ_FILE_CPP
-
-#include <iostream>
-#include <fstream>
-#include <sstream>
-#include <string>*/
-
 #include "../inc/header.hpp"
 
 std::string readFileToString(const std::string& filename) {

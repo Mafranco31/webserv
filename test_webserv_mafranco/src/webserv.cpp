@@ -1,26 +1,7 @@
-/*#include <stdio.h>
-#include <stdlib.h>
-#include <unistd.h>
-#include <string>
-#include <iostream>
-#include <sys/socket.h>
-#include <netinet/in.h>
-//#include "read_file.cpp"
-#include <sys/event.h>
-#include "ft_memset.c"
-#include <fcntl.h>
-#include <sys/time.h>
-#include "send_html_page.cpp"
-#include <map>
-#include "get_html_data.cpp"
-
-#define MAX_EVENTS 10*/
 #include "../inc/header.hpp"
 
 int    clients[1024];
 int         maxfd = 0, gid = 0;
-//std::string send_buffer = readFileToString("index.html");
-//size_t      size_page = send_buffer.length();
 
 void    err(char  *msg)
 {
@@ -39,6 +20,7 @@ int main(int	argc, char **argv)
 
     struct sockaddr_in  serveraddr;
 
+    // map our html files
 	std::map<std::string, std::string>	*site_data = new std::map<std::string, std::string>;
 	if (get_site(site_data) == -1) err ((char*)"Wrong html directory in configuration");// in get_html_data, get the html.
 	
@@ -82,7 +64,6 @@ int main(int	argc, char **argv)
     timeout.tv_nsec = 0;
 
     // Macro to set the kqueue evenet as read and write
-	//EV_SET(&change_event, serverfd, EVFILT_READ, EV_ADD, 0, 0, NULL);
 	EV_SET(&change_event, serverfd, EVFILT_READ | EVFILT_WRITE, EV_ADD, 0, 0, NULL);
     if (kevent(kq, &change_event, 1, NULL, 0, NULL) == -1) {
         close(serverfd);
