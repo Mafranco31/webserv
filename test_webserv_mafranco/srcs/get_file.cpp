@@ -5,7 +5,7 @@
 #include <sys/stat.h>
 #include <unistd.h>
 #include <sys/socket.h>
-#include "conf/webserv.conf"
+#include "../conf/webserv.conf"
 #include <map>
 #include <fcntl.h>
 
@@ -29,32 +29,56 @@ int get_file(int fd) {
 
     std::string dir_uploads(WB_DIR_UPLOADS);
 
-    if (chdir(dir_uploads.c_str()) == -1){
+    if (chdir(dir_uploads.c_str()) == -1) {
         std::cout << "Error trying to go to directory: " << dir_uploads << " from /" << std::endl;
         return (-1);
     }
     
     DIR *dir = opendir(".");
+    if (!dir) {
+        std::cout << "Error opening directory: " << dir_uploads << " from /" << std::endl;
+        return (-1);
+    }
 
     struct dirent   *dirent;
 
     int nb_file = 1;
+    size_t ppose;
+    size_t  tmppose;
 
     do {
+        tmppose = 0;
         dirent = readdir(dir);
+        std::string num_file_bf = '(' + std::to_string(nb_file - 1) + ')';
+        std::string num_file = '(' + std::to_string(nb_file) + ')';
         if (dirent) {
             std::string ndir(dirent->d_name);
             if (ndir == "." || ndir == "..") continue;
             if (ndir == filename) {
-                filename = filename.substr(0, filename.find('.')) + '(' + std::to_string(nb_file) + ')' + filename.substr(filename.find('.'), filename.length() - filename.find('.') - 1);
+                // find last '.' in filename
+                do {
+                    ppose = tmppose;
+                    tmppose = filename.find('.', ppose + 1);
+                } while (tmppose != std::string::npos);
+                // find if there is already a (*nb*) in the filename to increment it
+                if (nb_file > 1 && filename.find(num_file_bf, ppose - num_file_bf.length() - 1) != std::string::npos)
+                    filename = filename.substr(0, ppose - num_file_bf.length()) + num_file + filename.substr(ppose);
+                else
+                    filename = filename.substr(0, ppose) + num_file + filename.substr(ppose, filename.length() - ppose);
                 nb_file += 1;
+                // re execute the opendir to check all files with the new filename
+                dir = opendir(".");
+                if (!dir) {
+                    std::cout << "Error opening directory: " << dir_uploads << " from /" << std::endl;
+                    return (-1);
+                }
             }
         }
     } while (dirent);
 
     filename = filename;
 
-    if (open(filename.c_str(), O_CREAT) == -1) {
+    if (open(filename.c_str(), O_CREAT, S_IRWXU) == -1) {
         std::cout << "Error creating " << filename << std::endl;
         return (-1);
     }
