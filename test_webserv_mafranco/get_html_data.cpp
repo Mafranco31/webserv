@@ -12,7 +12,7 @@
 /*  drop comments to do a recursive search over all subdirectories  */
 int    read_path_content(char *path, std::map<std::string, std::string> *map) {
     if (chdir(path) == -1){
-        std::cout << "Error trying to go to directory: " << path << std::endl;
+        std::cout << "Error trying to go to directory: " << path << " from /" << std::endl;
         return (-1);
     }
     
@@ -49,7 +49,7 @@ int    read_path_content(char *path, std::map<std::string, std::string> *map) {
     } while (dirent);
 
     if (chdir("..") == -1){
-        std::cout << "Error trying to go to directory: .." << std::endl;
+        std::cout << "Error trying to go to directory: .. from " << path << std::endl;
         return (-1);
     }
     return (0);
@@ -57,7 +57,7 @@ int    read_path_content(char *path, std::map<std::string, std::string> *map) {
 
 
 int get_site(std::map<std::string, std::string> *map) {
-    if (read_path_content(WB_DIR_PATH, map) == -1) return (-1);
+    if (read_path_content((char*)WB_DIR_PATH, map) == -1) return (-1);
     if (read_path_content((char*)"errwww", map) == -1) return (-1);
 
     for (std::map<std::string, std::string>::iterator it = map->begin(); it != map->end(); ++it) {

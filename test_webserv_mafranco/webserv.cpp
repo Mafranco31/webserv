@@ -121,11 +121,11 @@ int main(int	argc, char **argv)
                     buffer[bytes_read] = '\0';
 					// Echo back the message to the client
                     std::cout << "Received from client " << events[i].ident << ": " << std::endl;
-                    std::cout << buffer << std::endl << "End of transmission." << std::endl;
-                    
+					std::cout << buffer << std::endl;
 					// Send the asked html page to the client
-					std::string path(buffer, 50);
-					send_html_page(events[i].ident, path, site_data);
+					std::string path(buffer, 100);
+
+					action_html(events[i].ident, path, site_data);
                 } else {
                     // Client disconnected
 					std::cout << "\033[1;31mClient " << events[i].ident << " disconnected\033[0m" << std::endl;
