@@ -1,4 +1,4 @@
-#include <stdio.h>
+/*#include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
 #include <string>
@@ -7,14 +7,15 @@
 #include <netinet/in.h>
 //#include "read_file.cpp"
 #include <sys/event.h>
-#include "../inc/ft_memset.c"
+#include "ft_memset.c"
 #include <fcntl.h>
 #include <sys/time.h>
-#include "../inc/send_html_page.cpp"
+#include "send_html_page.cpp"
 #include <map>
-#include "../inc/get_html_data.cpp"
+#include "get_html_data.cpp"
 
-#define MAX_EVENTS 10
+#define MAX_EVENTS 10*/
+#include "../inc/header.hpp"
 
 int    clients[1024];
 int         maxfd = 0, gid = 0;

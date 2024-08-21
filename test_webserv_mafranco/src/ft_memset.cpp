@@ -1,4 +1,4 @@
-#include <stdio.h>
+#include "../inc/header.hpp"
 
 void	*ft_memset(void *s, int c, size_t n)
 {

@@ -1,4 +1,4 @@
-#include <string>
+/*#include <string>
 #include <iostream>
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -6,7 +6,9 @@
 #include <sys/socket.h>
 #include "read_file.cpp"
 #include "get_file.cpp"
-#include <map>
+#include <map>*/
+
+#include "../inc/header.hpp"
 
 void    action_html(int fd, std::string buff, std::map<std::string, std::string> *map) {
     int posSpace = buff.find(' ');

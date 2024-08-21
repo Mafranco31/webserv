@@ -1,14 +1,18 @@
-SRC_DIR 	= src
-SRC 		= $(wildcard $(SRC_DIR)/*.cpp)
 NAME 		= webserv
+
+SRC_DIR 	= src
 OBJ_DIR 	= .obj
 UPL_DIR		= uploads
+INCLUDE_DIR = inc
+INCLUDE 	= $(wildcard $(INCLUDE_DIR)/*.hpp)
+
+SRC 		= $(wildcard $(SRC_DIR)/*.cpp)
 OBJS 		= $(patsubst $(SRC_DIR)/%.cpp,$(OBJ_DIR)/%.o,$(SRC))
+
 CC 			= g++
 CFLAGS 		= -Wall -Wextra -Werror -std=c++98
 DEPFLAGS 	= -MMD -MP
-INCLUDE_DIR = inc
-INCLUDE 	= $(wildcard $(INCLUDE_DIR)/*.hpp)
+
 RM 			= rm -rf
 DEP_DIR 	= dep
 DEPS 		= $(OBJS:.o=.d)
@@ -31,7 +35,6 @@ $(OBJ_DIR)/%.o: $(SRC_DIR)/%.cpp Makefile | $(OBJ_DIR)
 
 clean:
 	$(RM) $(OBJ_DIR)
-	$(RM) uploads/*
 
 fclean: clean
 	$(RM) $(NAME)
