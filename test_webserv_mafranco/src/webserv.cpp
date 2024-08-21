@@ -7,12 +7,12 @@
 #include <netinet/in.h>
 //#include "read_file.cpp"
 #include <sys/event.h>
-#include "ft_memset.c"
+#include "../inc/ft_memset.c"
 #include <fcntl.h>
 #include <sys/time.h>
-#include "send_html_page.cpp"
+#include "../inc/send_html_page.cpp"
 #include <map>
-#include "get_html_data.cpp"
+#include "../inc/get_html_data.cpp"
 
 #define MAX_EVENTS 10
 
@@ -37,7 +37,6 @@ int main(int	argc, char **argv)
         err((char*)"Wrong number of arguments");
 
     struct sockaddr_in  serveraddr;
-    socklen_t           len;
 
 	std::map<std::string, std::string>	*site_data = new std::map<std::string, std::string>;
 	if (get_site(site_data) == -1) err ((char*)"Wrong html directory in configuration");// in get_html_data, get the html.
@@ -98,7 +97,7 @@ int main(int	argc, char **argv)
     	}
 
         for (int i = 0; i < nev; i++) {
-            if (events[i].ident == serverfd) {
+            if (events[i].ident == static_cast<uintptr_t>(serverfd)) {
                 // New connection on the server socket
                 clientfd = accept(serverfd, NULL, NULL);
                 if (clientfd == -1) continue; // err message

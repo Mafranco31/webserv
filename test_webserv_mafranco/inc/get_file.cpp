@@ -12,9 +12,12 @@
 int get_file(int fd) {
     char buffer[30000];
     std::string buff;
-    ssize_t bytes_read;
+    ssize_t bytes_read = read(fd, buffer, sizeof(buffer) - 1);
 
-    bytes_read = read(fd, buffer, sizeof(buffer) - 1);
+    if (bytes_read == 0) {
+        std::cout << "Error trying to read file posted" << std::endl;
+        return (-1);
+    }
     std::string s_buffer(buffer);
     buff += s_buffer;
     
@@ -75,8 +78,6 @@ int get_file(int fd) {
             }
         }
     } while (dirent);
-
-    filename = filename;
 
     if (open(filename.c_str(), O_CREAT, S_IRWXU) == -1) {
         std::cout << "Error creating " << filename << std::endl;
