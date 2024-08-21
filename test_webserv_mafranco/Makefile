@@ -1,7 +1,7 @@
 SRC_DIR 	= src
 SRC 		= $(wildcard $(SRC_DIR)/*.cpp)
 NAME 		= webserv
-OBJ_DIR 	= obj
+OBJ_DIR 	= .obj
 OBJS 		= $(patsubst $(SRC_DIR)/%.cpp,$(OBJ_DIR)/%.o,$(SRC))
 CC 			= g++
 CFLAGS 		= -Wall -Wextra -Werror -std=c++98
@@ -23,7 +23,7 @@ $(OBJ_DIR)/%.o: $(SRC_DIR)/%.cpp Makefile
 	$(CC) $(CFLAGS) $(DEPFLAGS) -I$(INCLUDE_DIR) -c $< -o $@
 
 clean:
-	$(RM) $(OBJS) $(OBJ_DIR)/*
+	$(RM) $(OBJS) $(OBJ_DIR)/*.o $(OBJ_DIR)/*.d
 	$(RM) uploads/*
 
 fclean: clean
