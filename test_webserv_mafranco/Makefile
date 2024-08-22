@@ -6,6 +6,7 @@ UPL_DIR		= uploads
 HTML_DIR	= www
 CGI_DIR		= cgi-bin
 INCLUDE_DIR = inc
+TMP_DIR		= tmp
 
 HTML_FILES 	= $(wildcard $(HTML_DIR)/*)
 CGI_FILES	= $(wildcard $(CGI_DIR)/*)
@@ -25,9 +26,12 @@ DEPS 		= $(OBJS:.o=.d)
 all: $(NAME)
 
 -include $(DEPS)
-$(NAME):    $(OBJS) | $(UPL_DIR)
+$(NAME):    $(OBJS) | $(UPL_DIR) $(TMP_DIR)
 	$(CC) $(CFLAGS) $^ -o $@
 	@echo "\033[1;32mwebserv ready to launch, use 80 as argument and connect in a browther as localhost.\033[0m"
+
+$(TMP_DIR):
+	@mkdir $@
 
 $(OBJ_DIR):
 	@mkdir $@

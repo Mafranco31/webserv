@@ -73,6 +73,7 @@ $files = scandir('../uploads');
                 <?php endif; ?>
             <?php endforeach; ?>
         </ul>
+        <button onclick="window.location.href='http://localhost/';">Go back</button>   
     </div>
     <script>
         function confirmAndDownload(filename) {
