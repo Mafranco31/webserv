@@ -13,7 +13,7 @@ void    err(char  *msg)
     exit(1);
 }
 
-int main(int	argc, char **argv)
+int main(int	argc, char **argv, char **env)
 {
     if (argc != 2)
         err((char*)"Wrong number of arguments");
@@ -106,7 +106,7 @@ int main(int	argc, char **argv)
 					// Send the asked html page to the client
 					std::string path(buffer, 100);
 
-					action_html(events[i].ident, path, site_data);
+					action_html(events[i].ident, path, site_data, env);
                 } else {
                     // Client disconnected
 					std::cout << "\033[1;31mClient " << events[i].ident << " disconnected\033[0m" << std::endl;

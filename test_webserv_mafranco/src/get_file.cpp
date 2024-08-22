@@ -1,6 +1,6 @@
 #include "../inc/header.hpp"
 
-int get_file(int fd) {
+int get_file(int fd, std::map<std::string, std::string> *map) {
     char buffer[30000];
     ssize_t bytes_read = read(fd, buffer, sizeof(buffer) - 1);
 
@@ -88,6 +88,13 @@ int get_file(int fd) {
         std::cout << "Error trying to go to directory: .. from " <<  dir_uploads << std::endl;
         return (-1);
     }
-
+    
+    std::string response = "HTTP/1.1 201 Created\r\n";
+    response += "Content-Type: text/html\r\n";
+    response += "Connection: close\r\n";
+    response += "Content-Length: " + std::to_string((*map)["/upload"].length()) + "\r\n\r\n";
+    response += (*map)["/upload"];
+    send(fd, response.c_str(), response.length(), 0);
+    
     return (0);
 }

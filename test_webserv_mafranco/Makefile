@@ -3,7 +3,12 @@ NAME 		= webserv
 SRC_DIR 	= src
 OBJ_DIR 	= .obj
 UPL_DIR		= uploads
+HTML_DIR	= www
+CGI_DIR		= cgi-bin
 INCLUDE_DIR = inc
+
+HTML_FILES 	= $(wildcard $(HTML_DIR)/*)
+CGI_FILES	= $(wildcard $(CGI_DIR)/*)
 INCLUDE 	= $(wildcard $(INCLUDE_DIR)/*.hpp)
 
 SRC 		= $(wildcard $(SRC_DIR)/*.cpp)
@@ -30,7 +35,7 @@ $(OBJ_DIR):
 $(UPL_DIR):
 	@mkdir $@
 
-$(OBJ_DIR)/%.o: $(SRC_DIR)/%.cpp Makefile | $(OBJ_DIR)
+$(OBJ_DIR)/%.o: $(SRC_DIR)/%.cpp Makefile $(HTML_FILES) $(CGI_FILES) | $(OBJ_DIR)
 	$(CC) $(CFLAGS) $(DEPFLAGS) -I$(INCLUDE_DIR) -c $< -o $@
 
 clean:

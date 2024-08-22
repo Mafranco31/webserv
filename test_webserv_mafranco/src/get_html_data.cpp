@@ -30,6 +30,11 @@ int    read_path_content(char *path, std::map<std::string, std::string> *map) {
                     if (ndir == "index.html")(*map)["/"] = n_path;
                     (*map)['/' + ndir.substr(0, ndir.length() - 5)] = n_path;
                 }
+                else if (ndir.substr(ndir.length() - 4) == ".cgi") {
+                    //if (f_redirect == 0) (*map)[path] = ndir;
+                    //if (ndir == "index.html") f_redirect = 1;
+                    (*map)['/' + ndir.substr(0, ndir.length() - 4)] = n_path;
+                }
             }/*
             else if (dirent->d_type == DT_DIR){
                 std::cout << dirent->d_name << std::endl;

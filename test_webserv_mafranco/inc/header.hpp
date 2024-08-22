@@ -13,6 +13,7 @@
 # include <netinet/in.h>
 
 # include <map>
+# include <vector>
 # include <string>
 # include <iostream>
 # include <fstream>
@@ -27,12 +28,20 @@
 
 void	    *ft_memset(void *s, int c, size_t n);
 
-int         get_file(int fd);
+int         get_file(int fd, std::map<std::string, std::string> *map);
 
 int         get_site(std::map<std::string, std::string> *map);
 
 std::string readFileToString(const std::string& filename);
 
-void        action_html(int fd, std::string buff, std::map<std::string, std::string> *map);
+void        action_html(int fd, std::string buff, std::map<std::string, std::string> *map, char **env);
+
+int         ex_cgi(std::string &cmd, int fd, char **env, std::string method);
+
+std::string get_str_errcode(int errcode);
+
+int     delete_file(int fd, std::map<std::string, std::string> *map, std::string page);
+
+int     download_file(int fd, std::map<std::string, std::string> *map, std::string page);
 
 #endif
