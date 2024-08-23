@@ -5,9 +5,14 @@ int     delete_file(int fd, std::map<std::string, std::string> *map, std::string
     (void)map;
 
     std::string     dir_uploads(WB_DIR_UPLOADS);
-    if (page.find("delete.php?file=") == std::string::npos) return (404);
-    std::string     file_path = page.substr(page.find("delete.php?file=") + 16, page.find(" ", page.find("delete.php?file=")) - page.find("delete.php?file=") + 17);
-
+    std::string search_string = "delete.php?file=";
+    if (page.find(search_string) == std::string::npos) return (404);
+    size_t start_pos = page.find(search_string);
+    start_pos += search_string.length();  // Move start_pos to the end of "delete.php?file="
+    size_t end_pos = page.find(" ", start_pos);
+    std::string file_path = page.substr(start_pos, end_pos - start_pos);
+    file_path = decode_filepath(file_path);
+    if (file_path == "") return 400;
     if (chdir(WB_DIR_UPLOADS) == -1){
         std::cout << "Error trying to go to directory: " << WB_DIR_UPLOADS << " from /" << std::endl;
         return (500);

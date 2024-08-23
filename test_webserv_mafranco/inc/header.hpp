@@ -44,4 +44,6 @@ int     delete_file(int fd, std::map<std::string, std::string> *map, std::string
 
 int     download_file(int fd, std::map<std::string, std::string> *map, std::string page);
 
+std::string decode_filepath(std::string &path);
+
 #endif

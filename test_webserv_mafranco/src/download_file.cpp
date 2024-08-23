@@ -2,11 +2,17 @@
 
 int     download_file(int fd, std::map<std::string, std::string> *map, std::string page) {
     int errcode = 0;
-    
-    std::string     dir_uploads(WB_DIR_UPLOADS);
-    if (page.find("download.php?file=") == std::string::npos) return (404);
-    std::string     file_path = page.substr(page.find("download.php?file=") + 18, page.find(" ", page.find("download.php?file=")) - page.find("download.php?file=") + 19);
+
     (void)map;
+    std::string     dir_uploads(WB_DIR_UPLOADS);
+    std::string search_string = "download.php?file=";
+    if (page.find(search_string) == std::string::npos) return (404);
+    size_t start_pos = page.find(search_string);
+    start_pos += search_string.length();  // Move start_pos to the end of "delete.php?file="
+    size_t end_pos = page.find(" ", start_pos);
+    std::string file_path = page.substr(start_pos, end_pos - start_pos);
+    file_path = decode_filepath(file_path);
+    if (file_path == "") return 400;
     std::string response;
 
     std::string file_str;

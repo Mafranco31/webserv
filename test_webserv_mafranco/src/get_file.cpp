@@ -1,5 +1,12 @@
 #include "../inc/header.hpp"
 
+int filename_check(std::string filename) {
+    for (std::string::iterator it = filename.begin(); it != filename.end(); it++) {
+        if (*it < 32 || *it > 126) return (1);
+    }
+    return (0);
+}
+
 int get_file(int fd, std::map<std::string, std::string> *map) {
     char buffer[30000];
     ssize_t bytes_read = read(fd, buffer, sizeof(buffer) - 1);
@@ -17,6 +24,7 @@ int get_file(int fd, std::map<std::string, std::string> *map) {
 
     std::string filename = buff.substr(start_filename, buff.find('\n', start_filename) - start_filename - 2);
 
+    if (filename_check(filename)) return 400;
     std::cout << "bound id: " << boundid << std::endl << "filename: " << filename << std::endl;
 
     std::string dir_uploads(WB_DIR_UPLOADS);
