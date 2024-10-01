@@ -1,56 +1,142 @@
-NAME 		= webserv
+# **************************************************************************** #
+#                                                                              #
+#                                                         :::      ::::::::    #
+#    Makefile                                           :+:      :+:    :+:    #
+#                                                     +:+ +:+         +:+      #
+#    By:  dlitran && mafranco && gmacias-           +#+  +:+       +#+         #
+#                                                 +#+#+#+#+#+   +#+            #
+#    Created: 2024/10/01 15:26:30                      #+#    #+#              #
+#    Updated: 2024/10/01 17:22:54                     ###   ########.fr        #
+#                                                                              #
+# **************************************************************************** #
 
-SRC_DIR 	= src
-OBJ_DIR 	= .obj
-UPL_DIR		= uploads
-HTML_DIR	= www
-CGI_DIR		= cgi-bin
-INCLUDE_DIR = inc
-TMP_DIR		= tmp
+
+NAME 		=	webserv
+CC			= 	c++
+FLAGS		= 	-std=c++98 -Wall -Wextra -Werror -pedantic -g3 -MMD -MP $(FLEAKS)
+FLEAKS		=	-fsanitize=address
+OS			:=	$(shell uname)
 
 HTML_FILES 	= $(wildcard $(HTML_DIR)/*)
 CGI_FILES	= $(wildcard $(CGI_DIR)/*)
-INCLUDE 	= $(wildcard $(INCLUDE_DIR)/*.hpp)
 
-SRC 		= $(wildcard $(SRC_DIR)/*.cpp)
-OBJS 		= $(patsubst $(SRC_DIR)/%.cpp,$(OBJ_DIR)/%.o,$(SRC))
+###############################################################################
+#									SRC										  #
+###############################################################################
 
-CC 			= g++
-CFLAGS 		= -Wall -Wextra -Werror -std=c++98
-DEPFLAGS 	= -MMD -MP
+SRC			=	src/webserv.cpp \
+				src/error/ \
+				src/network/ \
+				src/parse/ \
 
-RM 			= rm -rf
-DEP_DIR 	= dep
-DEPS 		= $(OBJS:.o=.d)
+OBJ		=	$(addprefix $(OBJ_DIR), $(SRC:.c=.o))
+DEPS    =   $(addprefix $(DPS_DIR), $(notdir $(SRC:.c=.d)))
 
-all: $(NAME)
+HTML_FILES 	= $(wildcard $(HTML_DIR)/*)
+CGI_FILES	= $(wildcard $(CGI_DIR)/*)
 
--include $(DEPS)
-$(NAME):    $(OBJS) | $(UPL_DIR) $(TMP_DIR)
-	$(CC) $(CFLAGS) $^ -o $@
-	@echo "\033[1;32mwebserv ready to launch, use 80 as argument and connect in a browther as localhost.\033[0m"
+###############################################################################
+#									DIR_PATH								  #
+###############################################################################
 
-$(TMP_DIR):
-	@mkdir $@
+PATH_DIR	=	src_webserv/
+SRC_DIR		=	$(PATH_DIR)src/
+OBJ_DIR		=	$(PATH_DIR).obj/
+DPS_DIR		=	$(PATH_DIR).dps/
+UPL_DIR		=	$(PATH_DIR)uploads/
+HTML_DIR	=	$(PATH_DIR)www/
+CGI_DIR		=	$(PATH_DIR)cgi-bin/
+TMP_DIR		=	$(PATH_DIR)tmp/
 
-$(OBJ_DIR):
-	@mkdir $@
+###############################################################################
+#									LIBRARIES								  #
+###############################################################################
 
-$(UPL_DIR):
-	@mkdir $@
+LIB_PATH	=	$(PATH_DIR)libraries/
+LIB_FLAGS	=	-L -l
 
-$(OBJ_DIR)/%.o: $(SRC_DIR)/%.cpp Makefile $(HTML_FILES) $(CGI_FILES) | $(OBJ_DIR)
-	$(CC) $(CFLAGS) $(DEPFLAGS) -I$(INCLUDE_DIR) -c $< -o $@
+ifeq ($(OS), Linux)
+	_PATH	= $(LIB_PATH)
+	LIB		= $(_PATH)/.a
+	_FLAGS	= -L$(_PATH) -
+else
+	_PATH	= $(LIB_PATH)
+	LIB		= $(_PATH)/.a
+	_FLAGS	= -L$(_PATH) -
+endif
+
+###############################################################################
+#									INLUDES									  #
+###############################################################################
+
+INCS	= -I $(PATH_DIR)includes/common/
+
+ifeq ($(OS), Linux)
+	INCS	+= -I $(PATH_DIR)includes/linux/
+else
+	INCS	+= -I $(PATH_DIR)includes/macos/
+endif
+
+###############################################################################
+#									COLORS									  #
+###############################################################################
+
+DEF_COLOR		= 	\033[0m
+GREEN 			= 	\033[38;5;46m
+WHITE 			= 	\033[38;5;15m
+GREY 			= 	\033[38;5;8m
+ORANGE 			= 	\033[38;5;202m
+RED 			= 	\033[38;5;160m
+
+###############################################################################
+#									RULES									  #
+###############################################################################
+
+all: make_dir $(NAME)
+	@echo "" && echo "$(YELLOW)$(NAME) ready to use:$(DEF_COLOR)"
+
+make_dir:
+	@mkdir -p $(OBJ_DIR) $(DPS_DIR) $(UPL_DIR)
+	@echo "$(GREEN)Compiling OBJECTS:$(DEF_COLOR)"
+
+
+
+$(OBJ_DIR)%.o: $(SRC_DIR)%.cpp $(HTML_FILES) $(CGI_FILES) | make_dir
+	@mkdir -p $(dir $@)
+	@echo "$(GRAY)Compiling $< to $@ $(DEF_COLOR)"
+	@$(CC) $(CFLAGS) $(INCS) -c $< -o $@
+	@mv $(basename $@).d $(DPS_DIR)
+
+#					--------	MAKE LIBRARIES	--------						  #
+
+
+#					--------	RULES PROGRAM	--------						  #
+
+$(NAME):  Makefile $(LIB) $(OBJ) | $(UPL_DIR) $(TMP_DIR)
+	@echo "$(MAGENTA)Compiling $(NAME)$(DEF_COLOR)"
+	@$(CC) $(CFLAGS) $(INCS) $(OBJ) -o $(NAME) 
+	@echo "$(BLUE)webserv ready to launch, use 80 as argument and connect in a browther as localhost.$(DEF_COLOR)"
 
 clean:
-	$(RM) $(OBJ_DIR)
+	@echo "$(RED)Removing ON $(NAME); OBJs and DEPs... $(DEF_COLOR)"
+	@/bin/rm -rf $(OBJ_DIR) $(DPS_DIR)
+	@echo "$(ORANGE)Done!$(DEF_COLOR)" && echo ""
 
 fclean: clean
-	$(RM) $(NAME)
-
+	@echo "$(RED)Removing execute $(NAME)... $(DEF_COLOR)"
+	@/bin/rm -f $(NAME)
+	@echo "$(ORANGE)Done!$(DEF_COLOR)" && echo ""
+	
 re:	clean all
+
+
 
 clean_uploads:
 	$(RM) $(UPL_DIR)
 
-.PHONY: all clean fclean re
+###############################################################################
+#									OTHERS									  #
+###############################################################################
+
+-include $(DEPS)
+.PHONY: all clean fclean re		clean_uploads
