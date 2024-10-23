@@ -6,7 +6,7 @@
 #    By:  dlitran && mafranco && gmacias-           +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/10/01 15:26:30                      #+#    #+#              #
-#    Updated: 2024/10/01 17:22:54                     ###   ########.fr        #
+#    Updated: 2024/10/23 11:47:44 by gmacias-         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -15,7 +15,7 @@ NAME 		=	webserv
 CC			= 	c++
 FLAGS		= 	-std=c++98 -Wall -Wextra -Werror -pedantic -g3 -MMD -MP $(FLEAKS)
 FLEAKS		=	-fsanitize=address
-OS			:=	$(shell uname)
+OS		:=	$(shell uname)
 
 HTML_FILES 	= $(wildcard $(HTML_DIR)/*)
 CGI_FILES	= $(wildcard $(CGI_DIR)/*)
@@ -29,8 +29,8 @@ SRC			=	src/webserv.cpp \
 				src/network/ \
 				src/parse/ \
 
-OBJ		=	$(addprefix $(OBJ_DIR), $(SRC:.c=.o))
-DEPS    =   $(addprefix $(DPS_DIR), $(notdir $(SRC:.c=.d)))
+OBJ		= $(addprefix $(OBJ_DIR), $(SRC:.c=.o))
+DEPS		= $(addprefix $(DPS_DIR), $(notdir $(SRC:.c=.d)))
 
 HTML_FILES 	= $(wildcard $(HTML_DIR)/*)
 CGI_FILES	= $(wildcard $(CGI_DIR)/*)
@@ -39,20 +39,19 @@ CGI_FILES	= $(wildcard $(CGI_DIR)/*)
 #									DIR_PATH								  #
 ###############################################################################
 
-PATH_DIR	=	src_webserv/
-SRC_DIR		=	$(PATH_DIR)src/
-OBJ_DIR		=	$(PATH_DIR).obj/
-DPS_DIR		=	$(PATH_DIR).dps/
-UPL_DIR		=	$(PATH_DIR)uploads/
-HTML_DIR	=	$(PATH_DIR)www/
-CGI_DIR		=	$(PATH_DIR)cgi-bin/
-TMP_DIR		=	$(PATH_DIR)tmp/
+SRC_DIR		=	src/
+OBJ_DIR		=	.obj/
+DPS_DIR		=	.dps/
+UPL_DIR		=	ploads/
+HTML_DIR	=	www/
+CGI_DIR		=	cgi-bin/
+TMP_DIR		=	tmp/
 
 ###############################################################################
 #									LIBRARIES								  #
 ###############################################################################
 
-LIB_PATH	=	$(PATH_DIR)libraries/
+LIB_PATH	=	libraries/
 LIB_FLAGS	=	-L -l
 
 ifeq ($(OS), Linux)
@@ -69,12 +68,12 @@ endif
 #									INLUDES									  #
 ###############################################################################
 
-INCS	= -I $(PATH_DIR)includes/common/
+INCS	= -I includes/common/
 
 ifeq ($(OS), Linux)
-	INCS	+= -I $(PATH_DIR)includes/linux/
+	INCS	+= -I includes/linux/
 else
-	INCS	+= -I $(PATH_DIR)includes/macos/
+	INCS	+= -I includes/macos/
 endif
 
 ###############################################################################
