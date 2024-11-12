@@ -91,6 +91,15 @@ std::ostream& operator<<(std::ostream& os, const Request& request) {
 	return os;
 }
 
+//	Getters
+
+std::string	Request::GetUri( void ) const {
+	if (uri.find(".") != std::string::npos) {
+		return uri.substr(0, uri.find("."));
+	}
+	return uri;
+}
+
 //	Exceptions
 const char	*Request::ErrorMethodNotImplemented::what()	const throw () {	return "Error: method not implemented.";	}
 

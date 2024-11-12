@@ -6,8 +6,11 @@ int main(int argc, char **argv, char **env) {
     (void)argv;
     (void)env;
     Server server = Server();
+    std::string path_to_html = "www";
+    std::string path_to_err = "errwww";
 
     try {
+        server.Initialize(path_to_html, path_to_err);
         server.Start();
         while (true) {
             server.Wait();

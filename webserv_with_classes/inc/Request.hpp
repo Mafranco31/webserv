@@ -25,7 +25,7 @@ class Request {
 
 	//	Getters
 		std::string	GetMethod( void ) const {	return method;	}
-		std::string	GetUri( void ) const {	return uri;	}
+		std::string	GetUri( void ) const ;
 		std::string	GetVersion( void ) const {	return version;	}
 		std::map<std::string, std::string> GetHeaders( void ) const {	return headers;	}
 		std::string GetBody( void ) const {	return body;	}
