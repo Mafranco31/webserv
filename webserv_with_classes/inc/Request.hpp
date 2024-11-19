@@ -3,6 +3,8 @@
 
 # include "header.hpp"
 
+class ErrorHttp;
+
 class Request {
 
 	private:
@@ -11,6 +13,7 @@ class Request {
 		std::string	uri;
 		std::string	version;
 		std::string body;
+		size_t body_length;
 		std::map<std::string, std::string> headers;
 	public:
 	//	Canonical form

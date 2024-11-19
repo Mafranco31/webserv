@@ -21,6 +21,8 @@
 
 # include "Server.hpp"
 # include "Request.hpp"
+# include "Sender.hpp"
+# include "ErrorHttp.hpp"
 
 # define MAX_EVENTS 100
 # define BUFFER_SIZE 8192

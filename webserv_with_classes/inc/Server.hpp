@@ -6,6 +6,7 @@
 # include "header.hpp"
 # define MAX_EVENTS 100
 
+class Sender;
 
 class Server {
 
@@ -18,16 +19,18 @@ class Server {
 		int	kq;
 		int	nev;
 
-		std::map<std::string, std::string> _html_map;
-		void ReadPath( std::string path , std::string last_path );
-		void ReadFile( std::string file , std::string last_path );
-		void Send( int clientfd, char *buffer );
+		Sender & sender;
+
+		//std::map<std::string, std::string> _html_map;
+		//void ReadPath( std::string path , std::string last_path );
+		//void ReadFile( std::string file , std::string last_path );
+		//void Send( int clientfd, char *buffer );
 
 	public:
-		Server( void );
+		Server( Sender &s );
 		~Server();
 
-		void Initialize( std::string &path_to_html, std::string &path_to_err );
+		//void Initialize( std::string &path_to_html, std::string &path_to_err );
 		void Start( void );
 		void Stop( void );
 		void Wait( void );
