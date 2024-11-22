@@ -51,11 +51,9 @@ void ConfFile::make_list(std::string line)
 
 	while (stream >> word)
 	{
-		//std::cout << word << std::endl;
 		if (!word.compare("include"))
 		{
 			stream >> word;
-			//std::cout << word << std::endl;
 			this->parse(word);
 			stream >> word;
 			if (word.compare(";"))
@@ -84,13 +82,14 @@ void ConfFile::parse(std::string path)
 	}
 	while (std::getline(ifs, line))
 	{
+		size_t pos;
 		if (line.find('#') != std::string::npos)
 		{
 			line.erase(line.begin() + line.find('#'), line.end()); //Erase commented parts of configuration file.
 			if (line.size() == 0)
 				continue ;
 		}
-		size_t pos = line.find('\'');
+		//size_t pos = line.find('\'');
 		/*while (pos != std::string::npos)
 		{
 			if (quotation == 0)
@@ -130,9 +129,10 @@ void ConfFile::parse(std::string path)
 			line.insert(line.find(';', pos), 1, ' ');
 			pos = line.find(';', pos + 2);
 		}
-		//std::cout << line << std::endl;
 		total += line + '\n';
 	}
+	if (total.size() == 0) //If file is empty.
+		throw InvalidConfigurationFile();
 	ifs.close();
 	make_list(total);
 } //Esta función es recursiva así que no puedo añadir nada más después de make_list.
@@ -158,11 +158,10 @@ void ConfFile::last_function(int &bracket, std::vector<std::string>::iterator &i
 	it++;
 	while (bracket != n)
 	{
-		//std::cout << "otro check" << std::endl;
-		//std::cout << *it << std::endl;
 		if (!(*it).compare("{"))
 		{
-			//std::cout << "hola" << std::endl;
+			if ((*(it - 2)).compare("location"))
+				throw InvalidConfigurationFile();
 			bracket++;
 			if (bracket == n + 2)
 			{
@@ -220,7 +219,7 @@ void ConfFile::sub_location_blocks()
 			if (bracket == 1)
 				loc_it++;
 		}
-		else if (bracket == 1 && !((*it).compare("location")))
+		else if (bracket == 1 && !((*it).compare("location")) && (it + 2) != _v.end() && *(it + 2) == "{")
 		{
 			//std::cout << "server: " << serv_it << ", location block:" << loc_it << std::endl;
 			last_function(bracket, it, serv[serv_it].location[loc_it]);
@@ -238,7 +237,6 @@ void ConfFile::sub_location_blocks()
 		else
 			continue ;
 	}
-	//std::cout << "check" << std::endl;
 }
 
 void ConfFile::count_location_blocks(void) //inicialmente n = 1, con recursividad va aumentando.
@@ -263,9 +261,9 @@ void ConfFile::count_location_blocks(void) //inicialmente n = 1, con recursivida
 				serv_it++;
 			}
 		}
-		else if (bracket == 1 && !((*it).compare("location")))
+		else if (bracket == 1 && !((*it).compare("location")) && (it + 2) != _v.end() && *(it + 2) == "{")
 		{
-			serv[serv_it].location_blocks++; //Muy mejorable, location podría ser el server_name...
+			serv[serv_it].location_blocks++;
 			it++;
 			it++;
 			if (*it != "{")
@@ -273,6 +271,8 @@ void ConfFile::count_location_blocks(void) //inicialmente n = 1, con recursivida
 			else
 				bracket++;
 		}
+		else if (bracket == 1 && (*it == "{" || *it == "}"))
+			throw InvalidConfigurationFile();
 		else
 			continue ;
 	}
@@ -290,7 +290,10 @@ void ConfFile::count_servers(void)
 	for (std::vector<std::string>::iterator it = _v.begin(); it < _v.end(); it++)
 	{
 		if (*it == "{")
+		{	if (bracket == 0 && (it == _v.begin() || (*(it - 1)).compare("server")))
+				throw InvalidConfigurationFile();
 			bracket++;
+		}
 		else if (*it == "}")
 			bracket--;
 		else if (bracket == 0)
@@ -306,6 +309,7 @@ void ConfFile::count_servers(void)
 	}
 	if (bracket != 0)
 		throw InvalidConfigurationFile();
+
 	//std::cout << "number of server blocks: " << server_blocks << std::endl;
 	serv_n = server_blocks;
 	this->serv = new Servers[server_blocks];
@@ -400,7 +404,7 @@ void ConfFile::data_structure(void)
 			else if (bracket == 1)
 				loc_it++;
 		}
-		else if (!(*it).compare("location") && bracket == 1)
+		else if (!(*it).compare("location") && bracket == 1 && (it + 2) != _v.end() && *(it + 2) == "{")
 		{
 			//std::cout << "\033[32m serv_it: " << serv_it << ", loc_it: " << loc_it << "\033[0m" << std::endl;
 			location_parse(bracket, it, serv[serv_it].location[loc_it], 1);
@@ -456,9 +460,27 @@ void ConfFile::check(void)
 	}
 }
 
+void ConfFile::recursive_clear(Location &location)
+{
+	for (int i = 0; i < location.sub_location_blocks; i++)
+		recursive_clear(location.sub_block[i]);
+	location.data.clear();
+	if (location.sub_location_blocks > 0)
+		delete [] location.sub_block;
+}
+
 void ConfFile::clean(void)
 {
-	//bucle con clean de todos los containers.
+	for (int i = 0; i < serv_n; i++)
+	{
+		for (int j = 0; j < serv[i].location_blocks; j++)
+		{
+			recursive_clear(serv[i].location[j]);
+		}
+		if (serv[i].location_blocks > 0)
+			delete [] serv[i].location;
+	}
+	_v.clear();
 	delete [] serv;
 }
 

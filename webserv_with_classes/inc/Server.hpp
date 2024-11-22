@@ -8,6 +8,28 @@
 
 class Sender;
 
+class Location
+{
+	public:
+		Location();
+		~Location();
+		std::string prefix;
+		int sub_location_blocks;
+		Location *sub_block;
+		std::map<std::string, std::vector<std::string> > data;
+};
+
+class Servers
+{
+	public:
+		Servers();
+		~Servers();
+		std::map<std::string, std::vector<std::string> > d; //eg. server_name (key) server.com server.org server.net (parameters -> vector)
+		Location *location;
+		int location_blocks;
+
+};
+
 class Server {
 
 	private:
@@ -36,6 +58,22 @@ class Server {
 		void Wait( void );
 		void ManageConnexion( void );
 
+		//Configuration file
+		void make_list(std::string line);
+		void parse(std::string path);
+		void data_structure(void);
+		void count_servers(void);
+		void count_location_blocks(void);
+		void sub_location_blocks(void);
+		void last_function(int &bracket, std::vector<std::string>::iterator &it, Location &location);
+		void location_parse(int &bracket, std::vector<std::string>::iterator &it, Location &location, int n);
+		void check(void);
+		void recursive_clear(Location &location);
+		void clean(void);
+		std::vector<std::string> _v;
+		Servers *serv;
+		int serv_n;
+
 	//	Exceptions
 		class ErrorCreatingSocket: public std::exception	{	const char	*what() const throw ();	};
 		class ErrorBindingSocket: public std::exception		{	const char	*what() const throw ();	};
@@ -47,6 +85,8 @@ class Server {
 		class ErrorReadingSocket: public std::exception		{	const char	*what() const throw ();	};
 		class ErrorSendingData: public std::exception		{	const char	*what() const throw ();	};
 		class ErrorReadingHtmlPath: public std::exception	{	const char	*what() const throw ();	};
+		class OpenFileException: public std::exception		{	const char	*what() const throw ();	};
+		class InvalidConfigurationFile: public std::exception	{const char	*what() const throw ();	};
 };
 
 #endif

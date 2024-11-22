@@ -42,7 +42,6 @@ class Servers
 		std::map<std::string, std::vector<std::string> > d; //eg. server_name (key) server.com server.org server.net (parameters -> vector)
 		Location *location;
 		int location_blocks; //initialize to 0.
-		//std::string *valid_directives_server = {"a", "b"};
 
 };
 
@@ -50,10 +49,10 @@ class ConfFile
 {
 	private:
 		void make_list(std::string line);
-		//std::string _path;
-		//std::string _name; //inicialmente
-		//std::map<std::string, std::vector<std::string>> _conf;
-		//ConfFile *_sub_conf;
+		std::vector<std::string> _v;
+		//valid_directives = {"listen", "root", "index", "server_name", "location", "allow_methods", "cgi_pass"}
+		Servers *serv;
+		int serv_n;
 
 
 	public:
@@ -67,11 +66,8 @@ class ConfFile
 		void last_function(int &bracket, std::vector<std::string>::iterator &it, Location &location);
 		void location_parse(int &bracket, std::vector<std::string>::iterator &it, Location &location, int n);
 		void check(void);
+		void recursive_clear(Location &location);
 		void clean(void);
-		std::vector<std::string> _v;
-		//valid_directives = {"listen", "root", "index", "server_name", "location", "allow_methods", "cgi_pass"}
-		Servers *serv;
-		int serv_n;
 
 		class OpenFileException: public std::exception
 		{

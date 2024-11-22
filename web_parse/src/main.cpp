@@ -14,6 +14,7 @@
 
 int main(int argc, char **argv)
 {
+
 	if (argc != 2)
 	{
 		std::cout << "Error: Invalid number of arguments" << std::endl;
@@ -23,10 +24,6 @@ int main(int argc, char **argv)
 	try
 	{
 		a.parse(std::string(argv[1]));
-		/*for (size_t i = 0; i < a._v.size(); ++i)
-		{
-			std::cout << "[" << a._v[i] << "]" << std::endl;
-		}*/
 		a.data_structure();
 		a.check();
 		a.clean();
