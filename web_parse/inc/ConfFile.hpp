@@ -19,6 +19,7 @@
 #include <vector>
 #include <fstream>
 #include <sstream>
+#include <set>
 
 
 
@@ -50,7 +51,8 @@ class ConfFile
 	private:
 		void make_list(std::string line);
 		std::vector<std::string> _v;
-		//valid_directives = {"listen", "root", "index", "server_name", "location", "allow_methods", "cgi_pass"}
+		std::set<std::string> valid_directives;
+		std::set<std::string> valid_directives_location;
 		Servers *serv;
 		int serv_n;
 
@@ -80,3 +82,4 @@ class ConfFile
 				virtual const char *what() const throw();
 		};
 };
+

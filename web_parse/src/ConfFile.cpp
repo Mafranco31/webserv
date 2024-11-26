@@ -14,6 +14,18 @@
 
 ConfFile::ConfFile(): serv(NULL), serv_n(0)
 {
+	valid_directives.insert("listen");
+	valid_directives.insert("root");
+	valid_directives.insert("index");
+	valid_directives.insert("server_name");
+	valid_directives.insert("allow_methods");
+
+	valid_directives_location.insert("root");
+	valid_directives_location.insert("alias");
+	valid_directives_location.insert("allow_methods");
+	valid_directives_location.insert("client_body_buffer_size");
+	valid_directives_location.insert("index");
+	valid_directives_location.insert("cgi_pass");
 
 }
 
@@ -345,9 +357,13 @@ void ConfFile::location_parse(int &bracket, std::vector<std::string>::iterator &
 			}
 			else
 			{
-				std::string key;	//Check if key is valid.
-
+				std::string key;
 				key = *it;
+				if (valid_directives_location.find(key) == valid_directives_location.end())
+				{
+					std::cout << "Invalid_directive: " << key << std::endl;
+					throw InvalidConfigurationFile();
+				}
 				//std::cout << *it << std::endl;
 				it++;
 				//std::cout << *it << std::endl;
@@ -422,6 +438,11 @@ void ConfFile::data_structure(void)
 			std::string key;
 			key = *it;
 			//Check if key is valid.
+			if (valid_directives.find(key) == valid_directives.end())
+			{
+				std::cout << "Invalid_directive: " << key << std::endl;
+				throw InvalidConfigurationFile();
+			}
 			it++;
 			while ((*it).compare(";"))
 			{
