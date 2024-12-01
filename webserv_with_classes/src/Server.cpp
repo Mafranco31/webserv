@@ -1,7 +1,7 @@
 #include "Server.hpp"
 
 //	Constructor
-Server::Server ( Sender & s ) : sender(s), serv(NULL), serv_n(0){
+Server::Server ( Sender & s, char **env ) : env(env), sender(s), serv(NULL), serv_n(0){
 	std::cout << "Default Server constructor called" << std::endl;
 }
 //	Destructor
@@ -45,7 +45,7 @@ void	Server::Start( void ) {
     }
 
 	// Setting the timeout for the kqueue
-    timeout.tv_sec = 1;
+    timeout.tv_sec = 5;
     timeout.tv_nsec = 0;
 
     // Macro to set the kqueue evenet as read and write
@@ -55,12 +55,13 @@ void	Server::Start( void ) {
 		throw Server::ErrorInitializeKqueue();
     }
 
-	std::cout << "\033[1;32mServer started on port " << 8080 << "...\033[0m" << std::endl;
+	std::cout << "\033[1;32mServer started on port " << 80 << "...\033[0m" << std::endl;
 }
 
 void	Server::Wait( void ) {
 	// waiting for event
 	nev = kevent(kq, NULL, 0, events, MAX_EVENTS, &timeout);
+	std::cout <<"\033[1;33mEvent found : " << nev << "\033[0m" << std::endl;
 	if (nev == -1) {
 		std::cerr << "Error: Could not get the new event." << std::endl;
 	}
@@ -97,11 +98,17 @@ void	Server::ManageConnexion( void ) {
 			else if (bytes_read < 0)
 				std::cerr << "Error: Could not read in the socket." << std::endl;
 			else {
-				buffer[bytes_read] = '\0';
+				std::string data = "";
+				while (bytes_read > 0) {
+					buffer[bytes_read] = '\0';
+					data = data + std::string(buffer);
+					bytes_read = read(events[i].ident, buffer, sizeof(buffer) - 1);
+				}
 				std::cout << "Received from client " << events[i].ident << ": " << std::endl;
-				std::cout <<  buffer << "$" << std::endl;
-				sender.Send(events[i].ident, buffer);
+				std::cout <<  data << "$" << std::endl;
+				sender.Send(events[i].ident, data, env);
 			}
+			//close(events[i].ident);//pas sur
 		}
 	}
 }

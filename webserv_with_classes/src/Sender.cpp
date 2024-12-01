@@ -55,23 +55,38 @@ void	Sender::ReadFile( std::string file, std::string last_path) {
 	std::cout << last_path + file.substr(0, file.find(".")) << std::endl;
 }
 
-void	Sender::Send(int clientfd, char *buffer) {
+void	Sender::Send(int clientfd, std::string buffer, char **env) {
 	Request request = Request();
 	std::string response = "";
 	std::string body = "";
 	try {
 		request.Parse(buffer);
+		std::cout << "\033[34m" << request << "\033[0m" << std::endl;
 		if (request.GetMethod() == "GET") {
 			if (_html_map[request.GetUri()] != "") {
-				body = _html_map[request.GetUri()];
-				response = http_version  + " 200\nContent-Type: text/html\nContent-Length: " + std::to_string(body.size()) + "\n\n" + body;
+				if (_html_map[request.GetUri()].find('\n') == std::string::npos)
+					body = ex_cgi(_html_map[request.GetUri()], clientfd, env, request.GetMethod());
+				else
+					body = _html_map[request.GetUri()];
+				response = http_version  + " 200 OK\nContent-Type: text/html\nContent-Length: " + std::to_string(body.size()) + "\n\n" + body;
 			}
 			else {
 				throw ErrorHttp("404 Not Found", "/404");
 			}
 		}
-		//else if (request.GetMethod() == "POST") {	Post(clientfd, request);	}
-		//else if (request.GetMethod() == "DELETE") {	Delete(clientfd, request);	}
+		else if (request.GetMethod() == "POST") {
+			if (_html_map[request.GetUri()] != "") {
+				body = _html_map[request.GetUri()];
+				response = Post(clientfd, request);
+				response = response + std::to_string(body.size()) + "\n\n" + body;
+			}
+			else {
+				throw ErrorHttp("404 Not Found", "/404");
+			}
+		}
+		else if (request.GetMethod() == "DELETE") {
+			response = Delete(request);
+		}
 		// else if (request.GetMethod() == "PUT") {	Put(clientfd, request);	}
 		// else if (request.GetMethod() == "HEAD") {	Head(clientfd, request);	}
 		// else if (request.GetMethod() == "OPTIONS") {	Options(clientfd, request);	}
@@ -87,4 +102,77 @@ void	Sender::Send(int clientfd, char *buffer) {
 	}
 	if (send(clientfd, response.c_str(), response.size(), 0) == -1)
 		throw Server::ErrorSendingData();
+}
+
+std::string	Sender::Post(int clientfd, Request &request) {
+	std::string response = "";
+	std::string data = "";
+	
+	std::cout << "Longueur du body : " <<  request.GetBodyLength() << std::endl;
+	if (request.GetBodyLength() < 5) {
+		char buffer[BUFFER_SIZE];
+
+		ssize_t bytes_read = read(clientfd, buffer, sizeof(buffer) - 1);
+		if (bytes_read < 0) {
+			std::cout << "error ici " << std::endl;
+			throw ErrorHttp("500 Internal Server Error", "/500");
+		}
+		else {
+			while (bytes_read > 0) {
+				buffer[bytes_read] = '\0';
+				data = data + std::string(buffer);
+				bytes_read = read(clientfd, buffer, sizeof(buffer) - 1);
+				if (bytes_read < 0)
+					throw ErrorHttp("500 Internal Server Error", "/500");
+			}
+		}
+	}
+	else {
+		data = request.GetBody();
+	}
+
+	size_t name_start = data.find("filename=") + 10;
+	std::string name = data.substr(name_start, data.find("\"", name_start) - name_start);
+
+	size_t content_type_start = data.find("\n\r\n") + 3;
+	size_t content_type_end = data.find("------WebKitFormBoundary", content_type_start);
+	std::string content = data.substr(content_type_start, content_type_end - content_type_start - 2);
+
+	if (request.GetHeaders()["CONTENT-TYPE"] != "") {
+		/*
+			Manage accepted content types
+		*/
+		std::cout << "File received : " << std::endl;
+		std::string file_path = "." + request.GetUri() + "/" + name;
+		std::cout <<  content << "$" << std::endl << "at" << file_path << "$" << std::endl;
+		std::ofstream ofs(file_path);
+		if (ofs.is_open()) {
+			ofs << content;
+			ofs.close();
+		} else {
+			std::cout << "error ici 2" << std::endl;
+			throw ErrorHttp("500 Internal Server Error", "/500");
+		}
+		response = http_version + " 201 Created\nContent-Type: text/html\nContent-Length: ";
+	}
+	else {
+		throw ErrorHttp("415 Unsupported Media Type", "/415");
+	}
+
+	return response;
+}
+
+std::string Sender::Delete(Request &request) {
+	std::string response = "";
+	std::string body = "";
+	std::string name = "./uploads" + request.GetFullUri();
+
+	std::cout << "Delete de : " << name << "$" << std::endl;
+	if (std::remove(name.c_str())) {
+		throw ErrorHttp("500 Internal Server Error", "/500");
+	}
+
+	body = _html_map["delete"];
+	response = http_version + " 200 OK\nContent-Type: text/html\nContent-Length: " + std::to_string(body.size()) + "\n\n" + body;
+	return response;
 }

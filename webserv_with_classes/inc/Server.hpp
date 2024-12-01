@@ -41,6 +41,7 @@ class Server {
 		int	kq;
 		int	nev;
 
+		char **env;
 		Sender & sender;
 
 		//std::map<std::string, std::string> _html_map;
@@ -49,7 +50,7 @@ class Server {
 		//void Send( int clientfd, char *buffer );
 
 	public:
-		Server( Sender &s );
+		Server( Sender &s, char **env );
 		~Server();
 
 		//void Initialize( std::string &path_to_html, std::string &path_to_err );

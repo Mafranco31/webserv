@@ -29,4 +29,6 @@
 
 void	    *ft_memset(void *s, int c, size_t n);
 
+std::string ex_cgi(std::string cmd, int fd, char **env, std::string method);
+
 #endif
