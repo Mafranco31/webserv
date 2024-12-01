@@ -77,7 +77,6 @@ int main(int	argc, char **argv, char **env)
         	close(serverfd);
 			err((char*)"kevent");
     	}
-
         for (int i = 0; i < nev; i++) {
             if (events[i].ident == static_cast<uintptr_t>(serverfd)) {
                 // New connection on the server socket
@@ -93,26 +92,36 @@ int main(int	argc, char **argv, char **env)
                     continue;
                 }
 				//send(clientfd, send_buffer.c_str(), size_page, 0);
-            } else if (events[i].filter == EVFILT_READ) {
+            }
+            else if (events[i].filter == EVFILT_READ) {
                 // Data available to read from a client socket
                 char buffer[30000];
                 ssize_t bytes_read = read(events[i].ident, buffer, sizeof(buffer) - 1);
+                while ( bytes_read > 0) {
 
-                if (bytes_read > 0) {
+                    //if (bytes_read > 0) {
                     buffer[bytes_read] = '\0';
-					// Echo back the message to the client
+                        // Echo back the message to the client
                     std::cout << "Received from client " << events[i].ident << ": " << std::endl;
-					std::cout << buffer << std::endl;
-					// Send the asked html page to the client
-					std::string path(buffer, 100);
+                    std::cout << buffer << std::endl;
+                    // Send the asked html page to the client
+                    std::string path(buffer, 100);
 
-					action_html(events[i].ident, path, site_data, env);
-                } else {
-                    // Client disconnected
-					std::cout << "\033[1;31mClient " << events[i].ident << " disconnected\033[0m" << std::endl;
-                    close(events[i].ident);
+                    action_html(events[i].ident, path, site_data, env);
+                    bytes_read = read(events[i].ident, buffer, sizeof(buffer) - 1);
+                    //} else {
+                        // Client disconnected
+                        //std::cout << "\033[1;31mClient " << events[i].ident << " disconnected\033[0m" << std::endl;
+                        //close(events[i].ident);
+                    //}
                 }
-            } else if (events[i].filter == EVFILT_WRITE) {
+                if (bytes_read == 0)
+                    std::cout << "\033[1;31mClient " << events[i].ident << " disconnected\033[0m" << std::endl;
+                else
+                    err((char *)"read");
+                close(events[i].ident);
+            }
+            if (events[i].filter == EVFILT_WRITE) {
 				continue;
 				//send(events[i].ident, "YOOOO", 6, 0);
 			}
