@@ -12,6 +12,8 @@
 # include <sys/time.h>
 # include <sys/stat.h>
 # include <netinet/in.h>
+# include <sys/types.h>
+# include <sys/wait.h>
 
 # include <map>
 # include <vector>
@@ -19,6 +21,7 @@
 # include <iostream>
 # include <fstream>
 # include <sstream>
+# include <algorithm>
 
 #include <set>
 

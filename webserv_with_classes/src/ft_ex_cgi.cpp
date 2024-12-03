@@ -4,7 +4,7 @@ class ErrorHttp;
 
 std::string readFileToString(const std::string& filename) {
     // Create an ifstream object to read the file
-    std::ifstream file(filename);
+    std::ifstream file(filename.c_str());
 
     // Check if the file was opened successfully
     if (!file.is_open()) {
@@ -40,7 +40,7 @@ std::string ex_cgi(std::string cmd, int fd, char **env, std::string method) {
         if (sep > sep_before) v.push_back(cmd.substr(sep_before, sep - sep_before));
         sep_before = sep + 1;
     }
-    
+
     char    *arg[v.size()];
     int i = 0;
     for (std::vector<std::string>::iterator it = v.begin();it != v.end();it++) {

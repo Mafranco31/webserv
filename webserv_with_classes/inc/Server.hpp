@@ -33,6 +33,9 @@ class Servers_parse
 class Server
 {
 	private:
+
+	public:
+
 		int serverfd;
 		int maxfd;
 		struct sockaddr_in serveraddr;
@@ -44,42 +47,52 @@ class Server
 		int	nev;
 		*/
 		//EPOLL
-		struct epoll_event change_event, events[MAX_EVENTS];
-		int ep;
-		int nev;
-
+		struct epoll_event change_event;
 		char **_env;
-		Sender & _sender;
+		Sender &_sender;
 		int _port;
 		std::string _host;
+		//kQUEUE
+		int &kq;
+		struct timespec timeout;
+		//EPOLL
+		//int &ep;
 
-	public:
-		Server(char **env, Sender &sender, std::string host, std::string port);
+		int &nev;
+		std::vector<int> fds;
+
+		Server(char **env, Sender &sender, std::string host, std::string port, int &serv_ep, int &serv_nev);
 		~Server();
 		void Start( void );
 		void Stop( void );
-		void Wait( void );
-		void ManageConnexion( void );
+		void ManageConnexion(struct epoll_event *events);
 
 };
 
 class Webserv {
 
 	private:
-
-		char **env;
-		Sender & sender;
-		std::vector<Server> sub_server;
 		//std::map<std::string, std::string> _html_map;
 		//void ReadPath( std::string path , std::string last_path );
 		//void ReadFile( std::string file , std::string last_path );
 		//void Send( int clientfd, char *buffer );
 
 	public:
+		std::vector<Server> sub_server;
+		char **env;
+		Sender & sender;
+		//EPOLL
+		//int ep;
+		//KQUEUE
+		int kq;
+		int nev;
+		struct epoll_event events[MAX_EVENTS];
+
 		Webserv( Sender &s, char **env );
 		~Webserv();
 
 		//void Initialize( std::string &path_to_html, std::string &path_to_err );
+		void Wait( void );
 
 		//Configuration file
 		std::set<std::string> valid_directives;

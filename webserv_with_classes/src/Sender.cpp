@@ -104,7 +104,7 @@ void	Sender::Send(int clientfd, std::string buffer, char **env) {
 		response = http_version + " " + e.what() + "\nContent-Type: text/html\nContent-Length: " + oss.str() + "\n\n" + body;
 	}
 	if (send(clientfd, response.c_str(), response.size(), 0) == -1)
-		throw Server::ErrorSendingData();
+		throw Webserv::ErrorSendingData();
 }
 
 std::string	Sender::Post(int clientfd, Request &request) {
