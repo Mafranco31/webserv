@@ -19,27 +19,42 @@ class Location
 		std::map<std::string, std::vector<std::string> > data;
 };
 
-class Servers
+class Servers_parse
 {
 	public:
-		Servers();
-		~Servers();
+		Servers_parse();
+		~Servers_parse();
 		std::map<std::string, std::vector<std::string> > d; //eg. server_name (key) server.com server.org server.net (parameters -> vector)
 		Location *location;
 		int location_blocks;
 
 };
 
-class Server {
+class Server
+{
+	private:
+
+	public:
+	
+};
+
+class Webserv {
 
 	private:
 		int serverfd;
 		int maxfd;
 		struct sockaddr_in serveraddr;
+		//KQUEUE
+		/*
 		struct kevent change_event, events[MAX_EVENTS];
 		struct timespec timeout;
 		int	kq;
 		int	nev;
+		*/
+		//EPOLL
+		struct epoll_event change_event, events[MAX_EVENTS];
+		int ep;
+		int nev;
 
 		Sender & sender;
 
@@ -49,8 +64,8 @@ class Server {
 		//void Send( int clientfd, char *buffer );
 
 	public:
-		Server( Sender &s );
-		~Server();
+		Webserv( Sender &s );
+		~Webserv();
 
 		//void Initialize( std::string &path_to_html, std::string &path_to_err );
 		void Start( void );
@@ -59,20 +74,31 @@ class Server {
 		void ManageConnexion( void );
 
 		//Configuration file
+		std::set<std::string> valid_directives;
+		std::set<std::string> valid_directives_location;
+
 		void make_list(std::string line);
 		void parse(std::string path);
 		void data_structure(void);
 		void count_servers(void);
 		void count_location_blocks(void);
 		void sub_location_blocks(void);
+		void prepare_location_parse(void);
 		void last_function(int &bracket, std::vector<std::string>::iterator &it, Location &location);
 		void location_parse(int &bracket, std::vector<std::string>::iterator &it, Location &location, int n);
+		void listen_set(void);
 		void check(void);
 		void recursive_clear(Location &location);
 		void clean(void);
 		std::vector<std::string> _v;
-		Servers *serv;
+		Servers_parse *serv;
 		int serv_n;
+
+		//listen (configuration file)
+		std::set<std::string> _listen_set;
+		std::vector<std::string> _host;
+		std::vector<std::string> _port;
+
 
 	//	Exceptions
 		class ErrorCreatingSocket: public std::exception	{	const char	*what() const throw ();	};

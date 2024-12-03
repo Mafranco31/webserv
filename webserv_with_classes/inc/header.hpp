@@ -7,7 +7,8 @@
 # include <fcntl.h>
 # include <dirent.h>
 # include <sys/socket.h>
-# include <sys/event.h>
+//# include <sys/event.h> //kqueue
+#include <sys/epoll.h> //epoll
 # include <sys/time.h>
 # include <sys/stat.h>
 # include <netinet/in.h>
@@ -19,10 +20,13 @@
 # include <fstream>
 # include <sstream>
 
+#include <set>
+
 # include "Server.hpp"
 # include "Request.hpp"
 # include "Sender.hpp"
 # include "ErrorHttp.hpp"
+
 
 # define MAX_EVENTS 100
 # define BUFFER_SIZE 8192

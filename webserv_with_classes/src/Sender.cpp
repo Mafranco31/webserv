@@ -21,7 +21,7 @@ Sender::Sender ( const std::string &path_to_html, const std::string &path_to_err
 }
 
 void	Sender::ReadPath( std::string path, std::string last_path) {
-	if (chdir(path.c_str()) == -1) throw Server::ErrorReadingHtmlPath();
+	if (chdir(path.c_str()) == -1) throw Webserv::ErrorReadingHtmlPath();
 
 	if (path.at(path.length() - 1) != '/') path += '/';
 	if (path.at(0) == '/') path = path.substr(1);
@@ -35,14 +35,14 @@ void	Sender::ReadPath( std::string path, std::string last_path) {
 			continue; }
 		try { ReadFile(ndir, last_path); } catch (std::exception &e) { throw; }
 	}
-	
-	if (chdir("..")) throw Server::ErrorReadingHtmlPath();
+
+	if (chdir("..")) throw Webserv::ErrorReadingHtmlPath();
 	closedir(dir);
 }
 
 void	Sender::ReadFile( std::string file, std::string last_path) {
-	std::ifstream ifs(file);
-	if (!ifs.is_open()) throw Server::ErrorReadingHtmlPath();
+	std::ifstream ifs(file.c_str());
+	if (!ifs.is_open()) throw Webserv::ErrorReadingHtmlPath();
 	std::stringstream buffer;
     buffer << ifs.rdbuf();
 	ifs.close();
@@ -64,7 +64,9 @@ void	Sender::Send(int clientfd, char *buffer) {
 		if (request.GetMethod() == "GET") {
 			if (_html_map[request.GetUri()] != "") {
 				body = _html_map[request.GetUri()];
-				response = http_version  + " 200\nContent-Type: text/html\nContent-Length: " + std::to_string(body.size()) + "\n\n" + body;
+				std::ostringstream oss;
+				oss << body.size();
+				response = http_version  + " 200\nContent-Type: text/html\nContent-Length: " + oss.str() + "\n\n" + body;
 			}
 			else {
 				throw ErrorHttp("404 Not Found", "/404");
@@ -83,8 +85,10 @@ void	Sender::Send(int clientfd, char *buffer) {
 		}
 	} catch (ErrorHttp &e) {
 		body = _html_map[e.get_errcode()];
-		response = http_version + " " + e.what() + "\nContent-Type: text/html\nContent-Length: " + std::to_string(body.size()) + "\n\n" + body;
+		std::ostringstream oss;
+		oss << body.size();
+		response = http_version + " " + e.what() + "\nContent-Type: text/html\nContent-Length: " + oss.str() + "\n\n" + body;
 	}
 	if (send(clientfd, response.c_str(), response.size(), 0) == -1)
-		throw Server::ErrorSendingData();
+		throw Webserv::ErrorSendingData();
 }
