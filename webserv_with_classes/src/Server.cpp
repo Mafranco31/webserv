@@ -1,8 +1,19 @@
 #include "Server.hpp"
 #include <arpa/inet.h>
 
+Server::Server(char **env, Sender &sender, std::string host, std::string port): _env(env), _sender(sender), _host(host)
+{
+	std::stringstream ss(port);
+	ss >> _port;
+}
+
+Server::~Server()
+{
+
+}
+
 //	Constructor
-Webserv::Webserv ( Sender & s ) : sender(s), serv(NULL), serv_n(0){
+Webserv::Webserv ( Sender & s, char **env ) : env(env), sender(s), serv(NULL), serv_n(0){
 	valid_directives.insert("listen");
 	valid_directives.insert("root");
 	valid_directives.insert("index");
@@ -23,7 +34,7 @@ Webserv::~Webserv ( void ) {
 }
 
 //	Methods
-void	Webserv::Start( void ) {
+void	Server::Start( void ) {
 	// Creating the socket
 	serverfd = socket(AF_INET, SOCK_STREAM, 0);
 	if (serverfd == -1) {
@@ -40,7 +51,7 @@ void	Webserv::Start( void ) {
 	//int port;
 	//std::stringstream ss(_port[i]);
 	//ss >> port;
-    serveraddr.sin_port = htons(8080);
+    serveraddr.sin_port = htons(this->_port);
 
 	// Binding the socket to the address
 	if (bind(serverfd, (const struct sockaddr *)&serveraddr, sizeof(serveraddr)) == -1){
@@ -63,7 +74,7 @@ void	Webserv::Start( void ) {
     }
 
 	// Setting the timeout for the kqueue
-    timeout.tv_sec = 1;
+    timeout.tv_sec = 5;
     timeout.tv_nsec = 0;
 
     // Macro to set the kqueue evenet as read and write
@@ -87,12 +98,13 @@ void	Webserv::Start( void ) {
 		close(serverfd);
 		throw Webserv::ErrorInitializeKqueue(); //Change name.
 	}
-	std::cout << "\033[1;32mServer started on port " << 8080 << "...\033[0m" << std::endl;
+	std::cout << "\033[1;32mServer started on port " << 80 << "...\033[0m" << std::endl;
 }
 
-void	Webserv::Wait( void ) {
+void	Server::Wait( void ) {
 	// waiting for event
 	/*nev = kevent(kq, NULL, 0, events, MAX_EVENTS, &timeout);
+	std::cout <<"\033[1;33mEvent found : " << nev << "\033[0m" << std::endl;
 	if (nev == -1) {
 		std::cerr << "Error: Could not get the new event." << std::endl;
 	}*/
@@ -101,7 +113,7 @@ void	Webserv::Wait( void ) {
 		std::cerr << "Error: Could not get the new event." << std::endl;
 }
 
-void	Webserv::ManageConnexion( void ) {
+void	Server::ManageConnexion( void ) {
 	//	Iterating over the events to manage the connections
 	/*
 	int	clientfd;
@@ -133,11 +145,17 @@ void	Webserv::ManageConnexion( void ) {
 			else if (bytes_read < 0)
 				std::cerr << "Error: Could not read in the socket." << std::endl;
 			else {
-				buffer[bytes_read] = '\0';
+				std::string data = "";
+				while (bytes_read > 0) {
+					buffer[bytes_read] = '\0';
+					data = data + std::string(buffer);
+					bytes_read = read(events[i].ident, buffer, sizeof(buffer) - 1);
+				}
 				std::cout << "Received from client " << events[i].ident << ": " << std::endl;
-				std::cout <<  buffer << "$" << std::endl;
-				sender.Send(events[i].ident, buffer);
+				std::cout <<  data << "$" << std::endl;
+				sender.Send(events[i].ident, data, _env);
 			}
+			//close(events[i].ident);//pas sur
 		}
 	}
 	*/
@@ -179,16 +197,22 @@ void	Webserv::ManageConnexion( void ) {
 				std::cerr << "Error: Could not read in the socket." << std::endl;
 			else
 			{
+				std::string data = "";
+				while (bytes_read > 0) {
+					buffer[bytes_read] = '\0';
+					data = data + std::string(buffer);
+					bytes_read = read(events[i].data.fd, buffer, sizeof(buffer) - 1);
+				}
 				buffer[bytes_read] = '\0';
 				std::cout << "Received from client " << events[i].data.fd << ": " << std::endl; //Create a structure for clients to identify them by a number, and not its fd.
 				std::cout <<  buffer << "$" << std::endl;
-				sender.Send(events[i].data.fd, buffer);
+				_sender.Send(events[i].data.fd, data, _env);
 			}
 		}
 	}
 }
 
-void	Webserv::Stop( void ) {
+void	Server::Stop( void ) {
 	close(serverfd);
 	std::cout << "\033[1;32mServer stopped on port " << serverfd << "...\033[0m" << std::endl;
 }

@@ -66,8 +66,8 @@ $files = scandir('../uploads');
                     <li>
                         <span><?php echo htmlspecialchars($file); ?></span>
                         <div class="actions">
-                            <a href="download.php?file=<?php echo urlencode($file); ?>" class="btn btn-download" download onclick="confirmAndDownload('<?php echo urlencode($file); ?>');">Download</a>
-                            <a href="delete.php?file=<?php echo urlencode($file); ?>" class="btn btn-delete" onclick="confirmAndDelete('<?php echo urlencode($file); ?>'); return false;">Delete</a>
+                            <!-- <a href="download.php?file=<?php echo urlencode($file); ?>" class="btn btn-download" download onclick="confirmAndDownload('<?php echo urlencode($file); ?>');">Download</a> -->
+                            <a href="<?php echo urlencode($file); ?>" class="btn btn-delete" onclick="confirmAndDelete('<?php echo urlencode($file); ?>'); return false;">Delete</a>
                         </div>
                     </li>
                 <?php endif; ?>
@@ -76,13 +76,13 @@ $files = scandir('../uploads');
         <button onclick="window.location.href='http://localhost/';">Go back</button>   
     </div>
     <script>
-        function confirmAndDownload(filename) {
-            fetch(`download.php?file=${filename}`, {
-                method: 'GET',
-            })
-        }
+        // function confirmAndDownload(filename) {
+        //     fetch(`download.php?file=${filename}`, {
+        //         method: 'GET',
+        //     })
+        // }
         function confirmAndDelete(filename) {
-            fetch(`delete.php?file=${filename}`, {
+            fetch(`${filename}`, {
                 method: 'DELETE',
             })
             .then(response => {

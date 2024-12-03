@@ -33,14 +33,6 @@ class Servers_parse
 class Server
 {
 	private:
-
-	public:
-	
-};
-
-class Webserv {
-
-	private:
 		int serverfd;
 		int maxfd;
 		struct sockaddr_in serveraddr;
@@ -56,22 +48,38 @@ class Webserv {
 		int ep;
 		int nev;
 
-		Sender & sender;
+		char **_env;
+		Sender & _sender;
+		int _port;
+		std::string _host;
 
+	public:
+		Server(char **env, Sender &sender, std::string host, std::string port);
+		~Server();
+		void Start( void );
+		void Stop( void );
+		void Wait( void );
+		void ManageConnexion( void );
+
+};
+
+class Webserv {
+
+	private:
+
+		char **env;
+		Sender & sender;
+		std::vector<Server> sub_server;
 		//std::map<std::string, std::string> _html_map;
 		//void ReadPath( std::string path , std::string last_path );
 		//void ReadFile( std::string file , std::string last_path );
 		//void Send( int clientfd, char *buffer );
 
 	public:
-		Webserv( Sender &s );
+		Webserv( Sender &s, char **env );
 		~Webserv();
 
 		//void Initialize( std::string &path_to_html, std::string &path_to_err );
-		void Start( void );
-		void Stop( void );
-		void Wait( void );
-		void ManageConnexion( void );
 
 		//Configuration file
 		std::set<std::string> valid_directives;

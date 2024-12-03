@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>415 Error - Unsupported Media Type</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: #121212;
+            color: #ffffff;
+            font-family: 'Arial', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            overflow: hidden;
+        }
+        .error-container {
+            text-align: center;
+            max-width: 600px;
+        }
+        .error-title {
+            font-size: 8rem;
+            font-weight: bold;
+            background: linear-gradient(45deg, #ff416c, #ff4b2b);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: glow 1.5s infinite alternate;
+        }
+        .error-message {
+            font-size: 1.5rem;
+            margin-top: 20px;
+            line-height: 1.8;
+            color: #bbbbbb;
+        }
+        .back-link {
+            display: inline-block;
+            margin-top: 30px;
+            padding: 12px 25px;
+            font-size: 1rem;
+            color: #ffffff;
+            background: #ff416c;
+            text-decoration: none;
+            border-radius: 25px;
+            transition: background 0.3s ease;
+        }
+        .back-link:hover {
+            background: #ff4b2b;
+        }
+        @keyframes glow {
+            from {
+                text-shadow: 0 0 10px #ff416c, 0 0 20px #ff4b2b;
+            }
+            to {
+                text-shadow: 0 0 20px #ff4b2b, 0 0 30px #ff416c;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="error-container">
+        <div class="error-title">415</div>
+        <p class="error-message">
+            Oops! Unsupported Media Type.<br>
+            The server couldn't handle your request. Please try a different format.
+        </p>
+        <a class="back-link" href="/">Go Back to Safety</a>
+    </div>
+    <script>
+        // Optionally, add functionality to animate or log the error for debugging.
+        console.log("415 Error: Unsupported Media Type encountered.");
+    </script>
+</body>
+</html>

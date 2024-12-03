@@ -21,17 +21,19 @@ class Request {
 		~Request();
 
 	//	Methods
-		void	Parse( char *buffer );
+		void	Parse( std::string buffer );
 		void	ParseFirstLine( void );
 		void	ParseHeader( void );
-		void	ParseBody( void );
+		// void	ParseBody( void );
 
 	//	Getters
 		std::string	GetMethod( void ) const {	return method;	}
 		std::string	GetUri( void ) const ;
+		std::string GetFullUri( void ) const {	return uri;	}
 		std::string	GetVersion( void ) const {	return version;	}
 		std::map<std::string, std::string> GetHeaders( void ) const {	return headers;	}
 		std::string GetBody( void ) const {	return body;	}
+		size_t GetBodyLength( void ) const {	return body_length;	}
 
 	//	Exceptions
 		class ErrorMethodNotImplemented: public std::exception		{	const char	*what() const throw ();	};
