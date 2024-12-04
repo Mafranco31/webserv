@@ -56,5 +56,16 @@
         <p>Thank you for all your hard work and dedication.</p>
         <div class="footer">© 2024 All Rights Reserved</div>
     </div>
+    <button id="back-home-btn">Back to Home</button>
+
+    <script>
+        // Récupère l'origine actuelle (protocole + domaine + port)
+        const baseUrl = window.location.origin;
+
+        // Redirection dynamique vers la page d'accueil
+        document.getElementById('back-home-btn').addEventListener('click', function() {
+            window.location.href = `${baseUrl}/`;
+        });
+    </script>
 </body>
 </html>

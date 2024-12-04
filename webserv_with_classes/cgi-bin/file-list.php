@@ -73,14 +73,19 @@ $files = scandir('../uploads');
                 <?php endif; ?>
             <?php endforeach; ?>
         </ul>
-        <button onclick="window.location.href='http://localhost/';">Go back</button>   
+        <button id="back-home-btn">Back to Home</button>
+
+        <script>
+            // Récupère l'origine actuelle (protocole + domaine + port)
+            const baseUrl = window.location.origin;
+
+            // Redirection dynamique vers la page d'accueil
+            document.getElementById('back-home-btn').addEventListener('click', function() {
+                window.location.href = `${baseUrl}/`;
+            });
+        </script>
     </div>
     <script>
-        // function confirmAndDownload(filename) {
-        //     fetch(`download.php?file=${filename}`, {
-        //         method: 'GET',
-        //     })
-        // }
         function confirmAndDelete(filename) {
             fetch(`${filename}`, {
                 method: 'DELETE',

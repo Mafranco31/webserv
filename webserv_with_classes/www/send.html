@@ -63,6 +63,16 @@
         </form>
         <p>Choose a file from your computer and click "Upload File" to submit.</p>
     </div>
-    <button onclick="window.location.href='http://localhost/';">Go back</button>
+    <button id="back-home-btn">Back to Home</button>
+
+    <script>
+        // Récupère l'origine actuelle (protocole + domaine + port)
+        const baseUrl = window.location.origin;
+
+        // Redirection dynamique vers la page d'accueil
+        document.getElementById('back-home-btn').addEventListener('click', function() {
+            window.location.href = `${baseUrl}/`;
+        });
+    </script>
 </body>
 </html>
