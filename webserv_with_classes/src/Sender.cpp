@@ -79,7 +79,8 @@ void	Sender::Send(int clientfd, std::string buffer, char **env) {
 				body = _html_map[request.GetUri()];
 				std::ostringstream oss; //Lo pongo así porque me dice que el to_string() no es de c++ 98 -> oss.str()
 				oss << body.size();
-				response = http_version  + " 200\nContent-Type: text/html\nContent-Length: " + oss.str() + "\n\n" + body;
+				response = Post(clientfd, request);
+				response = response + oss.str() + "\n\n" + body;
 			}
 			else {
 				throw ErrorHttp("404 Not Found", "/404");
@@ -110,9 +111,10 @@ void	Sender::Send(int clientfd, std::string buffer, char **env) {
 std::string	Sender::Post(int clientfd, Request &request) {
 	std::string response = "";
 	std::string data = "";
+	(void)clientfd;
 
 	std::cout << "Longueur du body : " <<  request.GetBodyLength() << std::endl;
-	if (request.GetBodyLength() < 5) {
+	if (request.GetBodyLength() < 1) {
 		char buffer[BUFFER_SIZE];
 
 		ssize_t bytes_read = read(clientfd, buffer, sizeof(buffer) - 1);
