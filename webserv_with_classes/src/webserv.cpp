@@ -18,22 +18,13 @@ int main(int argc, char **argv, char **env) {
 		server.parse(std::string("linux.conf"));
 		server.data_structure();
 		//server.check();
-
-		//EPOLL
-		/*server.ep = epoll_create(1);
+		server.ep = epoll_create(1);
 		if (server.ep == -1)
-			throw Webserv::ErrorCreatingKqueue();*/
-		//KQUEU
-		server.kq = kqueue();
-		if (server.kq == -1)
 			throw Webserv::ErrorCreatingKqueue();
-
 		for (int i = 0; i < static_cast<int>(server._port.size()); i++)
-			server.sub_server.push_back(Server(server.env, server.sender, server._host[i], server._port[i], /*server.ep,*/ server.kq, server.nev));
-
+			server.sub_server.push_back(Server(server.env, server.sender, server._host[i], server._port[i], server.ep, server.nev));
 		for (std::vector<Server>::iterator it = server.sub_server.begin(); it != server.sub_server.end(); it++)
 			(*it).Start();
-
 		while (true) {
 			server.Wait();
 			for (std::vector<Server>::iterator it = server.sub_server.begin(); it != server.sub_server.end(); it++)

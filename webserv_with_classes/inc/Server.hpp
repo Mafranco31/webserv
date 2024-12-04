@@ -48,16 +48,12 @@ class Server
 		*/
 		//EPOLL
 		struct epoll_event change_event;
+
 		char **_env;
 		Sender &_sender;
 		int _port;
 		std::string _host;
-		//kQUEUE
-		int &kq;
-		struct timespec timeout;
-		//EPOLL
-		//int &ep;
-
+		int &ep;
 		int &nev;
 		std::vector<int> fds;
 
@@ -81,10 +77,7 @@ class Webserv {
 		std::vector<Server> sub_server;
 		char **env;
 		Sender & sender;
-		//EPOLL
-		//int ep;
-		//KQUEUE
-		int kq;
+		int ep;
 		int nev;
 		struct epoll_event events[MAX_EVENTS];
 

@@ -1,9 +1,9 @@
 #include "Server.hpp"
-//#include <arpa/inet.h>
-//#include <cerrno>
-//#include <cstring>
+#include <arpa/inet.h>
+#include <cerrno>
+#include <cstring>
 
-Server::Server(char **env, Sender &sender, std::string host, std::string port, int &serv_ep, int &serv_nev): _env(env), _sender(sender), _host(host), kq(serv_ep), nev(serv_nev)
+Server::Server(char **env, Sender &sender, std::string host, std::string port, int &serv_ep, int &serv_nev): _env(env), _sender(sender), _host(host), ep(serv_ep), nev(serv_nev)
 {
 	std::stringstream ss(port);
 	ss >> _port;
@@ -49,7 +49,11 @@ void	Server::Start( void ) {
 	// Creating the struct sockaddr_in to use the socket
 	ft_memset(&serveraddr, 0, sizeof(serveraddr));
     serveraddr.sin_family = AF_INET;
+	//serveraddr.sin_addr.s_addr = inet_addr("ip address");
     serveraddr.sin_addr.s_addr = htonl(INADDR_ANY);
+	//int port;
+	//std::stringstream ss(_port[i]);
+	//ss >> port;
     serveraddr.sin_port = htons(this->_port);
 
 	// Binding the socket to the address
@@ -64,6 +68,13 @@ void	Server::Start( void ) {
 		throw Webserv::ErrorListeningSocket();
     }
 	//KQUEUE
+	/*
+	// Creating the kqueue
+	kq = kqueue();
+    if (kq == -1) {
+        close(serverfd);
+		throw Webserv::ErrorCreatingKqueue();
+    }
 
 	// Setting the timeout for the kqueue
     timeout.tv_sec = 5;
@@ -75,9 +86,8 @@ void	Server::Start( void ) {
         close(serverfd);
 		throw Webserv::ErrorInitializeKqueue();
     }
-
+	*/
 	//EPOLL
-	/*
 	change_event.data.fd = serverfd;
 	change_event.events = EPOLLIN;
 	if (epoll_ctl(ep, EPOLL_CTL_ADD, serverfd, &change_event) == -1)
@@ -85,30 +95,28 @@ void	Server::Start( void ) {
 		close(serverfd);
 		throw Webserv::ErrorInitializeKqueue(); //Change name.
 	}
-	*/
 	std::cout << "\033[1;32mServer started on port " << _port << "...\033[0m" << std::endl;
 }
 
 void	Webserv::Wait( void ) {
 	// waiting for event
-	nev = kevent(kq, NULL, 0, events, MAX_EVENTS, &timeout);
+	/*nev = kevent(kq, NULL, 0, events, MAX_EVENTS, &timeout);
 	std::cout <<"\033[1;33mEvent found : " << nev << "\033[0m" << std::endl;
 	if (nev == -1) {
 		std::cerr << "Error: Could not get the new event." << std::endl;
-	}
-	/*
+	}*/
 	nev = epoll_wait(ep, events, MAX_EVENTS, 1000); //Poner -1?
 	if (nev == -1)
 	{
-		//std::cout << strerror(errno) << std::endl;
+		std::cout << strerror(errno) << std::endl;
 		std::cerr << "Error: Could not get the new event." << std::endl;
-	}*/
-	//std::cout << nev << std::endl;
+	}
+	std::cout << nev << std::endl;
 }
 
 void	Server::ManageConnexion( struct epoll_event *events ) {
 	//	Iterating over the events to manage the connections
-
+	/*
 	int	clientfd;
 	for (int i = 0; i < nev; i++) {
 		if (events[i].ident == static_cast<uintptr_t>(serverfd)) {
@@ -119,7 +127,6 @@ void	Server::ManageConnexion( struct epoll_event *events ) {
 				continue;
 			}
 			fcntl(clientfd, F_SETFL, O_NONBLOCK);// Set the client socket as non-blocking
-			fds.push_back(clientfd);
 			std::cout << "\033[1;32mNew client connected: " << clientfd << "\033[0m" << std::endl;
 		//	Add the new client socket to kqueue for monitoring
 			EV_SET(&change_event, clientfd, EVFILT_READ, EV_ADD, 0, 0, NULL);
@@ -128,7 +135,7 @@ void	Server::ManageConnexion( struct epoll_event *events ) {
 				std::cerr << "Error: Cannot configure kevent for new connection." << std::endl;
 			}
 		}
-		else if (events[i].filter == EVFILT_READ && std::find(fds.begin(), fds.end(), events[i].data.fd) != fds.end()) {
+		else if (events[i].filter == EVFILT_READ) {
 		//	Data available to read from a client socket
 			char buffer[BUFFER_SIZE];
 			ssize_t bytes_read = read(events[i].ident, buffer, sizeof(buffer) - 1);
@@ -152,8 +159,7 @@ void	Server::ManageConnexion( struct epoll_event *events ) {
 			//close(events[i].ident);//pas sur
 		}
 	}
-
-	/*
+	*/
 	int	clientfd;
 	//std::cout << nev << std::endl;
 	for (int i = 0; i < nev; i++)
@@ -212,7 +218,6 @@ void	Server::ManageConnexion( struct epoll_event *events ) {
 			}
 		}
 	}
-	*/
 }
 
 void	Server::Stop( void ) {
