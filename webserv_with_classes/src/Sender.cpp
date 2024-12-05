@@ -55,13 +55,17 @@ void	Sender::ReadFile( std::string file, std::string last_path) {
 	std::cout << last_path + file.substr(0, file.find(".")) << std::endl;
 }
 
-void	Sender::Send(int clientfd, std::string buffer, char **env) {
+void	Sender::Send(int clientfd, std::string buffer, char **env, Webserv *ws) {
 	Request request = Request();
 	std::string response = "";
 	std::string body = "";
 	try {
 		request.Parse(buffer);
 		std::cout << "\033[34m" << request << "\033[0m" << std::endl;
+		//choose server block
+		//set general variables/default variables.
+		//choose location block
+		
 		if (request.GetMethod() == "GET") {
 			if (_html_map[request.GetUri()] != "") {
 				if (_html_map[request.GetUri()].find('\n') == std::string::npos)

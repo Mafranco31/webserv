@@ -7,7 +7,7 @@ Server::Server(char **env, Sender &sender, std::string host, std::string port, i
 {
 	std::stringstream ss(port);
 	ss >> _port;
-	std::cout << _port << std::endl;
+	//std::cout << _port << std::endl;
 }
 
 Server::~Server()
@@ -108,10 +108,10 @@ void	Webserv::Wait( void ) {
 	nev = epoll_wait(ep, events, MAX_EVENTS, 1000); //Poner -1?
 	if (nev == -1)
 	{
-		std::cout << strerror(errno) << std::endl;
+		//std::cout << strerror(errno) << std::endl;
 		std::cerr << "Error: Could not get the new event." << std::endl;
 	}
-	std::cout << nev << std::endl;
+	//std::cout << nev << std::endl;
 }
 
 void	Server::ManageConnexion( struct epoll_event *events ) {
@@ -213,8 +213,8 @@ void	Server::ManageConnexion( struct epoll_event *events ) {
 				}
 				//buffer[bytes_read] = '\0';
 				std::cout << "Received from client " << events[i].data.fd << ": " << std::endl; //Create a structure for clients to identify them by a number, and not its fd.
-				std::cout <<  buffer << "$" << std::endl;
-				_sender.Send(events[i].data.fd, data, _env);
+				std::cout << buffer << "$" << std::endl;
+				_sender.Send(events[i].data.fd, data, _env, this);
 			}
 		}
 	}

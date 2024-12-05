@@ -11,10 +11,10 @@ int main(int argc, char **argv, char **env) {
         argv[1] = (char *)"../web_parse/linux.conf";
     }*/
 
+	Sender sender(std::string("www"), std::string("errwww"));
+	Webserv server(sender, env);
 	try
 	{
-		Sender sender(std::string("www"), std::string("errwww"));
-		Webserv server(sender, env);
 		server.parse(std::string("linux.conf"));
 		server.data_structure();
 		//server.check();
@@ -37,6 +37,7 @@ int main(int argc, char **argv, char **env) {
 		for (std::vector<Server>::iterator it = server.sub_server.begin(); it != server.sub_server.end(); it++)
 			(*it).Stop();
     } catch (std::exception &e) {
+		server.clean();
         std::cerr << e.what() << std::endl;
         return 1;
     }
