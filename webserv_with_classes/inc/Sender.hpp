@@ -21,7 +21,7 @@ class Sender {
 		Sender( const std::string &path_to_html, const std::string &path_to_err );
 		~Sender();
 
-		void	Send(int clientfd, std::string buffer, char **env);
+		void	Send(int clientfd, std::string buffer, char **env, Webserv *ws);
 		void	ReadPath( std::string path , std::string last_path );
 		void	ReadFile( std::string file , std::string last_path );
 		std::string Post( int clientfd, Request &request );
