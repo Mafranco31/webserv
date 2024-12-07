@@ -275,7 +275,6 @@ void	Sender::Send(int clientfd, std::string buffer, char **env) {
 		//choose server block
 		//set general variables/default variables.
 		//choose location block
-
 		if (request.GetMethod() == "GET") {
 			if (request.GetIsCgi()) {
 				response = ft_ex_cgi2(clientfd, env, request);
@@ -388,14 +387,12 @@ std::string	Sender::Post(int clientfd, Request &request) {
 std::string Sender::Delete(Request &request) {
 	std::string response = "";
 	std::string body = "";
-	std::string name = "./uploads" + request.GetFullUri();
+	std::string name = "./uploads/" + request.GetFullUri().substr(request.GetFullUri().rfind('/'));
 
 	std::cout << "Delete de : " << name << "$" << std::endl;
 	if (std::remove(name.c_str())) {
 		throw ErrorHttp("500 Internal Server Error", request.error["500"]);
 	}
-
-	body = _html_map["delete"];
-	response = http_version + " 200 OK\nContent-Type: text/html\nContent-Length: " + ft_strlen(body) + "\n\n" + body;
+	response = http_version + " 200 OK\nContent-Type: text/html\nContent-Length: 0\n\n";
 	return response;
 }

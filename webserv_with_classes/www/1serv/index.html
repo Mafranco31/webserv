@@ -47,7 +47,7 @@
     <button id="send-btn">Send us files &#9829;</button>
 
     <h1>List of files</h1>
-    <button id="file-list-btn">See files &#9829;</button>
+    <button id="file-list-btn">Delete files &#9829;</button>
 
     <script>
         // Récupère l'origine actuelle (protocole + domaine + port)
@@ -65,7 +65,7 @@
 
         // Redirection dynamique pour le bouton "See files"
         document.getElementById('file-list-btn').addEventListener('click', function() {
-            window.location.href = `${baseUrl}/cgi-bin/file-list.php`;
+            window.location.href = `${baseUrl}/delete`;
         });
     </script>
 </body>
