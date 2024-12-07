@@ -18,6 +18,8 @@ class Request {
 		std::string body;
 		size_t body_length;
 		std::map<std::string, std::string> headers;
+		int is_cgi;
+		std::string cgi_ext;
 
 	public:
 
@@ -43,6 +45,7 @@ class Request {
 		void	Parse( std::string buffer );
 		void	ParseFirstLine( void );
 		void	ParseHeader( void );
+		void	IsCGI();
 		// void	ParseBody( void );
 
 	//	Getters
@@ -53,6 +56,8 @@ class Request {
 		std::map<std::string, std::string> GetHeaders( void ) const {	return headers;	}
 		std::string GetBody( void ) const {	return body;	}
 		size_t GetBodyLength( void ) const {	return body_length;	}
+		int GetIsCgi( void ) const { return is_cgi; }
+		std::string GetCgiExt (void) const {return cgi_ext;}
 
 	//	Exceptions
 		class ErrorMethodNotImplemented: public std::exception		{	const char	*what() const throw ();	};

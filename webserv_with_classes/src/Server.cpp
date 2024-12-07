@@ -69,6 +69,7 @@ void	Server::Start( void ) {
 	if (bind(serverfd, (const struct sockaddr *)&serveraddr, sizeof(serveraddr)) == -1){
 		std::cout << strerror(errno) << std::endl;
         close(serverfd);
+		std::cout << "port = " << this->_port << std::endl;
 		throw  Webserv::ErrorBindingSocket();
     }
 
@@ -98,7 +99,8 @@ void	Server::Start( void ) {
     }
 	*/
 	//EPOLL
-	change_event = {};
+	//change_event = {};
+	ft_memset(&change_event, 0, sizeof(change_event));
 	change_event.data.fd = serverfd;
 	change_event.events = EPOLLIN;
 	if (epoll_ctl(ep, EPOLL_CTL_ADD, serverfd, &change_event) == -1)
@@ -219,13 +221,8 @@ void	Server::ManageConnexion( struct epoll_event *events ) {
 			}
 			else
 			{
-				std::string data = "";
-				while (bytes_read > 0) {
-					buffer[bytes_read] = '\0';
-					data = data + std::string(buffer);
-					bytes_read = read(events[i].data.fd, buffer, sizeof(buffer) - 1);
-				}
-				//buffer[bytes_read] = '\0';
+				buffer[bytes_read] = '\0';
+				std::string data = std::string(buffer);
 				std::cout << "Received from client " << events[i].data.fd << ": " << std::endl; //Create a structure for clients to identify them by a number, and not its fd.
 				std::cout << buffer << "$" << std::endl;
 				_sender.Send(events[i].data.fd, data, _env);

@@ -16,7 +16,7 @@ SRC 		= $(wildcard $(SRC_DIR)/*.cpp)
 OBJS 		= $(patsubst $(SRC_DIR)/%.cpp,$(OBJ_DIR)/%.o,$(SRC))
 
 CC 			= g++
-CFLAGS 		= -Wall -Wextra -Werror #-std=c++98
+CFLAGS 		= -Wall -Wextra -Werror -std=c++98
 DEPFLAGS 	= -MMD -MP
 
 RM 			= rm -rf
