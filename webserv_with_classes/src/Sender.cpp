@@ -164,13 +164,13 @@ void	Sender::Send(int clientfd, std::string buffer, char **env) {
 					body = ex_cgi(_html_map[request.GetUri()], clientfd, env, request.GetMethod());
 				else
 					body = _html_map[request.GetUri()];
-				response = http_version  + " 200 OK\nContent-Type: text/html\nContent-Length: " + std::to_string(body.size()) + "\n\n" + body;
+				response = http_version  + " 200 OK\nContent-Type: text/html\nContent-Length: " + ft_strlen(body) + "\n\n" + body;
 			}
 			else {
 				throw ErrorHttp("404 Not Found", request.e_404);
 			}
 		}
-		else if (request.GetMethod() == "POST") {
+		/*else if (request.GetMethod() == "POST") {
 			if (_html_map[request.GetUri()] != "") {
 				body = _html_map[request.GetUri()];
 				std::ostringstream oss; //Lo pongo así porque me dice que el to_string() no es de c++ 98 -> oss.str()
@@ -178,10 +178,10 @@ void	Sender::Send(int clientfd, std::string buffer, char **env) {
 				response = Post(clientfd, request);
 				response = response + oss.str() + "\n\n" + body;
 			}
-			else {
-				throw ErrorHttp("404 Not Found", "/404");
+			//else {
+			throw ErrorHttp("404 Not Found", "/404");
 			}
-		}
+		}*/
 		else if (request.GetMethod() == "DELETE") {
 			response = Delete(request);
 		}
@@ -196,15 +196,13 @@ void	Sender::Send(int clientfd, std::string buffer, char **env) {
 		}
 	} catch (ErrorHttp &e) {
 		body = _html_map[e.get_errcode()];
-		std::ostringstream oss;
-		oss << body.size();
-		response = http_version + " " + e.what() + "\nContent-Type: text/html\nContent-Length: " + oss.str() + "\n\n" + body;
+		response = http_version + " " + e.what() + "\nContent-Type: text/html\nContent-Length: " + ft_strlen(body) + "\n\n" + body;
 	}
 	if (send(clientfd, response.c_str(), response.size(), 0) == -1)
 		throw Webserv::ErrorSendingData();
 }
 
-std::string	Sender::Post(int clientfd, Request &request) {
+/*std::string	Sender::Post(int clientfd, Request &request) {
 	std::string response = "";
 	std::string data = "";
 	(void)clientfd;
@@ -240,9 +238,7 @@ std::string	Sender::Post(int clientfd, Request &request) {
 	std::string content = data.substr(content_type_start, content_type_end - content_type_start - 2);
 
 	if (request.GetHeaders()["CONTENT-TYPE"] != "") {
-		/*
-			Manage accepted content types
-		*/
+		
 		std::cout << "File received : " << std::endl;
 		std::string file_path = "." + request.GetUri() + "/" + name;
 		std::cout <<  content << "$" << std::endl << "at" << file_path << "$" << std::endl;
@@ -261,7 +257,7 @@ std::string	Sender::Post(int clientfd, Request &request) {
 	}
 
 	return response;
-}
+}*/
 
 std::string Sender::Delete(Request &request) {
 	std::string response = "";
@@ -274,6 +270,6 @@ std::string Sender::Delete(Request &request) {
 	}
 
 	body = _html_map["delete"];
-	response = http_version + " 200 OK\nContent-Type: text/html\nContent-Length: " + std::to_string(body.size()) + "\n\n" + body;
+	response = http_version + " 200 OK\nContent-Type: text/html\nContent-Length: " + ft_strlen(body) + "\n\n" + body;
 	return response;
 }

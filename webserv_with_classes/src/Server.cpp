@@ -68,6 +68,7 @@ void	Server::Start( void ) {
 	if (bind(serverfd, (const struct sockaddr *)&serveraddr, sizeof(serveraddr)) == -1){
 		std::cout << strerror(errno) << std::endl;
         close(serverfd);
+		std::cout << "port = " << this->_port << std::endl;
 		throw  Webserv::ErrorBindingSocket();
     }
 
@@ -97,7 +98,8 @@ void	Server::Start( void ) {
     }
 	*/
 	//EPOLL
-	change_event = {};
+	//change_event = {};
+	ft_memset(&change_event, 0, sizeof(change_event));
 	change_event.data.fd = serverfd;
 	change_event.events = EPOLLIN;
 	if (epoll_ctl(ep, EPOLL_CTL_ADD, serverfd, &change_event) == -1)
