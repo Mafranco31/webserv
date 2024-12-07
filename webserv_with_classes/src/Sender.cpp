@@ -217,7 +217,7 @@ void	Sender::Send(int clientfd, std::string buffer, char **env) {
 				response = Post(clientfd, request);
 			}
 			else 
-				throw ErrorHttp("404 Not Found", "/404");
+				throw ErrorHttp("404 Not Found", request.error["404"]);
 		}
 		else if (request.GetMethod() == "DELETE") {
 			response = Delete(request);
@@ -229,7 +229,7 @@ void	Sender::Send(int clientfd, std::string buffer, char **env) {
 		// else if (request.GetMethod() == "CONNECT") {	Connect(clientfd, request);	}
 		// else if (request.GetMethod() == "PATCH") {	Patch(clientfd, request);	}
 		else {
-			throw ErrorHttp("501 Not Implemented", "/501");
+			throw ErrorHttp("501 Not Implemented", request.error["501"]);
 		}
 	} catch (ErrorHttp &e) {
 		body = _html_map[e.get_errcode()];
@@ -249,7 +249,7 @@ std::string	Sender::Post(int clientfd, Request &request) {
 	std::cout << "DENTRO POST " << std::endl;
 	
 	if (request.GetBodyLength() < 10)
-		throw ErrorHttp("404 Not Found", request.e_404);
+		throw ErrorHttp("400 Bad Request", request.error["400"]);
 	data = request.GetBody();
 
 	if (data.find("------WebKitFormBoundary") == std::string::npos) {
@@ -260,11 +260,11 @@ std::string	Sender::Post(int clientfd, Request &request) {
 			content = data.substr(name_end + 1);
 		}
 		else
-			throw ErrorHttp("404 Not Found", request.e_404);
+			throw ErrorHttp("400 Bad Request", request.error["400"]);
 	}
 	else {
 		if (data.find("filename=") == std::string::npos)
-			throw ErrorHttp("404 Not Found", request.e_404);
+			throw ErrorHttp("400 Bad Request", request.error["400"]);
 		size_t name_start = data.find("filename=") + 10;
 		name = data.substr(name_start, data.find("\"", name_start) - name_start);
 
@@ -276,7 +276,7 @@ std::string	Sender::Post(int clientfd, Request &request) {
 	std::cout << "filename = " << name << "  content = " << content << std::endl;
 
 	if (name.find('.') == std::string::npos)
-		throw ErrorHttp("404 Not Found", request.e_404);
+		throw ErrorHttp("400 Bad Request", request.error["400"]);
 	if (name.substr(name.find('.')) != ".txt")
 		throw ErrorHttp("415 Unsupported Media Type", "/415");
 
@@ -291,11 +291,11 @@ std::string	Sender::Post(int clientfd, Request &request) {
 			ofs.close();
 		} else {
 			std::cout << "error ici 2" << std::endl;
-			throw ErrorHttp("500 Internal Server Error", "/500");
+			throw ErrorHttp("500 Internal Server Error", request.error["500"]);
 		}
 	}
 	else {
-		throw ErrorHttp("415 Unsupported Media Type", "/415");
+		throw ErrorHttp("415 Unsupported Media Type", request.error["415"]);
 	}
 
 	std::string body_uploaded = _html_map[request.GetUri()];
@@ -309,7 +309,7 @@ std::string Sender::Delete(Request &request) {
 
 	std::cout << "Delete de : " << name << "$" << std::endl;
 	if (std::remove(name.c_str())) {
-		throw ErrorHttp("500 Internal Server Error", "/500");
+		throw ErrorHttp("500 Internal Server Error", request.error["500"]);
 	}
 
 	body = _html_map["delete"];

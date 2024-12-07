@@ -35,7 +35,7 @@ std::string ft_ex_cgi2(int fd, char **env, Request & request) {
     else if (language == ".php")
         program = "/bin/php";
     else
-        throw ErrorHttp("404 Not Found", request.e_404);
+        throw ErrorHttp("404 Not Found", request.error["404"]);
 
     std::cout << "program = " << program << "request = " << "." << request.GetUri() << language << std::endl;
     std::vector<std::string> v;
