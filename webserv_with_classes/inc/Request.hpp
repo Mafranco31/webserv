@@ -23,8 +23,8 @@ class Request {
 
 		std::string _host;
 		std::string _port;
-		Servers_parse serv_block;
-		Location location_block;
+		Servers_parse *serv_block;
+		Location *location_block;
 
 		std::string	uri;
 
@@ -32,12 +32,7 @@ class Request {
 		std::string root;
 		std::string index;
 
-		std::string e_400;
-		std::string e_404;
-		std::string e_405;
-		std::string e_415;
-		std::string e_500;
-		std::string e_501;
+		std::map<std::string, std::string> error;
 
 
 	//	Canonical form

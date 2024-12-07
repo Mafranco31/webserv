@@ -1,12 +1,13 @@
 #include "Request.hpp"
 
-Request::Request ( void ) : body(""), body_length(0), root("/") {
-	e_400 = "/";
-	e_404 = "/";
-	e_405 = "/";
-	e_415 = "/";
-	e_500 = "/";
-	e_501 = "/";
+Request::Request ( void ) : body(""), body_length(0), serv_block(NULL), location_block(NULL), root("") {
+	error["400"] = "/errwww/400";
+	error["404"] = "/";
+	error["405"] = "/";
+	error["415"] = "/";
+	error["500"] = "/";
+	error["501"] = "/";
+
 	std::cout << "Default Request constructor called" << std::endl;
 }
 

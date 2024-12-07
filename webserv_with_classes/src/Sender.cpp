@@ -94,8 +94,8 @@ void Sender::choose_server_block(Request &request)
 			{
 				if (request._host == *it)
 				{
-					request.serv_block = _ws->serv[i];
-					//std::cout << "holaaaaaaaaaaa: "<< request.serv_block.d["root"][0] << std::endl;
+					request.serv_block = &_ws->serv[i];
+					//std::cout << "holaaaaaaaaaaa: "<< request.serv_block->d["root"][0] << std::endl;
 					return ;
 				}
 			}
@@ -105,28 +105,48 @@ void Sender::choose_server_block(Request &request)
 	{
 		if ((request._host == "127.0.0.1" || request._host == "localhost") && _ws->serv[i].port == request._port)
 		{
-			request.serv_block = _ws->serv[i];
-			//std::cout << "holaaaaaaaaaaa: "<< request.serv_block.d["root"][0] << std::endl;
+			request.serv_block = &_ws->serv[i];
+			//std::cout << "holaaaaaaaaaaa: "<< request.serv_block->d["root"][0] << std::endl;
 			return ;
 		}
 	}
 }
 
+void Sender::recursive_location(Location &loc, Request &request)
+{
+	std::cout << "prefix: " << loc.prefix << std::endl;
+	std::cout << "URI: " << request.uri << std::endl;
+	std::string uri_prefix = request.uri.substr(0, loc.prefix.length());
+	if (!request.location_block)
+		std::cout << "Correct initialization" << std::endl;
+	if (loc.prefix == uri_prefix)
+	{
+		request.location_block = &loc;
+		std::cout << "request.location_block: " << request.location_block->prefix << std::endl;
+		if (loc.eq == 1 || loc.sub_location_blocks == 0)
+			return ;
+		else
+			for (int i = 0; i < loc.sub_location_blocks; i++)
+				recursive_location(loc.sub_block[i], request);
+	}
+}
+
 void Sender::choose_location_block(Request &request)
 {
-	for (int i = 0; i < request.serv_block.location_blocks; i++)
+	for (int i = 0; i < request.serv_block->location_blocks; i++)
 	{
-		//if (request.serv_block.location[i].prefix == request.GetUri)
+		recursive_location(request.serv_block->location[i], request);
 	}
 }
 
 void Sender::server_configuration(Request &request)
 {
-	if (request.serv_block.d.find("root") != request.serv_block.d.end())
-		request.root = request.serv_block.d["root"][0];
-	if (request.serv_block.d.find("index") != request.serv_block.d.end())
+	if (request.serv_block->d.find("root") != request.serv_block->d.end())
+		request.root = request.serv_block->d["root"][0];
+	std::cout << "root" << request.root << std::endl;
+	if (request.serv_block->d.find("index") != request.serv_block->d.end())
 	{
-		for (std::vector<std::string>::iterator it = request.serv_block.d["index"].begin(); it != request.serv_block.d["index"].end(); it++)
+		for (std::vector<std::string>::iterator it = request.serv_block->d["index"].begin(); it != request.serv_block->d["index"].end(); it++)
 		{
 			request.index = request.root + "/" + (*it).substr(0, (*it).find("."));
 			std::cout << "Index again: " << request.index << std::endl;
@@ -139,7 +159,20 @@ void Sender::server_configuration(Request &request)
 		}
 		//std::cout << "Index again: " << request.index << std::endl;
 	}
-	std::cout << "root" << request.root << std::endl;
+	if (request.serv_block->err_page.size() > 0) // add root.
+	{
+		for (std::vector<std::vector< std::string> >::iterator it1 = request.serv_block->err_page.begin(); it1 != request.serv_block->err_page.end(); it1++)
+		{
+			if ((*it1).size() < 2)
+				continue ;
+			std::string tmp = *((*it1).begin() + (*it1).size() - 1);
+			for (std::vector<std::string>::iterator it2 = (*it1).begin(); it2 != ((*it1).end() -1); it2++)
+			{
+				request.error[*it2] = request.root + tmp.substr(0, tmp.find("."));
+				std::cout << "path: " << request.error[*it2] << " error: " << *it2 << std::endl;
+			}
+		}
+	}
 	request.uri = request.root + request.uri;
 }
 
@@ -152,8 +185,9 @@ void	Sender::Send(int clientfd, std::string buffer, char **env) {
 		std::cout << "\033[34m" << request << "\033[0m" << std::endl;
 		choose_server_block(request);
 		server_configuration(request);
-		//choose_location_block(request);
-		std::cout << "uri" << request.uri << std::endl;
+		choose_location_block(request);
+		std::cout << "Vamooos" << request.location_block->prefix << std::endl;
+		//std::cout << "uri" << request.uri << std::endl;
 		//choose server block
 		//set general variables/default variables.
 		//choose location block
@@ -167,7 +201,7 @@ void	Sender::Send(int clientfd, std::string buffer, char **env) {
 				response = http_version  + " 200 OK\nContent-Type: text/html\nContent-Length: " + std::to_string(body.size()) + "\n\n" + body;
 			}
 			else {
-				throw ErrorHttp("404 Not Found", request.e_404);
+				throw ErrorHttp("404 Not Found", request.error["404"]);
 			}
 		}
 		else if (request.GetMethod() == "POST") {

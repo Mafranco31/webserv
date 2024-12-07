@@ -121,7 +121,6 @@ void Webserv::last_function(int &bracket, std::vector<std::string>::iterator &it
 	it++;
 	if (*(it) != "{")
 	{
-		std::cout << "1" << std::endl;
 		throw InvalidConfigurationFile();
 	}
 	it++;
@@ -131,7 +130,6 @@ void Webserv::last_function(int &bracket, std::vector<std::string>::iterator &it
 		{
 			if ((*(it - 2)).compare("location") && (*(it - 2)).compare("="))
 			{
-				std::cout << "2" << std::endl;
 				throw InvalidConfigurationFile();
 			}
 			bracket++;
@@ -191,7 +189,7 @@ void Webserv::sub_location_blocks()
 			if (bracket == 1)
 				loc_it++;
 		}
-		else if (bracket == 1 && !((*it).compare("location")) && (it + 2) != _v.end() && *(it + 2) == "{")
+		else if (bracket == 1 && !((*it).compare("location")) && (((it + 2) != _v.end() && *(it + 2) == "{") || ((it + 1) != _v.end() && (it + 3) != _v.end() && *(it + 1) == "=" && *(it + 3) == "{")))
 		{
 			//std::cout << "server: " << serv_it << ", location block:" << loc_it << std::endl;
 			last_function(bracket, it, serv[serv_it].location[loc_it]);
@@ -236,7 +234,6 @@ void Webserv::count_location_blocks(void) //inicialmente n = 1, con recursividad
 		}
 		else if (bracket == 1 && !((*it).compare("location")) && (((it + 2) != _v.end() && *(it + 2) == "{") || ((it + 1) != _v.end() && (it + 3) != _v.end() && *(it + 1) == "=" && *(it + 3) == "{")))
 		{
-			std::cout << "llegaaaa" << std::endl;
 			serv[serv_it].location_blocks++;
 			it++;
 			if (*(it) == "=")
@@ -244,7 +241,6 @@ void Webserv::count_location_blocks(void) //inicialmente n = 1, con recursividad
 			it++;
 			if (*it != "{")
 			{
-				std::cout << "3" << std::endl;
 				throw InvalidConfigurationFile();
 			}
 			else
@@ -252,7 +248,6 @@ void Webserv::count_location_blocks(void) //inicialmente n = 1, con recursividad
 		}
 		else if (bracket == 1 && (*it == "{" || *it == "}"))
 		{
-			std::cout << "4" << std::endl;
 			throw InvalidConfigurationFile();
 		}
 		else
@@ -300,7 +295,7 @@ void Webserv::count_servers(void)
 void Webserv::location_parse(int &bracket, std::vector<std::string>::iterator &it, Location &location, int n)
 {
 	it++;
-	if (!(*it).compare("="))
+	if ((*it) == "=")
 	{
 		it++;
 		location.eq = 1;
@@ -309,11 +304,7 @@ void Webserv::location_parse(int &bracket, std::vector<std::string>::iterator &i
 	int count;
 	count = 0;
 	it++;
-	if ((*it).compare("{"))
-	{
-		std::cout << "mal" << std::endl;
-		throw InvalidConfigurationFile();
-	}
+	//std::cout << *it << std::endl;
 	if ((*it).compare("{"))
 		throw InvalidConfigurationFile();
 	bracket++;
@@ -337,23 +328,37 @@ void Webserv::location_parse(int &bracket, std::vector<std::string>::iterator &i
 				key = *it;
 				if (valid_directives_location.find(key) == valid_directives_location.end())
 				{
-					std::cout << "Invalid_directive: " << key << std::endl;
 					throw InvalidConfigurationFile();
 				}
 				//std::cout << *it << std::endl;
 				it++;
 				//std::cout << *it << std::endl;
-				while ((*it).compare(";")) //not equal to ';'
+				if (key == "error_page")
 				{
-					if (*it == "{" || *it == "}")
+					location.err_page.push_back(std::vector<std::string>());
+					while ((*it).compare(";"))
 					{
-						std::cout << "mal2" << std::endl;
-						throw InvalidConfigurationFile();
+						if (*it == "{" || *it == "}")
+						{
+							throw InvalidConfigurationFile();
+						}
+						(*(location.err_page.begin() + location.err_page.size() - 1)).push_back(*it);
+						it++;
 					}
-					location.data[key].push_back(*it);
-					//this->serv[serv_it].d[key].push_back(*it);
-					//Guardar en class location.
-					it++;
+				}
+				else
+				{
+					while ((*it).compare(";")) //not equal to ';'
+					{
+						if (*it == "{" || *it == "}")
+						{
+							throw InvalidConfigurationFile();
+						}
+						location.data[key].push_back(*it);
+						//this->serv[serv_it].d[key].push_back(*it);
+						//Guardar en class location.
+						it++;
+					}
 				}
 				//std::cout << "salida: " << *it << std::endl;
 			}
@@ -406,19 +411,33 @@ void Webserv::prepare_location_parse(void)
 			//Check if key is valid.
 			if (valid_directives.find(key) == valid_directives.end())
 			{
-				std::cout << "Invalid_directive1: " << key << std::endl;
 				throw InvalidConfigurationFile();
 			}
 			it++;
-			while ((*it).compare(";"))
+			if (key == "error_page")
 			{
-				if (*it == "{" || *it == "}")
+				this->serv[serv_it].err_page.push_back(std::vector<std::string>());
+				while ((*it).compare(";"))
 				{
-					std::cout << "mal3" << std::endl;
-					throw InvalidConfigurationFile();
+					if (*it == "{" || *it == "}")
+					{
+						throw InvalidConfigurationFile();
+					}
+					(*(this->serv[serv_it].err_page.begin() + this->serv[serv_it].err_page.size() - 1)).push_back(*it);
+					it++;
 				}
-				this->serv[serv_it].d[key].push_back(*it);
-				it++;
+			}
+			else
+			{
+				while ((*it).compare(";"))
+				{
+					if (*it == "{" || *it == "}")
+					{
+						throw InvalidConfigurationFile();
+					}
+					this->serv[serv_it].d[key].push_back(*it);
+					it++;
+				}
 			}
 		}
 	}
