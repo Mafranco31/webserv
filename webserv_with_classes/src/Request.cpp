@@ -44,42 +44,42 @@ void	Request::IsCGI() {
 void	Request::ParseFirstLine ( void ) {
 	//	Parsing the first line of the request
 	std::string firstLine = content.substr(0, content.find('\n'));
-	if (firstLine.empty()) throw ErrorHttp("400 Bad Request", "/400");
+	if (firstLine.empty()) throw ErrorHttp("400 Bad Request", error["400"]);
 	size_t pos = firstLine.find_first_of(" \t\r\v\f");
-	if (pos == std::string::npos) throw ErrorHttp("400 Bad Request", "/400");
+	if (pos == std::string::npos) throw ErrorHttp("400 Bad Request", error["400"]);
 	method = firstLine.substr(0, pos);
 
 	pos = firstLine.find_first_not_of(" \t\r\v\f", firstLine.find_first_of(" \t\r\v\f"));
-	if (pos == std::string::npos) throw ErrorHttp("400 Bad Request", "/400");
+	if (pos == std::string::npos) throw ErrorHttp("400 Bad Request", error["400"]);
 	size_t pos2 = firstLine.find_first_of(" \t\r\v\f", pos);
-	if (pos2 == std::string::npos) throw ErrorHttp("400 Bad Request", "/400");
+	if (pos2 == std::string::npos) throw ErrorHttp("400 Bad Request", error["400"]);
 	uri = firstLine.substr(pos, pos2 - pos);
 
 	pos = firstLine.find_first_not_of(" \t\r\v\f", pos2);
-	if (pos == std::string::npos) throw ErrorHttp("400 Bad Request", "/400");
+	if (pos == std::string::npos) throw ErrorHttp("400 Bad Request", error["400"]);
 	pos2 = firstLine.find_first_of(" \t\r\v\f\n", pos);
-	if (pos2 == std::string::npos) throw ErrorHttp("400 Bad Request", "/400");
+	if (pos2 == std::string::npos) throw ErrorHttp("400 Bad Request", error["400"]);
 	version = firstLine.substr(pos, pos2 - pos);
 }
 
 void Request::ParseHeader( void ) {
 	// Parsing the headers of the request
 	size_t pos = content.find_first_of("\n") + 1;
-	if (!pos || pos == std::string::npos) throw ErrorHttp("400 Bad Request", "/400");
+	if (!pos || pos == std::string::npos) throw ErrorHttp("400 Bad Request", error["400"]);
 	std::string header = content.substr(pos, content.size() - pos);
 	size_t pos1 = 0;
 	size_t pos2 = header.find('\n');
-	if (pos2 == std::string::npos) throw ErrorHttp("400 Bad Request", "/400");
+	if (pos2 == std::string::npos) throw ErrorHttp("400 Bad Request", error["400"]);
 	std::string headerLine = header.substr(pos1, pos2);
 
 	while (!headerLine.empty() && headerLine.find_first_of(":") != std::string::npos) {
-		if (headerLine[0] == ':') throw ErrorHttp("400 Bad Request", "/400");
+		if (headerLine[0] == ':') throw ErrorHttp("400 Bad Request", error["400"]);
 		std::string key = headerLine.substr(0, headerLine.find(':'));
-		if (key[key.size() - 1] == ' ') throw ErrorHttp("400 Bad Request", "/400");
+		if (key[key.size() - 1] == ' ') throw ErrorHttp("400 Bad Request", error["400"]);
 		for (std::string::iterator it = key.begin(); it != key.end(); ++it) {
 			if (*it >= 97 && *it <= 122) *it -= 32;
 		}
-		if (headerLine.find(':') + 1 == headerLine.size()) throw ErrorHttp("400 Bad Request", "/400");
+		if (headerLine.find(':') + 1 == headerLine.size()) throw ErrorHttp("400 Bad Request", error["400"]);
 		std::string value = headerLine.substr(headerLine.find(':') + 1, headerLine.size() - headerLine.find(':') - 1);
 		headers.insert(std::pair<std::string, std::string>(key, value));
 
