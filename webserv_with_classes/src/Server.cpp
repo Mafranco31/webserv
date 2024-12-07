@@ -220,13 +220,8 @@ void	Server::ManageConnexion( struct epoll_event *events ) {
 			}
 			else
 			{
-				std::string data = "";
-				while (bytes_read > 0) {
-					buffer[bytes_read] = '\0';
-					data = data + std::string(buffer);
-					bytes_read = read(events[i].data.fd, buffer, sizeof(buffer) - 1);
-				}
-				//buffer[bytes_read] = '\0';
+				buffer[bytes_read] = '\0';
+				std::string data = std::string(buffer);
 				std::cout << "Received from client " << events[i].data.fd << ": " << std::endl; //Create a structure for clients to identify them by a number, and not its fd.
 				std::cout << buffer << "$" << std::endl;
 				_sender.Send(events[i].data.fd, data, _env);

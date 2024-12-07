@@ -147,6 +147,7 @@ void	Sender::Send(int clientfd, std::string buffer, char **env) {
 	Request request = Request();
 	std::string response = "";
 	std::string body = "";
+
 	try {
 		request.Parse(buffer);
 		std::cout << "\033[34m" << request << "\033[0m" << std::endl;
@@ -154,12 +155,20 @@ void	Sender::Send(int clientfd, std::string buffer, char **env) {
 		server_configuration(request);
 		//choose_location_block(request);
 		std::cout << "uri" << request.uri << std::endl;
+		std::cout << "Is CGI ? = " << request.GetIsCgi() << std::endl;
 		//choose server block
 		//set general variables/default variables.
 		//choose location block
 
 		if (request.GetMethod() == "GET") {
-			if (_html_map[request.GetUri()] != "") {
+			if (request.GetIsCgi()) {
+				response = ft_ex_cgi2(clientfd, env, request);
+				std::cout << "CGI : " << request.GetUri() << " response :" << std::endl << response << std::endl;
+				if (send(clientfd, response.c_str(), response.size(), 0) == -1)
+					throw Webserv::ErrorSendingData();
+				return;
+			}
+			else if (_html_map[request.GetUri()] != "") {
 				if (_html_map[request.GetUri()].find('\n') == std::string::npos)
 					body = ex_cgi(_html_map[request.GetUri()], clientfd, env, request.GetMethod());
 				else
@@ -170,18 +179,13 @@ void	Sender::Send(int clientfd, std::string buffer, char **env) {
 				throw ErrorHttp("404 Not Found", request.e_404);
 			}
 		}
-		/*else if (request.GetMethod() == "POST") {
-			if (_html_map[request.GetUri()] != "") {
-				body = _html_map[request.GetUri()];
-				std::ostringstream oss; //Lo pongo así porque me dice que el to_string() no es de c++ 98 -> oss.str()
-				oss << body.size();
+		else if (request.GetMethod() == "POST") {
+			if (request.GetUri() == "/www/1serv/uploads") {
 				response = Post(clientfd, request);
-				response = response + oss.str() + "\n\n" + body;
 			}
-			//else {
-			throw ErrorHttp("404 Not Found", "/404");
-			}
-		}*/
+			else 
+				throw ErrorHttp("404 Not Found", "/404");
+		}
 		else if (request.GetMethod() == "DELETE") {
 			response = Delete(request);
 		}
@@ -202,47 +206,53 @@ void	Sender::Send(int clientfd, std::string buffer, char **env) {
 		throw Webserv::ErrorSendingData();
 }
 
-/*std::string	Sender::Post(int clientfd, Request &request) {
+std::string	Sender::Post(int clientfd, Request &request) {
 	std::string response = "";
 	std::string data = "";
+	std::string content = "";
+	std::string name = "";
 	(void)clientfd;
 
-	std::cout << "Longueur du body : " <<  request.GetBodyLength() << std::endl;
-	if (request.GetBodyLength() < 1) {
-		char buffer[BUFFER_SIZE];
+	std::cout << "DENTRO POST " << std::endl;
+	
+	if (request.GetBodyLength() < 10)
+		throw ErrorHttp("404 Not Found", request.e_404);
+	data = request.GetBody();
 
-		ssize_t bytes_read = read(clientfd, buffer, sizeof(buffer) - 1);
-		if (bytes_read < 0) {
-			std::cout << "error ici " << std::endl;
-			throw ErrorHttp("500 Internal Server Error", "/500");
+	if (data.find("------WebKitFormBoundary") == std::string::npos) {
+		if (data.find("filename=") != std::string::npos) {
+			size_t name_start = data.find("filename=") + 10;
+			size_t name_end = data.find("\"", name_start);
+			name = data.substr(name_start, name_end - name_start );
+			content = data.substr(name_end + 1);
 		}
-		else {
-			while (bytes_read > 0) {
-				buffer[bytes_read] = '\0';
-				data = data + std::string(buffer);
-				bytes_read = read(clientfd, buffer, sizeof(buffer) - 1);
-				if (bytes_read < 0)
-					throw ErrorHttp("500 Internal Server Error", "/500");
-			}
-		}
+		else
+			throw ErrorHttp("404 Not Found", request.e_404);
 	}
 	else {
-		data = request.GetBody();
+		if (data.find("filename=") == std::string::npos)
+			throw ErrorHttp("404 Not Found", request.e_404);
+		size_t name_start = data.find("filename=") + 10;
+		name = data.substr(name_start, data.find("\"", name_start) - name_start);
+
+		size_t content_type_start = data.find("\n\r\n") + 3;
+		size_t content_type_end = data.find("------WebKitFormBoundary", content_type_start);
+		content = data.substr(content_type_start, content_type_end - content_type_start - 2);
 	}
+	
+	std::cout << "filename = " << name << "  content = " << content << std::endl;
 
-	size_t name_start = data.find("filename=") + 10;
-	std::string name = data.substr(name_start, data.find("\"", name_start) - name_start);
-
-	size_t content_type_start = data.find("\n\r\n") + 3;
-	size_t content_type_end = data.find("------WebKitFormBoundary", content_type_start);
-	std::string content = data.substr(content_type_start, content_type_end - content_type_start - 2);
+	if (name.find('.') == std::string::npos)
+		throw ErrorHttp("404 Not Found", request.e_404);
+	if (name.substr(name.find('.')) != ".txt")
+		throw ErrorHttp("415 Unsupported Media Type", "/415");
 
 	if (request.GetHeaders()["CONTENT-TYPE"] != "") {
 		
 		std::cout << "File received : " << std::endl;
-		std::string file_path = "." + request.GetUri() + "/" + name;
+		std::string file_path = "./uploads/" + name;
 		std::cout <<  content << "$" << std::endl << "at" << file_path << "$" << std::endl;
-		std::ofstream ofs(file_path);
+		std::ofstream ofs(file_path.c_str());
 		if (ofs.is_open()) {
 			ofs << content;
 			ofs.close();
@@ -250,14 +260,14 @@ void	Sender::Send(int clientfd, std::string buffer, char **env) {
 			std::cout << "error ici 2" << std::endl;
 			throw ErrorHttp("500 Internal Server Error", "/500");
 		}
-		response = http_version + " 201 Created\nContent-Type: text/html\nContent-Length: ";
 	}
 	else {
 		throw ErrorHttp("415 Unsupported Media Type", "/415");
 	}
 
-	return response;
-}*/
+	std::string body_uploaded = _html_map[request.GetUri()];
+	return response = http_version + " 200 OK\nContent-Type: text/html\nContent-Length: " + ft_strlen(body_uploaded) +  "\n\n" + body_uploaded;
+}
 
 std::string Sender::Delete(Request &request) {
 	std::string response = "";

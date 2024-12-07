@@ -38,6 +38,10 @@ void	    *ft_memset(void *s, int c, size_t n);
 
 std::string ex_cgi(std::string cmd, int fd, char **env, std::string method);
 
+std::string ft_ex_cgi2(int fd, char **env, Request & request);
+
 std::string	ft_strlen( std::string s);
+
+size_t	ft_strlcpy(char *dest, std::string src, size_t size);
 
 #endif

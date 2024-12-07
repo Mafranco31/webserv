@@ -22,8 +22,21 @@ void	Request::Parse ( std::string buffer ) {
 	try {
 		ParseFirstLine();
 		ParseHeader();
+		IsCGI();
 	} catch (std::exception &e) {
 		throw ;
+	}
+}
+
+void	Request::IsCGI() {
+	if (uri.find("/cgi-bin/") != std::string::npos)
+	{
+		is_cgi = 1;
+		cgi_ext = uri.substr(uri.rfind('.'));
+	}
+	else {
+		is_cgi = 0;
+		cgi_ext = "";
 	}
 }
 
