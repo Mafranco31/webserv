@@ -141,6 +141,7 @@ void Sender::choose_location_block(Request &request)
 
 void Sender::server_configuration(Request &request)
 {
+
 	if (request.serv_block->d.find("root") != request.serv_block->d.end())
 		request.root = request.serv_block->d["root"][0];
 	std::cout << "root" << request.root << std::endl;
@@ -176,6 +177,11 @@ void Sender::server_configuration(Request &request)
 	request.uri = request.root + request.uri;
 }
 
+void Sender::location_configuration(Request &request)
+{
+
+}
+
 void	Sender::Send(int clientfd, std::string buffer, char **env) {
 	Request request = Request();
 	std::string response = "";
@@ -187,6 +193,7 @@ void	Sender::Send(int clientfd, std::string buffer, char **env) {
 		choose_server_block(request);
 		server_configuration(request);
 		choose_location_block(request);
+		location_configuration(Request &request);
 		std::cout << "Vamooos" << request.location_block->prefix << std::endl;
 		//std::cout << "uri" << request.uri << std::endl;
 		//choose server block

@@ -36,6 +36,7 @@ class Sender {
 		void server_configuration(Request &request);
 		void choose_location_block(Request &request);
 		void recursive_location(Location &loc, Request &request);
+		void location_configuration(Request &request)
 };
 
 #endif
