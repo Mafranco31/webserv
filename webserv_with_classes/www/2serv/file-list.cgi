@@ -1,0 +1,1 @@
+/usr/local/bin/php-cgi cgi-bin/file-list.php

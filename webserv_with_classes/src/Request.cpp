@@ -1,6 +1,12 @@
 #include "Request.hpp"
 
-Request::Request ( void ) : body(""), body_length(0) {
+Request::Request ( void ) : body(""), body_length(0), root("/") {
+	e_400 = "/";
+	e_404 = "/";
+	e_405 = "/";
+	e_415 = "/";
+	e_500 = "/";
+	e_501 = "/";
 	std::cout << "Default Request constructor called" << std::endl;
 }
 
@@ -28,7 +34,7 @@ void	Request::ParseFirstLine ( void ) {
 	size_t pos = firstLine.find_first_of(" \t\r\v\f");
 	if (pos == std::string::npos) throw ErrorHttp("400 Bad Request", "/400");
 	method = firstLine.substr(0, pos);
-	
+
 	pos = firstLine.find_first_not_of(" \t\r\v\f", firstLine.find_first_of(" \t\r\v\f"));
 	if (pos == std::string::npos) throw ErrorHttp("400 Bad Request", "/400");
 	size_t pos2 = firstLine.find_first_of(" \t\r\v\f", pos);

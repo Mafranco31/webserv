@@ -2,20 +2,44 @@
 # define REQUEST_HPP
 
 # include "header.hpp"
+# include "Servers_parse.hpp"
 
 class ErrorHttp;
+
+class Servers_parse;
 
 class Request {
 
 	private:
 		std::string	content;
 		std::string	method;
-		std::string	uri;
+		//std::string	uri;
 		std::string	version;
 		std::string body;
 		size_t body_length;
 		std::map<std::string, std::string> headers;
+
 	public:
+
+		std::string _host;
+		std::string _port;
+		Servers_parse serv_block;
+		Location location_block;
+
+		std::string	uri;
+
+		//Configuration parameters:
+		std::string root;
+		std::string index;
+
+		std::string e_400;
+		std::string e_404;
+		std::string e_405;
+		std::string e_415;
+		std::string e_500;
+		std::string e_501;
+
+
 	//	Canonical form
 		Request();
 		~Request();

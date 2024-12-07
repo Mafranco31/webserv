@@ -4,31 +4,13 @@
 # include <iostream>
 # include <string>
 # include "header.hpp"
+# include "Servers_parse.hpp"
 # define MAX_EVENTS 100
 
 class Sender;
+class Request;
+class Location;
 
-class Location
-{
-	public:
-		Location();
-		~Location();
-		std::string prefix;
-		int sub_location_blocks;
-		Location *sub_block;
-		std::map<std::string, std::vector<std::string> > data;
-};
-
-class Servers_parse
-{
-	public:
-		Servers_parse();
-		~Servers_parse();
-		std::map<std::string, std::vector<std::string> > d; //eg. server_name (key) server.com server.org server.net (parameters -> vector)
-		Location *location;
-		int location_blocks;
-
-};
 
 class Server
 {

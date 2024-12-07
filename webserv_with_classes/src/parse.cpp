@@ -1,4 +1,5 @@
 #include "Server.hpp"
+#include "../inc/Servers_parse.hpp"
 
 Servers_parse::Servers_parse(): location(NULL), location_blocks(0)
 {
@@ -10,7 +11,7 @@ Servers_parse::~Servers_parse()
 
 }
 
-Location::Location()
+Location::Location(): sub_location_blocks(0), sub_block(NULL), eq(0)
 {
 
 }
@@ -99,27 +100,40 @@ void Webserv::parse(std::string path)
 
 void Webserv::last_function(int &bracket, std::vector<std::string>::iterator &it, Location &location)
 {
-	std::vector<std::string>::const_iterator start;
+	//std::vector<std::string>::const_iterator start;
 	std::vector<std::vector<std::string>::iterator> its;
 	int n;
 	int counter;
 
 	//std::cout << "seg" << std::endl;
-	start = it;
+	//start = it;
+	//std::cout << "sub_location block: "<< *it << std::endl;
 	counter = 0;
 	n = bracket;
 	bracket++;
 	it++;
+	if (!(*it).compare("="))
+	{
+		it++;
+		location.eq = 1;
+	}
+	location.prefix = *it;
 	it++;
 	if (*(it) != "{")
+	{
+		std::cout << "1" << std::endl;
 		throw InvalidConfigurationFile();
+	}
 	it++;
 	while (bracket != n)
 	{
 		if (!(*it).compare("{"))
 		{
-			if ((*(it - 2)).compare("location"))
+			if ((*(it - 2)).compare("location") && (*(it - 2)).compare("="))
+			{
+				std::cout << "2" << std::endl;
 				throw InvalidConfigurationFile();
+			}
 			bracket++;
 			if (bracket == n + 2)
 			{
@@ -215,22 +229,32 @@ void Webserv::count_location_blocks(void) //inicialmente n = 1, con recursividad
 			{
 				//std::cout << "\033[34mlo que sea\033[0m" <<std::endl;
 				//std::cout << serv_it << std::endl;
-				this->serv[serv_it].location = new Location[serv[serv_it].location_blocks];
+				if (serv[serv_it].location_blocks != 0)
+					this->serv[serv_it].location = new Location[serv[serv_it].location_blocks];
 				serv_it++;
 			}
 		}
-		else if (bracket == 1 && !((*it).compare("location")) && (it + 2) != _v.end() && *(it + 2) == "{")
+		else if (bracket == 1 && !((*it).compare("location")) && (((it + 2) != _v.end() && *(it + 2) == "{") || ((it + 1) != _v.end() && (it + 3) != _v.end() && *(it + 1) == "=" && *(it + 3) == "{")))
 		{
+			std::cout << "llegaaaa" << std::endl;
 			serv[serv_it].location_blocks++;
 			it++;
+			if (*(it) == "=")
+				it++;
 			it++;
 			if (*it != "{")
+			{
+				std::cout << "3" << std::endl;
 				throw InvalidConfigurationFile();
+			}
 			else
 				bracket++;
 		}
 		else if (bracket == 1 && (*it == "{" || *it == "}"))
+		{
+			std::cout << "4" << std::endl;
 			throw InvalidConfigurationFile();
+		}
 		else
 			continue ;
 	}
@@ -276,9 +300,13 @@ void Webserv::count_servers(void)
 void Webserv::location_parse(int &bracket, std::vector<std::string>::iterator &it, Location &location, int n)
 {
 	it++;
+	if (!(*it).compare("="))
+	{
+		it++;
+		location.eq = 1;
+	}
 	location.prefix = *it;
 	int count;
-
 	count = 0;
 	it++;
 	if ((*it).compare("{"))
@@ -286,6 +314,8 @@ void Webserv::location_parse(int &bracket, std::vector<std::string>::iterator &i
 		std::cout << "mal" << std::endl;
 		throw InvalidConfigurationFile();
 	}
+	if ((*it).compare("{"))
+		throw InvalidConfigurationFile();
 	bracket++;
 	it++;
 	while (bracket == n + 1) // == n + 1?
@@ -356,7 +386,7 @@ void Webserv::prepare_location_parse(void)
 			else if (bracket == 1)
 				loc_it++;
 		}
-		else if (!(*it).compare("location") && bracket == 1 && (it + 2) != _v.end() && *(it + 2) == "{")
+		else if (!(*it).compare("location") && bracket == 1 && (((it + 2) != _v.end() && *(it + 2) == "{") || ((it + 1) != _v.end() && (it + 3) != _v.end() && *(it + 1) == "=" && *(it + 3) == "{")))
 		{
 			//std::cout << "\033[32m serv_it: " << serv_it << ", loc_it: " << loc_it << "\033[0m" << std::endl;
 			location_parse(bracket, it, serv[serv_it].location[loc_it], 1);
@@ -376,7 +406,7 @@ void Webserv::prepare_location_parse(void)
 			//Check if key is valid.
 			if (valid_directives.find(key) == valid_directives.end())
 			{
-				std::cout << "Invalid_directive: " << key << std::endl;
+				std::cout << "Invalid_directive1: " << key << std::endl;
 				throw InvalidConfigurationFile();
 			}
 			it++;
@@ -400,14 +430,37 @@ void Webserv::listen_set(void)
 	{
 		//std::cout << serv[i].d["listen"][0] << std::endl;
 		if (serv[i].d["listen"].size() != 1)
+		{
+			std::cout << "no listen port" << std::endl;
 			throw InvalidConfigurationFile();
+		}
 		_listen_set.insert(serv[i].d["listen"][0]);
+		if ( serv[i].d["listen"][0].find(':') == std::string::npos) //No ':' -> argument must be just an interger (a port).
+		{
+			int n;
+			std::stringstream ss(serv[i].d["listen"][0]);
+			if (!(ss >> n))
+				throw InvalidConfigurationFile();
+			else
+			{
+				serv[i].host = "0.0.0.0";
+				serv[i].port = serv[i].d["listen"][0];
+			}
+		}
+		else //There's ':' -> host:port
+		{
+			std::string tmp1(serv[i].d["listen"][0].begin(), serv[i].d["listen"][0].begin() + serv[i].d["listen"][0].find(':'));
+			std::string tmp2(serv[i].d["listen"][0].begin() + serv[i].d["listen"][0].find(':') +1 , serv[i].d["listen"][0].end());
+			serv[i].host = tmp1;
+			serv[i].port = tmp2; //Check validity of ip and port.
+		}
+		std::cout << i << ": " << serv[i].host << ", " << serv[i].port << std::endl;
 	}
 	for (std::set<std::string>::iterator it = _listen_set.begin(); it != _listen_set.end(); it++)
 	{
 		int n;
 		std::stringstream ss(*it);
-		if ((*it).find(':') == (*it).size()) //No ':' -> argument must be just an interger (a port).
+		if ( (*it).find(':') == std::string::npos) //No ':' -> argument must be just an interger (a port).
 		{
 			if (!(ss >> n))
 				throw InvalidConfigurationFile();
@@ -423,8 +476,6 @@ void Webserv::listen_set(void)
 			std::string tmp2((*it).begin() + (*it).find(':') +1 , (*it).end());
 			_host.push_back(tmp1);
 			_port.push_back(tmp2); //Check validity of ip and port.
-			//std::cout << "host: " << tmp1 << " port: " << tmp2 << std::endl;
-			//std::cout << tmp1 + ":" + tmp2 << std::endl;
 		}
 	}
 }
@@ -466,7 +517,8 @@ void Webserv::recursive_clear(Location &location)
 		recursive_clear(location.sub_block[i]);
 	location.data.clear();
 	if (location.sub_location_blocks > 0)
-		delete [] location.sub_block;
+		if (location.sub_block)
+			delete [] location.sub_block;
 }
 
 void Webserv::clean(void)
@@ -474,11 +526,12 @@ void Webserv::clean(void)
 	for (int i = 0; i < serv_n; i++)
 	{
 		for (int j = 0; j < serv[i].location_blocks; j++)
-		{
 			recursive_clear(serv[i].location[j]);
-		}
 		if (serv[i].location_blocks > 0)
-			delete [] serv[i].location;
+		{
+			if (serv[i].location)
+				delete [] serv[i].location;
+		}
 	}
 	_v.clear();
 	delete [] serv;

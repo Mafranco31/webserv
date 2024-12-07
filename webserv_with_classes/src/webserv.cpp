@@ -1,5 +1,7 @@
 #include "../inc/header.hpp"
 #include "../inc/Server.hpp"
+#include <cerrno>
+#include <cstring>
 
 
 // Drop comments to use configuration file
@@ -13,11 +15,13 @@ int main(int argc, char **argv, char **env) {
 
 	Sender sender(std::string("www"), std::string("errwww"));
 	Webserv server(sender, env);
+	sender._ws = &server;
 	try
 	{
 		server.parse(std::string("linux.conf"));
 		server.data_structure();
 		//server.check();
+		std::cout << "parsing done" << std::endl;
 		server.ep = epoll_create(1);
 		if (server.ep == -1)
 			throw Webserv::ErrorCreatingKqueue();

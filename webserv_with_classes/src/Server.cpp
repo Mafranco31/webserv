@@ -22,6 +22,7 @@ Webserv::Webserv ( Sender & s, char **env ) : env(env), sender(s), serv(NULL), s
 	valid_directives.insert("index");
 	valid_directives.insert("server_name");
 	valid_directives.insert("allow_methods");
+	valid_directives.insert("error_page");
 
 	valid_directives_location.insert("root");
 	valid_directives_location.insert("alias");
@@ -29,6 +30,7 @@ Webserv::Webserv ( Sender & s, char **env ) : env(env), sender(s), serv(NULL), s
 	valid_directives_location.insert("client_body_buffer_size");
 	valid_directives_location.insert("index");
 	valid_directives_location.insert("cgi_pass");
+	//proxy_pass?
 	std::cout << "Default Server constructor called" << std::endl;
 }
 //	Destructor
@@ -45,6 +47,12 @@ void	Server::Start( void ) {
 		throw Webserv::ErrorCreatingSocket();
 	}
 	maxfd = serverfd;
+	int opt = 1;
+	if (setsockopt(serverfd, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt)) == -1)
+	{
+		std::cerr << "Error configurating the socket" << std::endl;
+		throw Webserv::ErrorCreatingSocket();
+	}
 
 	// Creating the struct sockaddr_in to use the socket
 	ft_memset(&serveraddr, 0, sizeof(serveraddr));
@@ -58,6 +66,7 @@ void	Server::Start( void ) {
 
 	// Binding the socket to the address
 	if (bind(serverfd, (const struct sockaddr *)&serveraddr, sizeof(serveraddr)) == -1){
+		std::cout << strerror(errno) << std::endl;
         close(serverfd);
 		throw  Webserv::ErrorBindingSocket();
     }
@@ -88,6 +97,7 @@ void	Server::Start( void ) {
     }
 	*/
 	//EPOLL
+	change_event = {};
 	change_event.data.fd = serverfd;
 	change_event.events = EPOLLIN;
 	if (epoll_ctl(ep, EPOLL_CTL_ADD, serverfd, &change_event) == -1)
@@ -202,7 +212,10 @@ void	Server::ManageConnexion( struct epoll_event *events ) {
 				close(events[i].data.fd);
 			}
 			else if (bytes_read < 0)
+			{
+				//std::cout << strerror(errno) << std::endl;
 				std::cerr << "Error: Could not read in the socket." << std::endl;
+			}
 			else
 			{
 				std::string data = "";
@@ -214,7 +227,7 @@ void	Server::ManageConnexion( struct epoll_event *events ) {
 				//buffer[bytes_read] = '\0';
 				std::cout << "Received from client " << events[i].data.fd << ": " << std::endl; //Create a structure for clients to identify them by a number, and not its fd.
 				std::cout << buffer << "$" << std::endl;
-				_sender.Send(events[i].data.fd, data, _env, this);
+				_sender.Send(events[i].data.fd, data, _env);
 			}
 		}
 	}
