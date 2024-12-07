@@ -33,6 +33,7 @@ class Request {
 		//Configuration parameters:
 		std::string root;
 		std::string index;
+		int limit_size;
 
 		std::map<std::string, std::string> error;
 

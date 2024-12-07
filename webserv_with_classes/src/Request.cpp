@@ -1,6 +1,6 @@
 #include "Request.hpp"
 
-Request::Request ( void ) : body(""), body_length(0), serv_block(NULL), location_block(NULL), root("") {
+Request::Request ( void ) : body(""), body_length(0), serv_block(NULL), location_block(NULL), root(""), index(""), limit_size(100000) {
 	error["400"] = "/errwww/400";
 	error["404"] = "/";
 	error["405"] = "/";

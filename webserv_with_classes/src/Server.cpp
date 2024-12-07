@@ -23,8 +23,10 @@ Webserv::Webserv ( Sender & s, char **env ) : env(env), sender(s), serv(NULL), s
 	valid_directives.insert("server_name");
 	valid_directives.insert("allow_methods");
 	valid_directives.insert("error_page");
+	valid_directives.insert("client_body_buffer_size");
 
 	valid_directives_location.insert("root");
+	valid_directives_location.insert("return");
 	valid_directives_location.insert("alias");
 	valid_directives_location.insert("allow_methods");
 	valid_directives_location.insert("error_page");

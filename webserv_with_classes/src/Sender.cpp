@@ -141,13 +141,20 @@ void Sender::choose_location_block(Request &request)
 
 void Sender::server_configuration(Request &request)
 {
-
-	if (request.serv_block->d.find("root") != request.serv_block->d.end())
-		request.root = request.serv_block->d["root"][0];
-	std::cout << "root" << request.root << std::endl;
-	if (request.serv_block->d.find("index") != request.serv_block->d.end())
+	std::map<std::string, std::vector<std::string> > map = request.serv_block->d;
+	if (map.find("root") != map.end())
 	{
-		for (std::vector<std::string>::iterator it = request.serv_block->d["index"].begin(); it != request.serv_block->d["index"].end(); it++)
+		if (map["root"].size() != 1 )
+			throw Webserv::InvalidConfigurationFile();
+		request.root = map["root"][0];
+	}
+	std::cout << "root" << request.root << std::endl;
+	request.uri = request.root + request.uri;
+	if (map.find("index") != map.end())
+	{
+		if (map["index"].size() < 1)
+			throw Webserv::InvalidConfigurationFile();
+		for (std::vector<std::string>::iterator it = map["index"].begin(); it != map["index"].end(); it++)
 		{
 			request.index = request.root + "/" + (*it).substr(0, (*it).find("."));
 			std::cout << "Index again: " << request.index << std::endl;
@@ -160,9 +167,10 @@ void Sender::server_configuration(Request &request)
 		}
 		//std::cout << "Index again: " << request.index << std::endl;
 	}
-	if (request.serv_block->err_page.size() > 0) // add root.
+	std::vector<std::vector<std::string> > err = request.serv_block->err_page;
+	if (err.size() > 0)
 	{
-		for (std::vector<std::vector< std::string> >::iterator it1 = request.serv_block->err_page.begin(); it1 != request.serv_block->err_page.end(); it1++)
+		for (std::vector<std::vector< std::string> >::iterator it1 = err.begin(); it1 != err.end(); it1++)
 		{
 			if ((*it1).size() < 2)
 				continue ;
@@ -174,12 +182,80 @@ void Sender::server_configuration(Request &request)
 			}
 		}
 	}
-	request.uri = request.root + request.uri;
+	if (map.find("client_body_buffer_size") != map.end())
+	{
+		if (map["client_body_buffer_size"].size() != 1)
+			throw Webserv::InvalidConfigurationFile();
+		std::stringstream ss(map["client_body_buffer_size"][0]);
+		int n;
+		ss >> n;
+		if (ss.fail())
+			throw Webserv::InvalidConfigurationFile();
+		request.limit_size =  n;
+		std::cout << n << std::endl;
+	}
 }
 
 void Sender::location_configuration(Request &request)
 {
-
+	std::map<std::string, std::vector<std::string> > map = request.location_block->data;
+	if (map.find("root") != map.end())
+	{
+		if (map["root"].size() != 1)
+			throw Webserv::InvalidConfigurationFile();
+		request.root = map["root"][0];
+	}
+	request.uri = request.root + request.uri;
+	std::cout << "root" << request.root << std::endl;
+	if (map.find("index") != map.end())
+	{
+		if (map["index"].size() < 1)
+			throw Webserv::InvalidConfigurationFile();
+		for (std::vector<std::string>::iterator it = map["index"].begin(); it != map["index"].end(); it++)
+		{
+			request.index = request.root + "/" + (*it).substr(0, (*it).find("."));
+			std::cout << "Index again: " << request.index << std::endl;
+			if (_html_map.find(request.index) != _html_map.end())
+			{
+				std::cout << "inside: " << request.index << std::endl;
+				_html_map[(request.root + "/")] = _html_map[request.index];
+				break ;
+			}
+		}
+		//std::cout << "Index again: " << request.index << std::endl;
+	}
+	std::vector<std::vector<std::string> > err = request.location_block->err_page;
+	if (err.size() > 0)
+	{
+		for (std::vector<std::vector< std::string> >::iterator it1 = err.begin(); it1 != err.end(); it1++)
+		{
+			if ((*it1).size() < 2)
+				continue ;
+			std::string tmp = *((*it1).begin() + (*it1).size() - 1);
+			for (std::vector<std::string>::iterator it2 = (*it1).begin(); it2 != ((*it1).end() -1); it2++)
+			{
+				request.error[*it2] = request.root + tmp.substr(0, tmp.find("."));
+				std::cout << "path: " << request.error[*it2] << " error: " << *it2 << std::endl;
+			}
+		}
+	}
+	if (map.find("alias") != map.end())
+	{
+		if (map["client_body_buffer_size"].size() != 1)
+			throw Webserv::InvalidConfigurationFile();
+			request.uri
+		request.location_block.prefix =
+		
+	}
+	if (map.find("return") != map.end())
+	{
+		if (map["return"].size() < 1)
+			throw Webserv::InvalidConfigurationFile();
+		std::string redir = map["return"][0];
+		request.uri = redir.substr(0, redir.find("."));
+		std::cout << request.uri << std::endl;
+	}
+	
 }
 
 void	Sender::Send(int clientfd, std::string buffer, char **env) {
@@ -193,7 +269,7 @@ void	Sender::Send(int clientfd, std::string buffer, char **env) {
 		choose_server_block(request);
 		server_configuration(request);
 		choose_location_block(request);
-		location_configuration(Request &request);
+		location_configuration(request);
 		std::cout << "Vamooos" << request.location_block->prefix << std::endl;
 		//std::cout << "uri" << request.uri << std::endl;
 		//choose server block
