@@ -456,6 +456,7 @@ void Webserv::prepare_location_parse(void)
 
 void Webserv::listen_set(void)
 {
+	std::set<std::string> port_set;
 	for (int i = 0; i < serv_n; i++)
 	{
 		//std::cout << serv[i].d["listen"][0] << std::endl;
@@ -464,12 +465,12 @@ void Webserv::listen_set(void)
 			std::cout << "no listen port" << std::endl;
 			throw InvalidConfigurationFile();
 		}
-		_listen_set.insert(serv[i].d["listen"][0]);
+		//Sets the host and port variables of server_parse class.
 		if ( serv[i].d["listen"][0].find(':') == std::string::npos) //No ':' -> argument must be just an interger (a port).
 		{
 			int n;
 			std::stringstream ss(serv[i].d["listen"][0]);
-			if (!(ss >> n))
+			if (!(ss >> n) || !ss.eof() || n <= 0)
 				throw InvalidConfigurationFile();
 			else
 			{
@@ -484,21 +485,20 @@ void Webserv::listen_set(void)
 			serv[i].host = tmp1;
 			serv[i].port = tmp2; //Check validity of ip and port.
 		}
+		if (port_set.find(serv[i].port) == port_set.end())
+		{
+			port_set.insert(serv[i].port);
+			_listen_set.insert(serv[i].d["listen"][0]);
+		}
 		std::cout << i << ": " << serv[i].host << ", " << serv[i].port << std::endl;
 	}
+	//sets the _host and _port variables of Server class.
 	for (std::set<std::string>::iterator it = _listen_set.begin(); it != _listen_set.end(); it++)
 	{
-		int n;
-		std::stringstream ss(*it);
 		if ( (*it).find(':') == std::string::npos) //No ':' -> argument must be just an interger (a port).
 		{
-			if (!(ss >> n))
-				throw InvalidConfigurationFile();
-			else
-			{
 				_host.push_back("0.0.0.0");
 				_port.push_back(*it);
-			}
 		}
 		else //There's ':' -> host:port
 		{
@@ -515,7 +515,7 @@ void Webserv::recursive_location(Location &loc)
 	if (loc.eq == 1 && loc.sub_block != 0) //A location = path {} block cannot have nested location blocks.
 		throw InvalidConfigurationFile();
 
-	std::cout << "sub_location_blocks: " << loc.sub_location_blocks << std::endl;
+	//std::cout << "sub_location_blocks: " << loc.sub_location_blocks << std::endl;
 	for (int i = 0; i < loc.sub_location_blocks; i++)
 		recursive_location(loc.sub_block[i]);
 
@@ -530,7 +530,6 @@ void Webserv::recursive_location(Location &loc)
 	}
 	if (map.find("index") != map.end()) //index
 	{
-		std::cout << "arrives here" << std::endl;
 		//std::cout << map["index"].size() << std::endl;
 		//std::cout << map["index"][0] << map["index"][1] << std::endl;
 		if (map["index"].size() == 0)

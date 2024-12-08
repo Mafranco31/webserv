@@ -3,7 +3,7 @@
 #include <cerrno>
 #include <cstring>
 
-Server::Server(char **env, Sender &sender, std::string host, std::string port, int &serv_ep, int &serv_nev): _env(env), _sender(sender), _host(host), ep(serv_ep), nev(serv_nev)
+Server::Server(char **env, Sender &sender, std::string host,std::string port, int &serv_ep, int &serv_nev): _env(env), _sender(sender), _host(host), ep(serv_ep), nev(serv_nev)
 {
 	std::stringstream ss(port);
 	ss >> _port;
@@ -21,14 +21,13 @@ Webserv::Webserv ( Sender & s, char **env ) : env(env), sender(s), serv(NULL), s
 	valid_directives.insert("root");
 	valid_directives.insert("index");
 	valid_directives.insert("server_name");
-	valid_directives.insert("allow_methods");
 	valid_directives.insert("error_page");
 	valid_directives.insert("client_body_buffer_size");
 
 	valid_directives_location.insert("root");
 	valid_directives_location.insert("return");
 	valid_directives_location.insert("alias");
-	valid_directives_location.insert("allow_methods");
+	valid_directives_location.insert("allow_methods"); //allow methods
 	valid_directives_location.insert("error_page");
 	valid_directives_location.insert("client_body_buffer_size");
 	valid_directives_location.insert("index");
@@ -61,6 +60,7 @@ void	Server::Start( void ) {
 	ft_memset(&serveraddr, 0, sizeof(serveraddr));
     serveraddr.sin_family = AF_INET;
 	//serveraddr.sin_addr.s_addr = inet_addr("ip address");
+	//Ahora mismo el host no importa. Resivarlo mas adelante.
     serveraddr.sin_addr.s_addr = htonl(INADDR_ANY);
 	//int port;
 	//std::stringstream ss(_port[i]);

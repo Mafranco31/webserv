@@ -25,9 +25,9 @@ int main(int argc, char **argv, char **env) {
 		server.ep = epoll_create(1);
 		if (server.ep == -1)
 			throw Webserv::ErrorCreatingKqueue();
-		for (int i = 0; i < static_cast<int>(server._port.size()); i++)
+		for (int i = 0; i < static_cast<int>(server._port.size()); i++) //Creates a sub_server for each _port.
 			server.sub_server.push_back(Server(server.env, server.sender, server._host[i], server._port[i], server.ep, server.nev));
-		for (std::vector<Server>::iterator it = server.sub_server.begin(); it != server.sub_server.end(); it++)
+		for (std::vector<Server>::iterator it = server.sub_server.begin(); it != server.sub_server.end(); it++) 
 			(*it).Start();
 		while (true) {
 			server.Wait();

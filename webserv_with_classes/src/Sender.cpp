@@ -80,11 +80,8 @@ void Sender::choose_server_block(Request &request)
 	}
 	//request._host = request._host.substr(request._host.find_first_not_of('\r'));
 	request._host.erase(request._host.find_last_not_of('\r') + 1);
-	//request._port = request._port.substr(request._port.find_first_not_of('\r'));
 	request._port.erase(request._port.find_last_not_of('\r') + 1);
 	std::cout << "$" << request._host << "$" << std::endl;
-	//request._port = request._port.substr(request._port.find_first_not_of('\0'));
-	//request._port.erase(request._port.find_last_not_of('\0') + 1);
 	std::cout << "$" << request._port << "$" << std::endl;
 	for (int i = 0; i < _ws->serv_n; i++ )
 	{
@@ -254,7 +251,12 @@ void Sender::location_configuration(Request &request)
 		request.uri = redir.substr(0, redir.find("."));
 		std::cout << request.uri << std::endl;
 	}
-
+	if (map.find("allow_methods") != map.end())
+	{
+		std::cout << "\033[32mThe method: \033[0m" << request.GetMethod() << std::endl;
+		if (std::find(map["allow_methods"].begin(), map["allow_methods"].end(), request.GetMethod()) == map["allow_methods"].end())
+			throw ErrorHttp("405 Method Not Allowed", request.error["405"]);
+	}
 }
 
 void	Sender::Send(int clientfd, std::string buffer, char **env) {
