@@ -292,7 +292,7 @@ void Webserv::count_servers(void)
 	this->serv = new Servers_parse[server_blocks];
 }
 
-void Webserv::location_parse(int &bracket, std::vector<std::string>::iterator &it, Location &location, int n)
+void Webserv::location_parse(int &bracket, std::vector<std::string>::iterator &it, Location &location, int n) //n -> bracket inicial
 {
 	it++;
 	if ((*it) == "=")
@@ -333,6 +333,11 @@ void Webserv::location_parse(int &bracket, std::vector<std::string>::iterator &i
 				//std::cout << *it << std::endl;
 				it++;
 				//std::cout << *it << std::endl;
+				if (!(*it).compare(";"))
+				{
+					std::cout << key << ": no parameters." << std::endl;
+					throw InvalidConfigurationFile();
+				}
 				if (key == "error_page")
 				{
 					location.err_page.push_back(std::vector<std::string>());
@@ -354,6 +359,7 @@ void Webserv::location_parse(int &bracket, std::vector<std::string>::iterator &i
 						{
 							throw InvalidConfigurationFile();
 						}
+						//std::cout << n << " prefix: " << location.prefix << " la key: " << key << std::endl;
 						location.data[key].push_back(*it);
 						//this->serv[serv_it].d[key].push_back(*it);
 						//Guardar en class location.
@@ -414,6 +420,11 @@ void Webserv::prepare_location_parse(void)
 				throw InvalidConfigurationFile();
 			}
 			it++;
+			if (!(*it).compare(";"))
+			{
+				std::cout << key << ": no parameters." << std::endl;
+				throw InvalidConfigurationFile();
+			}
 			if (key == "error_page")
 			{
 				this->serv[serv_it].err_page.push_back(std::vector<std::string>());
@@ -499,12 +510,79 @@ void Webserv::listen_set(void)
 	}
 }
 
+void Webserv::recursive_location(Location &loc)
+{
+	if (loc.eq == 1 && loc.sub_block != 0) //A location = path {} block cannot have nested location blocks.
+		throw InvalidConfigurationFile();
+
+	std::cout << "sub_location_blocks: " << loc.sub_location_blocks << std::endl;
+	for (int i = 0; i < loc.sub_location_blocks; i++)
+		recursive_location(loc.sub_block[i]);
+
+	std::map<std::string, std::vector<std::string> > map = loc.data;
+	if (map.find("root") != map.end()) //root
+	{
+		if (map["root"].size() != 1)
+		{
+			std::cout << "root: wrong number of parameters." << std::endl;
+			throw InvalidConfigurationFile();
+		}
+	}
+	if (map.find("index") != map.end()) //index
+	{
+		std::cout << "arrives here" << std::endl;
+		//std::cout << map["index"].size() << std::endl;
+		//std::cout << map["index"][0] << map["index"][1] << std::endl;
+		if (map["index"].size() == 0)
+		{
+			std::cout << "index: wrong number of parameters." << std::endl;
+			throw InvalidConfigurationFile();
+		}
+	}
+	if (map.find("return") != map.end()) //return
+	{
+		if (map["return"].size() != 1)
+		{
+			std::cout << "return: wrong number of parameters." << std::endl;
+			throw InvalidConfigurationFile();
+		}
+	}
+	if (map.find("client_body_buffer_size") != map.end()) //client_body_buffer_size
+	{
+		if (map["client_body_buffer_size"].size() != 1)
+		{
+			std::cout << "client_body_buffer_size: wrong number of parameters." << std::endl;
+			throw Webserv::InvalidConfigurationFile();
+		}
+		std::stringstream ss(map["client_body_buffer_size"][0]);
+		int n;
+		ss >> n;
+		if (ss.fail() || n < 0 ) //If it's not a natural number.
+		{
+			std::cout << "client_body_buffer_size: the parameter must be a positive number." << std::endl;
+			throw Webserv::InvalidConfigurationFile();
+		}
+	}
+}
+
+void Webserv::check_input(void)
+{
+	for (int i = 0; i < serv_n; i++)
+	{
+		for (int j = 0; j < serv[i].location_blocks; j++)
+		{
+			recursive_location(serv[i].location[j]);
+		}
+	}
+}
+
 void Webserv::data_structure(void)
 {
 	count_servers();
 	count_location_blocks();
 	sub_location_blocks();
 	prepare_location_parse();
+	check_input();
 	listen_set();
 }
 

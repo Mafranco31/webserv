@@ -243,9 +243,8 @@ void Sender::location_configuration(Request &request)
 	{
 		if (map["client_body_buffer_size"].size() != 1)
 			throw Webserv::InvalidConfigurationFile();
-			request.uri
-		request.location_block.prefix =
-		
+		//request.uri
+		//request.location_block.prefix =
 	}
 	if (map.find("return") != map.end())
 	{
@@ -255,7 +254,7 @@ void Sender::location_configuration(Request &request)
 		request.uri = redir.substr(0, redir.find("."));
 		std::cout << request.uri << std::endl;
 	}
-	
+
 }
 
 void	Sender::Send(int clientfd, std::string buffer, char **env) {
@@ -298,7 +297,7 @@ void	Sender::Send(int clientfd, std::string buffer, char **env) {
 			if (request.GetUri() == "/www/1serv/uploads") {
 				response = Post(clientfd, request);
 			}
-			else 
+			else
 				throw ErrorHttp("404 Not Found", request.error["404"]);
 		}
 		else if (request.GetMethod() == "DELETE") {
@@ -329,7 +328,7 @@ std::string	Sender::Post(int clientfd, Request &request) {
 	(void)clientfd;
 
 	std::cout << "DENTRO POST " << std::endl;
-	
+
 	if (request.GetBodyLength() < 10)
 		throw ErrorHttp("400 Bad Request", request.error["400"]);
 	data = request.GetBody();
@@ -354,7 +353,7 @@ std::string	Sender::Post(int clientfd, Request &request) {
 		size_t content_type_end = data.find("------WebKitFormBoundary", content_type_start);
 		content = data.substr(content_type_start, content_type_end - content_type_start - 2);
 	}
-	
+
 	std::cout << "filename = " << name << "  content = " << content << std::endl;
 
 	if (name.find('.') == std::string::npos)
@@ -363,7 +362,7 @@ std::string	Sender::Post(int clientfd, Request &request) {
 		throw ErrorHttp("415 Unsupported Media Type", "/415");
 
 	if (request.GetHeaders()["CONTENT-TYPE"] != "") {
-		
+
 		std::cout << "File received : " << std::endl;
 		std::string file_path = "./uploads/" + name;
 		std::cout <<  content << "$" << std::endl << "at" << file_path << "$" << std::endl;

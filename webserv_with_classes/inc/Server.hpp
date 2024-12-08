@@ -75,17 +75,26 @@ class Webserv {
 
 		void make_list(std::string line);
 		void parse(std::string path);
+
 		void data_structure(void);
+
 		void count_servers(void);
 		void count_location_blocks(void);
 		void sub_location_blocks(void);
 		void prepare_location_parse(void);
 		void last_function(int &bracket, std::vector<std::string>::iterator &it, Location &location);
 		void location_parse(int &bracket, std::vector<std::string>::iterator &it, Location &location, int n);
+
+		void check_input(void);
+		void recursive_location(Location &loc);
+
 		void listen_set(void);
+
 		void check(void);
+
 		void recursive_clear(Location &location);
 		void clean(void);
+
 		std::vector<std::string> _v;
 		Servers_parse *serv;
 		int serv_n;
