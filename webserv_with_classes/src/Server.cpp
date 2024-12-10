@@ -129,7 +129,7 @@ void	Webserv::Wait( void ) {
 	//std::cout << nev << std::endl;
 }
 
-void	Server::ManageConnexion( struct epoll_event *events ) {
+void	Server::ManageConnexion( struct epoll_event *events) {
 	//	Iterating over the events to manage the connections
 	/*
 	int	clientfd;
@@ -177,8 +177,10 @@ void	Server::ManageConnexion( struct epoll_event *events ) {
 	*/
 	int	clientfd;
 	//std::cout << nev << std::endl;
+	//this->Wait();
 	for (int i = 0; i < nev; i++)
 	{
+		//this->Wait();
 		if ((events)[i].data.fd == serverfd)
 		{
 			std::cout << "connection" << std::endl;
@@ -249,7 +251,7 @@ const char *Webserv::ErrorListeningSocket::what()	const throw()	{	return "Error:
 
 const char *Webserv::ErrorAcceptingSocket::what()	const throw()	{	return "Error: could not accept the new connection.";	}
 
-const char *Webserv::ErrorCreatingKqueue::what()		const throw()	{	return "Error: could not create kqueue instance.";		}
+const char *Webserv::ErrorCreatingKqueue::what()	const throw()	{	return "Error: could not create kqueue instance.";		}
 
 const char *Webserv::ErrorInitializeKqueue::what()	const throw()	{	return "Error: could not initialize kqueue instance.";		}
 

@@ -3,12 +3,22 @@
 #include <cerrno>
 #include <cstring>
 
+int g_finish;
+
+void handler(int)
+{
+	g_finish = 0;
+}
 
 // Drop comments to use configuration file
 int main(int argc, char **argv, char **env) {
     (void)argc;
     (void)argv;
     (void)env;
+	g_finish = 1;
+	signal(SIGSTOP, handler);
+	signal(SIGINT,  handler);
+	signal(SIGQUIT, handler);
     /*if (argc != 2) {
         argv[1] = (char *)"../web_parse/linux.conf";
     }*/
@@ -27,9 +37,9 @@ int main(int argc, char **argv, char **env) {
 			throw Webserv::ErrorCreatingKqueue();
 		for (int i = 0; i < static_cast<int>(server._port.size()); i++) //Creates a sub_server for each _port.
 			server.sub_server.push_back(Server(server.env, server.sender, server._host[i], server._port[i], server.ep, server.nev));
-		for (std::vector<Server>::iterator it = server.sub_server.begin(); it != server.sub_server.end(); it++) 
+		for (std::vector<Server>::iterator it = server.sub_server.begin(); it != server.sub_server.end(); it++)
 			(*it).Start();
-		while (true) {
+		while (g_finish) {
 			server.Wait();
 			for (std::vector<Server>::iterator it = server.sub_server.begin(); it != server.sub_server.end(); it++)
 			{

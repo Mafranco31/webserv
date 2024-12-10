@@ -269,9 +269,13 @@ void	Sender::Send(int clientfd, std::string buffer, char **env) {
 		std::cout << "\033[34m" << request << "\033[0m" << std::endl;
 		choose_server_block(request);
 		server_configuration(request);
+		//std::cout << "arrives here" << std::endl;
 		choose_location_block(request);
-		location_configuration(request);
-		std::cout << "Vamooos" << request.location_block->prefix << std::endl;
+		//std::cout << "arrives here" << std::endl;
+		std::cout << "location block: " << request.serv_block->location_blocks << std::endl;
+		if (request.serv_block->location_blocks != 0)
+			location_configuration(request);
+		//std::cout << "Vamooos" << request.location_block->prefix << std::endl;
 		//std::cout << "uri" << request.uri << std::endl;
 		//choose server block
 		//set general variables/default variables.

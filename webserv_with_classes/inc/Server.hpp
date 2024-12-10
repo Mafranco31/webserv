@@ -11,7 +11,6 @@ class Sender;
 class Request;
 class Location;
 
-
 class Server
 {
 	private:
@@ -29,7 +28,7 @@ class Server
 		int	nev;
 		*/
 		//EPOLL
-		struct epoll_event change_event;
+		struct epoll_event change_event; //events[MAX_EVENTS];
 
 		char **_env;
 		Sender &_sender;
@@ -41,6 +40,7 @@ class Server
 
 		Server(char **env, Sender &sender, std::string host, std::string port, int &serv_ep, int &serv_nev);
 		~Server();
+		//void Wait( void );
 		void Start( void );
 		void Stop( void );
 		void ManageConnexion(struct epoll_event *events);
