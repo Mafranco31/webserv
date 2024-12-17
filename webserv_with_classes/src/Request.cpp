@@ -77,8 +77,8 @@ void	Request::ParseFirstLine ( void ) {
 	uri = firstLine.substr(pos, pos2 - pos);
 	//	Looking for arguments
 	if (uri.find('?') != std::string::npos) {
-		uri = uri.substr(0, uri.find('?'));
 		get_args(uri.substr(uri.find('?') + 1));
+		uri = uri.substr(0, uri.find('?'));
 	}
 	else {
 		nb_args = 0;
