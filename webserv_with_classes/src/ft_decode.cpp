@@ -25,7 +25,7 @@ std::string decodePercentEncoding(const std::string &encoded) {
                 if (decodedChar >= 0x20 && decodedChar <= 0x7E) {
                     decoded += decodedChar;
                 }
-                else (decoded += '%');
+                else throw std::invalid_argument("invalid argument");
                 i += 2;
             } else {
                 decoded += '%';

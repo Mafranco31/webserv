@@ -51,14 +51,14 @@ void	Request::get_args(std::string args) {
 			arg = args.substr(posstart, posend - posstart);
 			size_t posmid = arg.find('=');
 			if (posmid != std::string::npos && posmid != arg.size() - 1 && posmid != 0)
-				_marg.insert(std::pair<std::string, std::string>(arg.substr(0, posmid), arg.substr(posmid + 1)));
+				_marg.insert(std::pair<std::string, std::string>(decodePercentEncoding(arg.substr(0, posmid)), decodePercentEncoding(arg.substr(posmid + 1))));
 			posstart = posend + 1;
 			posend = args.find('&', posstart);
 		}
 		arg = args.substr(posstart);
 		size_t posmid = arg.find('=');
 		if (posmid != std::string::npos && posmid != arg.size() - 1 && posmid != 0)
-			_marg.insert(std::pair<std::string, std::string>(arg.substr(0, posmid), arg.substr(posmid + 1)));
+			_marg.insert(std::pair<std::string, std::string>(decodePercentEncoding(arg.substr(0, posmid)), decodePercentEncoding(arg.substr(posmid + 1))));
 		nb_args = _marg.size();
 	}
 }
@@ -80,7 +80,11 @@ void	Request::ParseFirstLine ( void ) {
 	uri = firstLine.substr(pos, pos2 - pos);
 	//	Looking for arguments
 	if (uri.find('?') != std::string::npos) {
-		get_args(uri.substr(uri.find('?') + 1));
+		try {
+			get_args(uri.substr(uri.find('?') + 1));
+		} catch (std::invalid_argument &e) {
+			throw ErrorHttp("400 Bad Request", error["400"]);
+		}
 		uri = uri.substr(0, uri.find('?'));
 	}
 	else {
