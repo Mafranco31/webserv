@@ -20,7 +20,7 @@ class Request {
 		std::map<std::string, std::string> headers;
 		int is_cgi;
 		std::string cgi_ext;
-		std::vector<std::string> _varg;
+		std::map<std::string, std::string>  _marg;
 		int	nb_args;
 
 	public:
@@ -63,7 +63,7 @@ class Request {
 		int GetIsCgi( void ) const { return is_cgi; }
 		std::string GetCgiExt (void) const {return cgi_ext;}
 		int GetNbArgs( void ) const { return nb_args; }
-		std::vector<std::string> GetVarg( void ) const {	return _varg;	}
+		std::map<std::string, std::string> GetMarg( void ) const {	return _marg;	}
 
 	//	Exceptions
 		class ErrorMethodNotImplemented: public std::exception		{	const char	*what() const throw ();	};
