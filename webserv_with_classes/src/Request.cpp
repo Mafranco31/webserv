@@ -41,20 +41,50 @@ void	Request::IsCGI() {
 	}
 }
 
+void	Request::get_args(std::string args) {
+	if (args.empty())
+		nb_args = 0;
+	else {
+		std::string arg;
+		size_t pos1 = 0;
+		size_t pos2 = args.find('&');
+		while (pos2 != std::string::npos) {
+			arg = args.substr(pos1, pos2 - pos1);
+			_varg.push_back(arg);
+			pos1 = pos2 + 1;
+			pos2 = args.find('&', pos1);
+		}
+		arg = args.substr(pos1);
+		_varg.push_back(arg);
+		nb_args = _varg.size();
+	}
+}
+
 void	Request::ParseFirstLine ( void ) {
 	//	Parsing the first line of the request
+	//	Getting the method
 	std::string firstLine = content.substr(0, content.find('\n'));
 	if (firstLine.empty()) throw ErrorHttp("400 Bad Request", error["400"]);
 	size_t pos = firstLine.find_first_of(" \t\r\v\f");
 	if (pos == std::string::npos) throw ErrorHttp("400 Bad Request", error["400"]);
 	method = firstLine.substr(0, pos);
 
+	//	Getting the URI
 	pos = firstLine.find_first_not_of(" \t\r\v\f", firstLine.find_first_of(" \t\r\v\f"));
 	if (pos == std::string::npos) throw ErrorHttp("400 Bad Request", error["400"]);
 	size_t pos2 = firstLine.find_first_of(" \t\r\v\f", pos);
 	if (pos2 == std::string::npos) throw ErrorHttp("400 Bad Request", error["400"]);
 	uri = firstLine.substr(pos, pos2 - pos);
+	//	Looking for arguments
+	if (uri.find('?') != std::string::npos) {
+		uri = uri.substr(0, uri.find('?'));
+		get_args(uri.substr(uri.find('?') + 1));
+	}
+	else {
+		nb_args = 0;
+	}
 
+	//	Getting the version
 	pos = firstLine.find_first_not_of(" \t\r\v\f", pos2);
 	if (pos == std::string::npos) throw ErrorHttp("400 Bad Request", error["400"]);
 	pos2 = firstLine.find_first_of(" \t\r\v\f\n", pos);
@@ -135,6 +165,11 @@ std::ostream& operator<<(std::ostream& os, const Request& request) {
 	os << "-Method: " << request.GetMethod() << std::endl;
 	os << "-URI: " << request.GetUri() << std::endl;
 	os << "-Version: " << request.GetVersion() << std::endl;
+	os << "nb_args: " << request.GetNbArgs() << std::endl;
+	std::vector<std::string> varg = request.GetVarg();
+	for (int i = 0; i < request.GetNbArgs(); i++) {
+		os << "arg[" << i << "]: " << varg[i] << std::endl;
+	}
 	os << "-Headers:" << std::endl;
 	std::map<std::string, std::string>	headers = request.GetHeaders();
 	for (std::map<std::string, std::string>::const_iterator it = headers.begin(); it != headers.end(); ++it) {
