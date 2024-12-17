@@ -8,7 +8,7 @@
 # include <dirent.h>
 # include <sys/socket.h>
 //# include <sys/event.h> //kqueue
-#include <sys/epoll.h> //epoll
+# include <sys/epoll.h> //epoll
 # include <sys/time.h>
 # include <sys/stat.h>
 # include <netinet/in.h>
@@ -44,5 +44,7 @@ std::string ft_ex_cgi2(int fd, char **env, Request & request);
 std::string	ft_strlen( std::string s);
 
 size_t	ft_strlcpy(char *dest, std::string src, size_t size);
+
+std::string decodePercentEncoding(const std::string &encoded);
 
 #endif
