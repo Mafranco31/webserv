@@ -1,28 +1,19 @@
-#include "Sender.hpp"
+#include "Server.hpp"
 
-Sender::Sender( void ) {
-	std::cout << "Default Sender constructor called" << std::endl;
-}
-
-Sender::~Sender ( void ) {
-	std::cout << "Destructor Sender called" << std::endl;
-}
-
-Sender::Sender ( const std::string &path_to_html, const std::string &path_to_err ) {
-	std::cout << "Sender constructor called" << std::endl;
+void Webserv::initialize_path ( const std::string &path_to_html, const std::string &path_to_err ) {
+	//std::cout << "Sender constructor called" << std::endl;
 	http_version = "HTTP/1.1";
 	std::string last_path = "/";
 	try {
 		ReadPath(path_to_html, last_path);
-    	ReadPath(path_to_err, last_path);
+		ReadPath(path_to_err, last_path);
 	} catch (std::exception &e) {
 		throw;
 	}
 }
 
-void	Sender::ReadPath( std::string path, std::string last_path) {
+void	Webserv::ReadPath( std::string path, std::string last_path) {
 	if (chdir(path.c_str()) == -1) throw Webserv::ErrorReadingHtmlPath();
-
 	if (path.at(path.length() - 1) != '/') path += '/';
 	if (path.at(0) == '/') path = path.substr(1);
 	DIR *dir = opendir(".");
@@ -40,7 +31,7 @@ void	Sender::ReadPath( std::string path, std::string last_path) {
 	closedir(dir);
 }
 
-void	Sender::ReadFile( std::string file, std::string last_path) {
+void	Webserv::ReadFile( std::string file, std::string last_path) {
 	std::ifstream ifs(file.c_str());
 	if (!ifs.is_open()) throw Webserv::ErrorReadingHtmlPath();
 	std::stringstream buffer;
@@ -59,7 +50,7 @@ void	Sender::ReadFile( std::string file, std::string last_path) {
 	std::cout << last_path + file.substr(0, file.find(".")) << std::endl;
 }
 
-void Sender::choose_server_block(Request &request)
+void Webserv::choose_server_block(Request &request)
 {
 	//Primero: exact match
 	std::string host = request.GetHeaders()["HOST"];
@@ -83,33 +74,33 @@ void Sender::choose_server_block(Request &request)
 	request._port.erase(request._port.find_last_not_of('\r') + 1);
 	std::cout << "$" << request._host << "$" << std::endl;
 	std::cout << "$" << request._port << "$" << std::endl;
-	for (int i = 0; i < _ws->serv_n; i++ )
+	for (int i = 0; i < serv_n; i++ )
 	{
-		if (_ws->serv[i].port == request._port && _ws->serv[i].d.find("server_name") != _ws->serv[i].d.end())
+		if (serv[i].port == request._port && serv[i].d.find("server_name") != serv[i].d.end())
 		{
-			for (std::vector<std::string>::iterator it = _ws->serv[i].d["server_name"].begin(); it != _ws->serv[i].d["server_name"].end(); it++)
+			for (std::vector<std::string>::iterator it = serv[i].d["server_name"].begin(); it != serv[i].d["server_name"].end(); it++)
 			{
 				if (request._host == *it)
 				{
-					request.serv_block = &_ws->serv[i];
+					request.serv_block = &serv[i];
 					//std::cout << "holaaaaaaaaaaa: "<< request.serv_block->d["root"][0] << std::endl;
 					return ;
 				}
 			}
 		}
 	}
-	for (int i = 0; i < _ws->serv_n; i++ )
+	for (int i = 0; i < serv_n; i++ )
 	{
-		if ((request._host == "127.0.0.1" || request._host == "localhost") && _ws->serv[i].port == request._port)
+		if ((request._host == "127.0.0.1" || request._host == "localhost") && serv[i].port == request._port)
 		{
-			request.serv_block = &_ws->serv[i];
+			request.serv_block = &serv[i];
 			//std::cout << "holaaaaaaaaaaa: "<< request.serv_block->d["root"][0] << std::endl;
 			return ;
 		}
 	}
 }
 
-void Sender::recursive_location(Location &loc, Request &request)
+void Webserv::recursive_location(Location &loc, Request &request)
 {
 	std::cout << "prefix: " << loc.prefix << std::endl;
 	std::cout << "URI: " << request.uri << std::endl;
@@ -128,7 +119,7 @@ void Sender::recursive_location(Location &loc, Request &request)
 	}
 }
 
-void Sender::choose_location_block(Request &request)
+void Webserv::choose_location_block(Request &request)
 {
 	for (int i = 0; i < request.serv_block->location_blocks; i++)
 	{
@@ -136,7 +127,7 @@ void Sender::choose_location_block(Request &request)
 	}
 }
 
-void Sender::server_configuration(Request &request)
+void Webserv::server_configuration(Request &request)
 {
 	std::map<std::string, std::vector<std::string> > map = request.serv_block->d;
 	if (map.find("root") != map.end())
@@ -193,7 +184,7 @@ void Sender::server_configuration(Request &request)
 	}
 }
 
-void Sender::location_configuration(Request &request)
+void Webserv::location_configuration(Request &request)
 {
 	std::map<std::string, std::vector<std::string> > map = request.location_block->data;
 	if (map.find("root") != map.end())
@@ -259,7 +250,7 @@ void Sender::location_configuration(Request &request)
 	}
 }
 
-void	Sender::Send(int clientfd, std::string buffer, char **env) {
+void	Webserv::Send(int clientfd, std::string buffer, char **env) {
 	Request request = Request();
 	std::string response = "";
 	std::string body = "";
@@ -326,7 +317,7 @@ void	Sender::Send(int clientfd, std::string buffer, char **env) {
 		throw Webserv::ErrorSendingData();
 }
 
-std::string	Sender::Post(int clientfd, Request &request) {
+std::string	Webserv::Post(int clientfd, Request &request) {
 	std::string response = "";
 	std::string data = "";
 	std::string content = "";
@@ -389,7 +380,7 @@ std::string	Sender::Post(int clientfd, Request &request) {
 	return response = http_version + " 200 OK\nContent-Type: text/html\nContent-Length: " + ft_strlen(body_uploaded) +  "\n\n" + body_uploaded;
 }
 
-std::string Sender::Delete(Request &request) {
+std::string Webserv::Delete(Request &request) {
 	std::string response = "";
 	std::string body = "";
 	std::string name = "./uploads/" + request.GetFullUri().substr(request.GetFullUri().rfind('/'));

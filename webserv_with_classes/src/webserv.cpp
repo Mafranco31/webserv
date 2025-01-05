@@ -22,12 +22,15 @@ int main(int argc, char **argv, char **env) {
     /*if (argc != 2) {
         argv[1] = (char *)"../web_parse/linux.conf";
     }*/
-
-	Sender sender(std::string("www"), std::string("errwww"));
-	Webserv server(sender, env);
-	sender._ws = &server;
+	Webserv server;
 	try
 	{
+		server.initialize_path(std::string("www"), std::string("errwww"));
+		//server.sender = sender;
+		//server.sender = sender;
+		server.env = env;
+		//server.sender._ws = &server;
+
 		server.parse(std::string("linux.conf"));
 		server.data_structure();
 		//server.check();
@@ -36,7 +39,7 @@ int main(int argc, char **argv, char **env) {
 		if (server.ep == -1)
 			throw Webserv::ErrorCreatingKqueue();
 		for (int i = 0; i < static_cast<int>(server._port.size()); i++) //Creates a sub_server for each _port.
-			server.sub_server.push_back(Server(server.env, server.sender, server._host[i], server._port[i], server.ep, server.nev));
+			server.sub_server.push_back(Server(server.env, &server, server._host[i], server._port[i], server.ep, server.nev));
 		for (std::vector<Server>::iterator it = server.sub_server.begin(); it != server.sub_server.end(); it++)
 			(*it).Start();
 		while (g_finish) {

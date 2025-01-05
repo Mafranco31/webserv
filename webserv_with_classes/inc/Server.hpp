@@ -7,9 +7,9 @@
 # include "Servers_parse.hpp"
 # define MAX_EVENTS 100
 
-class Sender;
 class Request;
 class Location;
+class Webserv;
 
 class Server
 {
@@ -31,14 +31,15 @@ class Server
 		struct epoll_event change_event; //events[MAX_EVENTS];
 
 		char **_env;
-		Sender &_sender;
+		Webserv *_ws;
+		//Sender &_sender;
 		int _port;
 		std::string _host;
 		int &ep;
 		int &nev;
 		std::vector<int> fds;
 
-		Server(char **env, Sender &sender, std::string host, std::string port, int &serv_ep, int &serv_nev);
+		Server(char **env, Webserv *ws, std::string host, std::string port, int &serv_ep, int &serv_nev);
 		~Server();
 		//void Wait( void );
 		void Start( void );
@@ -58,12 +59,11 @@ class Webserv {
 	public:
 		std::vector<Server> sub_server;
 		char **env;
-		Sender & sender;
 		int ep;
 		int nev;
 		struct epoll_event events[MAX_EVENTS];
 
-		Webserv( Sender &s, char **env );
+		Webserv();
 		~Webserv();
 
 		//void Initialize( std::string &path_to_html, std::string &path_to_err );
@@ -104,6 +104,25 @@ class Webserv {
 		std::vector<std::string> _host;
 		std::vector<std::string> _port;
 
+
+		//Sender
+		std::string http_version;
+		std::string path_to_html;
+		std::map<std::string, std::string> _html_map;
+
+		void initialize_path( const std::string &path_to_html, const std::string &path_to_err );
+
+		void	Send(int clientfd, std::string buffer, char **env);
+		void	ReadPath( std::string path , std::string last_path );
+		void	ReadFile( std::string file , std::string last_path );
+		std::string Post( int clientfd, Request &request );
+		std::string Delete( Request &request );
+
+		void choose_server_block(Request &request);
+		void server_configuration(Request &request);
+		void choose_location_block(Request &request);
+		void recursive_location(Location &loc, Request &request);
+		void location_configuration(Request &request);
 
 	//	Exceptions
 		class ErrorCreatingSocket: public std::exception	{	const char	*what() const throw ();	};

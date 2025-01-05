@@ -3,7 +3,7 @@
 #include <cerrno>
 #include <cstring>
 
-Server::Server(char **env, Sender &sender, std::string host,std::string port, int &serv_ep, int &serv_nev): _env(env), _sender(sender), _host(host), ep(serv_ep), nev(serv_nev)
+Server::Server(char **env, Webserv *ws, std::string host,std::string port, int &serv_ep, int &serv_nev): _env(env), _ws(ws), _host(host), ep(serv_ep), nev(serv_nev)
 {
 	std::stringstream ss(port);
 	ss >> _port;
@@ -16,7 +16,7 @@ Server::~Server()
 }
 
 //	Constructor
-Webserv::Webserv ( Sender & s, char **env ) : env(env), sender(s), serv(NULL), serv_n(0){
+Webserv::Webserv () : serv(NULL), serv_n(0){
 	valid_directives.insert("listen");
 	valid_directives.insert("root");
 	valid_directives.insert("index");
@@ -229,7 +229,7 @@ void	Server::ManageConnexion( struct epoll_event *events) {
 				std::string data = std::string(buffer);
 				std::cout << "Received from client " << events[i].data.fd << ": " << std::endl; //Create a structure for clients to identify them by a number, and not its fd.
 				std::cout << buffer << "$" << std::endl;
-				_sender.Send(events[i].data.fd, data, _env);
+				_ws->Send(events[i].data.fd, data, _env);
 			}
 		}
 	}
@@ -237,7 +237,7 @@ void	Server::ManageConnexion( struct epoll_event *events) {
 
 void	Server::Stop( void ) {
 	close(serverfd);
-	std::cout << "\033[1;32mServer stopped on port " << serverfd << "...\033[0m" << std::endl;
+	std::cout << "\033[1;32mServer stopped on port " << _port << "...\033[0m" << std::endl;
 }
 
 //	Exceptions
