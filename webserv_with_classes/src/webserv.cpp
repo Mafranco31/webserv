@@ -35,7 +35,10 @@ int main(int argc, char **argv, char **env) {
 		server.data_structure();
 		//server.check();
 		std::cout << "parsing done" << std::endl;
+		//EPOLL
 		server.ep = epoll_create(1);
+		//KQUEUE
+		//server.ep = kqueue();
 		if (server.ep == -1)
 			throw Webserv::ErrorCreatingKqueue();
 		for (int i = 0; i < static_cast<int>(server._port.size()); i++) //Creates a sub_server for each _port.

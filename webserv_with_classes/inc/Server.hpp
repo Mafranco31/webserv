@@ -20,15 +20,14 @@ class Server
 		int serverfd;
 		int maxfd;
 		struct sockaddr_in serveraddr;
+
 		//KQUEUE
-		/*
-		struct kevent change_event, events[MAX_EVENTS];
-		struct timespec timeout;
-		int	kq;
-		int	nev;
-		*/
+		//struct kevent change_event;//, events[MAX_EVENTS];
+		//void ManageConnexion(struct kevent *events);
+		
 		//EPOLL
 		struct epoll_event change_event; //events[MAX_EVENTS];
+		void ManageConnexion(struct epoll_event *events);
 
 		char **_env;
 		Webserv *_ws;
@@ -44,8 +43,6 @@ class Server
 		//void Wait( void );
 		void Start( void );
 		void Stop( void );
-		void ManageConnexion(struct epoll_event *events);
-
 };
 
 class Webserv {
@@ -61,7 +58,13 @@ class Webserv {
 		char **env;
 		int ep;
 		int nev;
+
+		//EPOLL
 		struct epoll_event events[MAX_EVENTS];
+
+		//KQUEUE
+		//struct kevent events[MAX_EVENTS];
+		//struct timespec timeout;
 
 		Webserv();
 		~Webserv();
