@@ -23,43 +23,57 @@ std::string readFileToString(const std::string& filename) {
     return buffer.str();
 }
 
-std::string ex_cgi(std::string cmd, int fd, char **env, std::string method) {
+std::string ft_ex_cgi(int fd, char **env, Request & request) {
     std::string ret;
 
-    (void)method;
-
+    std::string language = request.GetCgiExt();
     int		status = 0;
+    std::string program;
 
-    //  Parsing file to get 'arg' arg to use execve
-    std::vector<std::string>    v;
-    size_t  sep = 0;
-    size_t  sep_before = 0;
-    while (sep_before < cmd.length()) {
-        sep = cmd.find(' ', sep_before);
-        if (sep == std::string::npos) sep = cmd.length();
-        if (sep > sep_before) v.push_back(cmd.substr(sep_before, sep - sep_before));
-        sep_before = sep + 1;
+    if (language == ".py")
+        program = "/usr/bin/python3";
+    else if (language == ".php")
+        program = "/usr/local/bin/php";
+    else
+        throw ErrorHttp("404 Not Found", request.error["404"]);
+
+    std::cout << "program = " << program << "   request = " << "." << request.GetUri() << language << std::endl;
+    std::vector<std::string> v;
+    v.push_back(program);
+    v.push_back("." + request.GetUri() + language);
+
+    std::map<std::string, std::string> args = request.GetMarg();
+
+    for (std::map<std::string, std::string>::iterator it = args.begin(); it != args.end(); it++) {
+        v.push_back(it->second);
     }
 
-    char    *arg[v.size()];
+    char    *arguments[v.size()];
     int i = 0;
     for (std::vector<std::string>::iterator it = v.begin();it != v.end();it++) {
-        arg[i] = const_cast<char *>((*it).c_str());
-        std::cout << "arg: " << arg[i] << std::endl;
+        arguments[i] = const_cast<char *>((*it).c_str());
+        std::cout << "arg: " << arguments[i] << std::endl;
         i++;
     }
-    arg[i] = NULL;
+    arguments[i] = NULL;
 
     int fd_response = open("tmp/response", O_CREAT | O_WRONLY | O_TRUNC, S_IRWXU);
-    if (fd_response == -1) throw ErrorHttp("500 Internal Server Error", "/500");
+    if (fd_response == -1) {
+        //delete[] charArray;
+        throw ErrorHttp("500 Internal Server Error", "/500");
+    }
 
     int pfd[2];
-    if (pipe(pfd) == -1) throw ErrorHttp("500 Internal Server Error", "/500");
-
+    if (pipe(pfd) == -1) {
+        //delete[] charArray;
+        throw ErrorHttp("500 Internal Server Error", "/500");
+    }
 
     pid_t pid = fork();
-    if (pid == -1) throw ErrorHttp("500 Internal Server Error", "/500");
-
+    if (pid == -1) {
+        //delete[] charArray;
+        throw ErrorHttp("500 Internal Server Error", "/500");
+    }
 
 
     if (pid == 0) {
@@ -67,7 +81,7 @@ std::string ex_cgi(std::string cmd, int fd, char **env, std::string method) {
         close(pfd[0]);  // Close read end
         if (dup2(pfd[1], STDOUT_FILENO) == -1) exit(500); // Redirect stdout to pipe
         close(pfd[1]);  // Close write end after dup2
-        if (execve(cmd.substr(0, cmd.find(' ')).c_str(), arg, env) == -1) exit(500);
+        if (execve(program.c_str(), arguments, env) == -1) exit(500);
     } else {
         // Parent process
         close(pfd[1]);  // Close write end
@@ -76,31 +90,38 @@ std::string ex_cgi(std::string cmd, int fd, char **env, std::string method) {
 
         // Read from the pipe and write to the response file
         while ((bytesRead = read(pfd[0], buffer, sizeof(buffer))) > 0) {
-            if (write(fd_response, buffer, bytesRead) == -1) throw ErrorHttp("500 Internal Server Error", "/500");
+            if (write(fd_response, buffer, bytesRead) == -1) {
+            //delete[] charArray;
+            throw ErrorHttp("500 Internal Server Error", "/500");
+            }
         }
 
         close(pfd[0]); // Close read end after done
-        if (waitpid(pid, &status, 0) == -1) throw ErrorHttp("500 Internal Server Error", "/500"); // Wait for child process
+        if (waitpid(pid, &status, 0) == -1) {
+            //delete[] charArray;
+            throw ErrorHttp("500 Internal Server Error", "/500"); // Wait for child process
+        }
     }
-
+    //delete[] charArray;
     close(fd_response); // Close response file descriptor
     (void)fd;
     if (status == 500)
         throw ErrorHttp("500 Internal Server Error", "/500");
 
-    std::string fd_response_str = readFileToString("tmp/response");
-    std::string fd_response_header = fd_response_str.substr(0, fd_response_str.find("<!DOCTYPE html>"));
-    std::string fd_response_body = fd_response_str.substr(fd_response_str.find("<!DOCTYPE html>"));
+    std::string fd_response_body = readFileToString("tmp/response");
 
-    return fd_response_body;
-    // std::string response = "HTTP/1.1 200 OK\r\n";
-    // response += "Content-Type: text/html\r\n";
-    // response += "Connection: close\r\n";
-    // response += "Content-Length: " + std::to_string(fd_response_body.length() - 2) + "\r\n";
-    // response += fd_response_header;
-    // if (method == "GET")
-    //     response += fd_response_body;
-    // std::remove("tmp/response");
-    // send(fd, response.c_str(), response.length(), 0);
-    // return 0; // Assuming success if no errors occurred
+    //return fd_response_str;
+    std::string response = "HTTP/1.1 200 OK\r\n";
+    response += "Content-Type: text/html\r\n";
+    response += "Connection: close\r\n";
+    response += "Content-Length: " + ft_strlen(fd_response_body) + "\r\n\n";
+    //response += fd_response_header;
+    if (request.GetMethod()== "GET") {
+        response += fd_response_body;
+    }
+    std::cout << request.GetMethod() << std::endl;
+    //std::remove("tmp/response");
+    return response;
+    //send(fd, response.c_str(), response.length(), 0);
+    //return 0; // Assuming success if no errors occurred
 }
