@@ -273,17 +273,14 @@ void	Webserv::Send(int clientfd, std::string buffer, char **env) {
 		//choose location block
 		if (request.GetMethod() == "GET") {
 			if (request.GetIsCgi()) {
-				response = ft_ex_cgi2(clientfd, env, request);
+				response = ft_ex_cgi(clientfd, env, request);
 				std::cout << "CGI : " << request.GetUri() << " response :" << std::endl << response << std::endl;
 				if (send(clientfd, response.c_str(), response.size(), 0) == -1)
 					throw Webserv::ErrorSendingData();
 				return;
 			}
 			else if (_html_map[request.GetUri()] != "") {
-				if (_html_map[request.GetUri()].find('\n') == std::string::npos)
-					body = ex_cgi(_html_map[request.GetUri()], clientfd, env, request.GetMethod());
-				else
-					body = _html_map[request.GetUri()];
+				body = _html_map[request.GetUri()];
 				response = http_version  + " 200 OK\nContent-Type: text/html\nContent-Length: " + ft_strlen(body) + "\n\n" + body;
 			}
 			else {
