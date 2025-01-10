@@ -32,7 +32,7 @@
 
 
 # define MAX_EVENTS 100
-# define BUFFER_SIZE 8192
+# define BUFFER_SIZE 1000000
 
 void	    *ft_memset(void *s, int c, size_t n);
 
@@ -43,5 +43,7 @@ std::string	ft_strlen( std::string s);
 size_t	ft_strlcpy(char *dest, std::string src, size_t size);
 
 std::string decodePercentEncoding(const std::string &encoded);
+
+void executeCGI(const std::string &scriptPath, const std::string &requestMethod, const std::string &queryString, const std::string &requestBody);
 
 #endif

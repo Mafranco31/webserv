@@ -17,14 +17,49 @@ Request::~Request ( void ) {
 
 // Methods
 
-void	Request::Parse ( std::string buffer ) {
+void	Request::Parse ( std::string buffer, int clientfd ) {
 	content = buffer;
+	client_socket = clientfd;
 	try {
 		ParseFirstLine();
 		ParseHeader();
 		IsCGI();
+		if (headers["CONTENT-LENGTH"] != "") {
+			std::cout << "Content-Length: " << headers["CONTENT-LENGTH"] << std::endl;
+			ChunkedBody();
+		}
 	} catch (std::exception &e) {
 		throw ;
+	}
+}
+
+void	Request::ChunkedBody(){
+	ssize_t bytes_received = 0;
+	char buffer[BUFFER_SIZE];
+	int content_length = 0;
+	std::string length = headers["CONTENT-LENGTH"];
+
+	if (length.find_first_not_of(' ') != std::string::npos) {
+		size_t start_pos_space = length.find_first_not_of(' ');
+		if (start_pos_space != std::string::npos) {
+			length.erase(0, start_pos_space);
+		}
+		size_t end_pos_space = length.find_last_not_of(' ');
+		if (end_pos_space != std::string::npos) {
+			length.erase(end_pos_space + 1);
+		}
+	}
+
+    std::stringstream ss(length.c_str()); // Initialize stringstream with the char*
+    ss >> content_length;
+
+	if (ss.fail()) throw ErrorHttp("400 Bad Request", error["400"]);
+
+	while (int(body.size()) < content_length) {
+		bytes_received = recv(client_socket, buffer, BUFFER_SIZE - 1, 0);
+		if (bytes_received <= 0) break;
+		buffer[bytes_received] = '\0';
+		body += buffer;
 	}
 }
 
@@ -80,6 +115,7 @@ void	Request::ParseFirstLine ( void ) {
 	uri = firstLine.substr(pos, pos2 - pos);
 	//	Looking for arguments
 	if (uri.find('?') != std::string::npos) {
+		query_string = uri.substr(uri.find('?') + 1);
 		try {
 			get_args(uri.substr(uri.find('?') + 1));
 		} catch (std::invalid_argument &e) {
@@ -88,6 +124,7 @@ void	Request::ParseFirstLine ( void ) {
 		uri = uri.substr(0, uri.find('?'));
 	}
 	else {
+		query_string = "";
 		nb_args = 0;
 	}
 
@@ -118,6 +155,19 @@ void Request::ParseHeader( void ) {
 		}
 		if (headerLine.find(':') + 1 == headerLine.size()) throw ErrorHttp("400 Bad Request", error["400"]);
 		std::string value = headerLine.substr(headerLine.find(':') + 1, headerLine.size() - headerLine.find(':') - 1);
+		
+		//	Removing leading and trailing spaces
+		// if (value.find_first_not_of(' ') != std::string::npos) {
+		// 	size_t start_pos_space = value.find_first_not_of(' ');
+		// 	if (start_pos_space != std::string::npos) {
+		// 		value.erase(0, start_pos_space);
+		// 	}
+		// 	size_t end_pos_space = value.find_last_not_of(' ');
+		// 	if (end_pos_space != std::string::npos) {
+		// 		value.erase(end_pos_space + 1);
+		// 	}
+		// }
+
 		headers.insert(std::pair<std::string, std::string>(key, value));
 
 		pos1 = pos2 + 1;
@@ -131,6 +181,7 @@ void Request::ParseHeader( void ) {
 
 //	Overload operator<<
 std::ostream& operator<<(std::ostream& os, const Request& request) {
+	os << "-FULL URI:" << request.GetFullUri() << std::endl;
 	os << "-Method: " << request.GetMethod() << std::endl;
 	os << "-URI: " << request.GetUri() << std::endl;
 	os << "-Version: " << request.GetVersion() << std::endl;

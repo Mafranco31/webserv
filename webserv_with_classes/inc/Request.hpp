@@ -22,6 +22,8 @@ class Request {
 		std::string cgi_ext;
 		std::map<std::string, std::string>  _marg;
 		int	nb_args;
+		int client_socket;
+		std::string query_string;
 
 	public:
 
@@ -45,11 +47,12 @@ class Request {
 		~Request();
 
 	//	Methods
-		void	Parse( std::string buffer );
+		void	Parse( std::string buffer, int clientfd );
 		void	ParseFirstLine( void );
 		void	ParseHeader( void );
 		void	IsCGI();
 		void	get_args(std::string args);
+		void	ChunkedBody();
 		// void	ParseBody( void );
 
 	//	Getters
@@ -57,6 +60,7 @@ class Request {
 		std::string	GetUri( void ) const ;
 		std::string GetFullUri( void ) const {	return uri;	}
 		std::string	GetVersion( void ) const {	return version;	}
+		std::string	GetQueryString( void ) const {	return query_string;	}
 		std::map<std::string, std::string> GetHeaders( void ) const {	return headers;	}
 		std::string GetBody( void ) const {	return body;	}
 		size_t GetBodyLength( void ) const {	return body_length;	}

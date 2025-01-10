@@ -47,7 +47,7 @@ void	Webserv::ReadFile( std::string file, std::string last_path) {
 	//	std::cout << "Index last path: " << last_path << std::endl;
 	//	_html_map[last_path] = buffer.str();
 	//}
-	std::cout << last_path + file.substr(0, file.find(".")) << std::endl;
+	//std::cout << last_path + file.substr(0, file.find(".")) << std::endl;
 }
 
 void Webserv::choose_server_block(Request &request)
@@ -72,8 +72,8 @@ void Webserv::choose_server_block(Request &request)
 	//request._host = request._host.substr(request._host.find_first_not_of('\r'));
 	request._host.erase(request._host.find_last_not_of('\r') + 1);
 	request._port.erase(request._port.find_last_not_of('\r') + 1);
-	std::cout << "$" << request._host << "$" << std::endl;
-	std::cout << "$" << request._port << "$" << std::endl;
+	//std::cout << "$" << request._host << "$" << std::endl;
+	//std::cout << "$" << request._port << "$" << std::endl;
 	for (int i = 0; i < serv_n; i++ )
 	{
 		if (serv[i].port == request._port && serv[i].d.find("server_name") != serv[i].d.end())
@@ -102,15 +102,15 @@ void Webserv::choose_server_block(Request &request)
 
 void Webserv::recursive_location(Location &loc, Request &request)
 {
-	std::cout << "prefix: " << loc.prefix << std::endl;
-	std::cout << "URI: " << request.uri << std::endl;
+	//std::cout << "prefix: " << loc.prefix << std::endl;
+	//std::cout << "URI: " << request.uri << std::endl;
 	std::string uri_prefix = request.uri.substr(0, loc.prefix.length());
 	if (!request.location_block)
-		std::cout << "Correct initialization" << std::endl;
+		//std::cout << "Correct initialization" << std::endl;
 	if (loc.prefix == uri_prefix)
 	{
 		request.location_block = &loc;
-		std::cout << "request.location_block: " << request.location_block->prefix << std::endl;
+		//std::cout << "request.location_block: " << request.location_block->prefix << std::endl;
 		if (loc.eq == 1 || loc.sub_location_blocks == 0)
 			return ;
 		else
@@ -130,13 +130,14 @@ void Webserv::choose_location_block(Request &request)
 void Webserv::server_configuration(Request &request)
 {
 	std::map<std::string, std::vector<std::string> > map = request.serv_block->d;
+
 	if (map.find("root") != map.end())
 	{
 		if (map["root"].size() != 1 )
 			throw Webserv::InvalidConfigurationFile();
 		request.root = map["root"][0];
 	}
-	std::cout << "root" << request.root << std::endl;
+	//std::cout << "root" << request.root << std::endl;
 	request.uri = request.root + request.uri;
 	if (map.find("index") != map.end())
 	{
@@ -145,10 +146,10 @@ void Webserv::server_configuration(Request &request)
 		for (std::vector<std::string>::iterator it = map["index"].begin(); it != map["index"].end(); it++)
 		{
 			request.index = request.root + "/" + (*it).substr(0, (*it).find("."));
-			std::cout << "Index again: " << request.index << std::endl;
+			//std::cout << "Index again: " << request.index << std::endl;
 			if (_html_map.find(request.index) != _html_map.end())
 			{
-				std::cout << "inside: " << request.index << std::endl;
+				//std::cout << "inside: " << request.index << std::endl;
 				_html_map[(request.root + "/")] = _html_map[request.index];
 				break ;
 			}
@@ -166,7 +167,7 @@ void Webserv::server_configuration(Request &request)
 			for (std::vector<std::string>::iterator it2 = (*it1).begin(); it2 != ((*it1).end() -1); it2++)
 			{
 				request.error[*it2] = request.root + tmp.substr(0, tmp.find("."));
-				std::cout << "path: " << request.error[*it2] << " error: " << *it2 << std::endl;
+				//std::cout << "path: " << request.error[*it2] << " error: " << *it2 << std::endl;
 			}
 		}
 	}
@@ -180,7 +181,7 @@ void Webserv::server_configuration(Request &request)
 		if (ss.fail())
 			throw Webserv::InvalidConfigurationFile();
 		request.limit_size =  n;
-		std::cout << n << std::endl;
+		//std::cout << n << std::endl;
 	}
 }
 
@@ -194,7 +195,7 @@ void Webserv::location_configuration(Request &request)
 		request.root = map["root"][0];
 	}
 	request.uri = request.root + request.uri;
-	std::cout << "root" << request.root << std::endl;
+	//std::cout << "root" << request.root << std::endl;
 	if (map.find("index") != map.end())
 	{
 		if (map["index"].size() < 1)
@@ -202,10 +203,10 @@ void Webserv::location_configuration(Request &request)
 		for (std::vector<std::string>::iterator it = map["index"].begin(); it != map["index"].end(); it++)
 		{
 			request.index = request.root + "/" + (*it).substr(0, (*it).find("."));
-			std::cout << "Index again: " << request.index << std::endl;
+			//std::cout << "Index again: " << request.index << std::endl;
 			if (_html_map.find(request.index) != _html_map.end())
 			{
-				std::cout << "inside: " << request.index << std::endl;
+				//std::cout << "inside: " << request.index << std::endl;
 				_html_map[(request.root + "/")] = _html_map[request.index];
 				break ;
 			}
@@ -223,7 +224,7 @@ void Webserv::location_configuration(Request &request)
 			for (std::vector<std::string>::iterator it2 = (*it1).begin(); it2 != ((*it1).end() -1); it2++)
 			{
 				request.error[*it2] = request.root + tmp.substr(0, tmp.find("."));
-				std::cout << "path: " << request.error[*it2] << " error: " << *it2 << std::endl;
+				//std::cout << "path: " << request.error[*it2] << " error: " << *it2 << std::endl;
 			}
 		}
 	}
@@ -240,11 +241,11 @@ void Webserv::location_configuration(Request &request)
 			throw Webserv::InvalidConfigurationFile();
 		std::string redir = map["return"][0];
 		request.uri = redir.substr(0, redir.find("."));
-		std::cout << request.uri << std::endl;
+		//std::cout << request.uri << std::endl;
 	}
 	if (map.find("allow_methods") != map.end())
 	{
-		std::cout << "\033[32mThe method: \033[0m" << request.GetMethod() << std::endl;
+		//std::cout << "\033[32mThe method: \033[0m" << request.GetMethod() << std::endl;
 		if (std::find(map["allow_methods"].begin(), map["allow_methods"].end(), request.GetMethod()) == map["allow_methods"].end())
 			throw ErrorHttp("405 Method Not Allowed", request.error["405"]);
 	}
@@ -256,14 +257,15 @@ void	Webserv::Send(int clientfd, std::string buffer, char **env) {
 	std::string body = "";
 
 	try {
-		request.Parse(buffer);
-		std::cout << "\033[34m" << request << "\033[0m" << std::endl;
+		request.Parse(buffer, clientfd);
+		//std::cout << "\033[34m" << request << "\033[0m" << std::endl;
 		choose_server_block(request);
+		//std::cout << "arrives here1" << std::endl;
 		server_configuration(request);
-		//std::cout << "arrives here" << std::endl;
+		//std::cout << "arrives here2" << std::endl;
 		choose_location_block(request);
 		//std::cout << "arrives here" << std::endl;
-		std::cout << "location block: " << request.serv_block->location_blocks << std::endl;
+		//std::cout << "location block: " << request.serv_block->location_blocks << std::endl;
 		if (request.serv_block->location_blocks != 0)
 			location_configuration(request);
 		//std::cout << "Vamooos" << request.location_block->prefix << std::endl;
@@ -271,10 +273,11 @@ void	Webserv::Send(int clientfd, std::string buffer, char **env) {
 		//choose server block
 		//set general variables/default variables.
 		//choose location block
+		std::cout << request << std::endl;
 		if (request.GetMethod() == "GET") {
 			if (request.GetIsCgi()) {
 				response = ft_ex_cgi(clientfd, env, request);
-				std::cout << "CGI : " << request.GetUri() << " response :" << std::endl << response << std::endl;
+				std::cout << std::endl << "CGI : " << request.GetFullUri() << " response :" << std::endl << response << std::endl;
 				if (send(clientfd, response.c_str(), response.size(), 0) == -1)
 					throw Webserv::ErrorSendingData();
 				return;
@@ -288,7 +291,14 @@ void	Webserv::Send(int clientfd, std::string buffer, char **env) {
 			}
 		}
 		else if (request.GetMethod() == "POST") {
-			if (request.GetUri() == "/www/1serv/uploads") {
+			if (request.GetIsCgi()) {
+				response = ft_ex_cgi(clientfd, env, request);
+				std::cout << std::endl << "CGI : " << request.GetFullUri() << " response :" << std::endl << response << std::endl;
+				if (send(clientfd, response.c_str(), response.size(), 0) == -1)
+					throw Webserv::ErrorSendingData();
+				return;
+			}
+			else if (request.GetUri() == "/www/1serv/uploads") {
 				response = Post(clientfd, request);
 			}
 			else

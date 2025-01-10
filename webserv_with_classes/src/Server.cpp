@@ -36,8 +36,8 @@ Webserv::Webserv () : serv(NULL), serv_n(0){
 	// Setting the timeout for the kqueue
 
 	//KQUEUE
-    //timeout.tv_sec = 5;
-    //timeout.tv_nsec = 0;
+    timeout.tv_sec = 5;
+    timeout.tv_nsec = 0;
 	
 	std::cout << "Default Server constructor called" << std::endl;
 }
@@ -88,26 +88,26 @@ void	Server::Start( void ) {
     }
 	//KQUEUE
     // Macro to set the kqueue evenet as read and write
-	/*EV_SET(&change_event, serverfd, EVFILT_READ | EVFILT_WRITE, EV_ADD, 0, 0, NULL);
+	EV_SET(&change_event, serverfd, EVFILT_READ | EVFILT_WRITE, EV_ADD, 0, 0, NULL);
     if (kevent(ep, &change_event, 1, NULL, 0, NULL) == -1) {
         close(serverfd);
 		throw Webserv::ErrorInitializeKqueue();
-    }*/
+    }
 	
 	//EPOLL
 	//change_event = {};
-	ft_memset(&change_event, 0, sizeof(change_event));
+	/*ft_memset(&change_event, 0, sizeof(change_event));
 	change_event.data.fd = serverfd;
 	change_event.events = EPOLLIN;
 	if (epoll_ctl(ep, EPOLL_CTL_ADD, serverfd, &change_event) == -1)
 	{
 		close(serverfd);
 		throw Webserv::ErrorInitializeKqueue(); //Change name.
-	}
+	}*/
 	std::cout << "\033[1;32mServer started on port " << _port << "...\033[0m" << std::endl;
 }
 
-
+/*
 void	Webserv::Wait( void ) {
 	nev = epoll_wait(ep, events, MAX_EVENTS, 1000); //Poner -1?
 	if (nev == -1)
@@ -178,12 +178,12 @@ void	Server::ManageConnexion( struct epoll_event *events) {
 			}
 		}
 	}
-}
-/*
+}*/
+
 void	Webserv::Wait( void ) {
 	// waiting for event
 	nev = kevent(ep, NULL, 0, events, MAX_EVENTS, &timeout);
-	std::cout <<"\033[1;33mEvent found : " << nev << "\033[0m" << std::endl;
+	//std::cout <<"\033[1;33mEvent found : " << nev << "\033[0m" << std::endl;
 	if (nev == -1) {
 		std::cerr << "Error: Could not get the new event." << std::endl;
 	}
@@ -224,14 +224,14 @@ void	Server::ManageConnexion( struct kevent *events) {
 			else {
 				buffer[bytes_read] = '\0';
 				std::string data = std::string(buffer);
-				std::cout << "Received from client " << events[i].ident << ": " << std::endl;
-				std::cout <<  data << "$" << std::endl;
+				// std::cout << "Received from client " << events[i].ident << ": " << std::endl;
+				// std::cout <<  data << "$" << std::endl;
 				_ws->Send(events[i].ident, data, _env);
 			}
 			//close(events[i].ident);//pas sur
 		}
 	}
-}*/
+}
 
 void	Server::Stop( void ) {
 	close(serverfd);

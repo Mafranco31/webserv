@@ -1,6 +1,6 @@
 <?php
 // Set the content type to JSON
-header('Content-Type: application/json');
+// header('Content-Type: application/json');
 
 // Specify the directory you want to list
 $directory = './uploads'; // Replace 'your-directory' with the path to your directory
@@ -27,5 +27,8 @@ function listFiles($dir) {
 $result = listFiles($directory);
 
 // Output the result as JSON
+header('Content-Type: text/plain');
+header('Connexion: close');
+header('Content-Length: ' . strlen(json_encode($result)));
 echo json_encode($result);
 ?>
