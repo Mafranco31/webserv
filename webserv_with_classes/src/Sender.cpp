@@ -48,7 +48,7 @@ void	Webserv::ReadFile( std::string file, std::string last_path) {
 	//	std::cout << "Index last path: " << last_path << std::endl;
 	//	_html_map[last_path] = buffer.str();
 	//}
-	std::cout << last_path + file.substr(0, file.find(".")) << std::endl;
+	//std::cout << last_path + file.substr(0, file.find(".")) << std::endl;
 }
 
 std::string	Webserv::CreateAutoIndex(Request &request)
@@ -154,7 +154,7 @@ void Webserv::recursive_location(Location &loc, Request &request)
 	if (loc.prefix == uri_prefix)
 	{
 		request.location_block = &loc;
-		std::cout << "request.location_block: " << request.location_block->prefix << std::endl;
+		//std::cout << "request.location_block: " << request.location_block->prefix << std::endl;
 		if (loc.eq == 1 || loc.sub_location_blocks == 0)
 			return ;
 		else
@@ -176,6 +176,7 @@ void Webserv::server_configuration(Request &request)
 	_html_map.erase("/"); //We make sure that the "index"
 	request.redir = "";
 	std::map<std::string, std::vector<std::string> > map = request.serv_block->d;
+
 	if (map.find("root") != map.end())
 	{
 		if (map["root"].size() != 1 )
@@ -324,7 +325,7 @@ void Webserv::location_configuration(Request &request)
 	}
 }
 
-void	Webserv::Send(int clientfd, std::string buffer, char **env) {
+int	Webserv::Send(int clientfd, std::string buffer, char **env, struct epoll_event *events, int ep) {
 	Request request = Request();
 	std::string response = "";
 	std::string body = "";
@@ -333,6 +334,7 @@ void	Webserv::Send(int clientfd, std::string buffer, char **env) {
 		std::cout << "\033[34m";
 		request.Parse(buffer);
 		choose_server_block(request);
+		//std::cout << "arrives here1" << std::endl;
 		server_configuration(request);
 		choose_location_block(request);
 		std::cout << "location block: " << request.serv_block->location_blocks << std::endl;
@@ -349,10 +351,11 @@ void	Webserv::Send(int clientfd, std::string buffer, char **env) {
 			}
 			else if (request.GetIsCgi()) {
 				response = ft_ex_cgi(clientfd, env, request);
-				std::cout << "CGI : " << request.GetUri() << " response :" << std::endl << response << std::endl;
+				std::cout << std::endl << "CGI : " << request.GetFullUri() << " response :" << std::endl << response << std::endl;
+				std::cout << "END OF CGI" << std::endl;
 				if (send(clientfd, response.c_str(), response.size(), 0) == -1)
 					throw Webserv::ErrorSendingData();
-				return;
+				return 1;
 			}
 			else if (_html_map[request.GetUri()] != "") {
 				body = _html_map[request.GetUri()];
@@ -372,6 +375,14 @@ void	Webserv::Send(int clientfd, std::string buffer, char **env) {
 		else if (request.GetMethod() == "POST") {
 			if (request.limit_size < (int)request.GetBodyLength())
 				throw ErrorHttp("413 Request Entity Too Large", request.error["413"]);
+			if (request.GetIsCgi()) {
+				response = ft_ex_cgi(clientfd, env, request);
+				std::cout << std::endl << "CGI : " << request.GetFullUri() << " response :" << std::endl << response << std::endl;
+				std::cout << "END OF CGI" << std::endl;
+				if (send(clientfd, response.c_str(), response.size(), 0) == -1)
+					throw Webserv::ErrorSendingData();
+				return 1;
+			}
 			else if (request.GetUri() == "/www/1serv/uploads") {
 				response = Post(clientfd, request);
 			}
@@ -401,6 +412,7 @@ void	Webserv::Send(int clientfd, std::string buffer, char **env) {
 	std::cout << response << std::endl;
 	if (send(clientfd, response.c_str(), response.size(), 0) == -1)
 		throw Webserv::ErrorSendingData();
+	return 1;
 }
 
 std::string	Webserv::Post(int clientfd, Request &request) {

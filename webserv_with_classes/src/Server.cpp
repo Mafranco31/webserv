@@ -107,7 +107,6 @@ void	Server::Start( void ) {
 	std::cout << "\033[1;32mServer started on port " << _port << "...\033[0m" << std::endl;
 }
 
-
 void	Webserv::Wait( void ) {
 	nev = epoll_wait(ep, events, MAX_EVENTS, 1000); //Poner -1?
 	if (nev == -1)
@@ -161,6 +160,8 @@ void	Server::ManageConnexion( struct epoll_event *events) {
 				change_event.events = EPOLLIN;
 				if (epoll_ctl(ep, EPOLL_CTL_DEL, events[i].data.fd, &change_event) == -1)
 					std::cout << "Couldn't delete event" << std::endl;
+				// _ws->Send(events[i].data.fd, epmap[events[i].data.fd], _env);
+				epmap[events[i].data.fd] = "";
 				close(events[i].data.fd);
 			}
 			else if (bytes_read < 0)
@@ -170,11 +171,25 @@ void	Server::ManageConnexion( struct epoll_event *events) {
 			}
 			else
 			{
-				buffer[bytes_read] = '\0';
-				std::string data = std::string(buffer);
+				std::string data = "";
+				while (bytes_read > 0){
+					buffer[bytes_read] = '\0';
+					data.append(buffer);
+					bytes_read = read(events[i].data.fd, buffer, sizeof(buffer) - 1);
+				}
 				std::cout << "Received from client " << events[i].data.fd << ": " << std::endl; //Create a structure for clients to identify them by a number, and not its fd.
-				std::cout << buffer << "$" << std::endl;
-				_ws->Send(events[i].data.fd, data, _env);
+				std::cout << data << "$" << std::endl;
+				if (epmap[events[i].data.fd] != ""){
+					data = epmap[events[i].data.fd] + data;
+				}
+				std::cout << data << "$" << std::endl;
+				// epmap[events[i].data.fd].append(data);
+				// if ((events[i].events & EPOLLET)){
+				// 	std::cout << "EPOLLEEEEET" << std::endl;}
+				if (_ws->Send(events[i].data.fd, data, _env, events, ep) == 2)
+					epmap[events[i].data.fd] = data;
+				else
+					epmap[events[i].data.fd] = "";
 			}
 			break ;
 		}
@@ -184,7 +199,7 @@ void	Server::ManageConnexion( struct epoll_event *events) {
 void	Webserv::Wait( void ) {
 	// waiting for event
 	nev = kevent(ep, NULL, 0, events, MAX_EVENTS, &timeout);
-	std::cout <<"\033[1;33mEvent found : " << nev << "\033[0m" << std::endl;
+	//std::cout <<"\033[1;33mEvent found : " << nev << "\033[0m" << std::endl;
 	if (nev == -1) {
 		std::cerr << "Error: Could not get the new event." << std::endl;
 	}
@@ -225,15 +240,15 @@ void	Server::ManageConnexion( struct kevent *events) {
 			else {
 				buffer[bytes_read] = '\0';
 				std::string data = std::string(buffer);
-				std::cout << "Received from client " << events[i].ident << ": " << std::endl;
-				std::cout <<  data << "$" << std::endl;
+				// std::cout << "Received from client " << events[i].ident << ": " << std::endl;
+				// std::cout <<  data << "$" << std::endl;
 				_ws->Send(events[i].ident, data, _env);
 			}
 			//close(events[i].ident);//pas sur
 		}
 	}
-}*/
-
+}
+*/
 void	Server::Stop( void ) {
 	close(serverfd);
 	std::cout << "\033[1;32mServer stopped on port " << _port << "...\033[0m" << std::endl;

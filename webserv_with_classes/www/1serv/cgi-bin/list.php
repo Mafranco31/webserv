@@ -1,9 +1,11 @@
+#!/usr/bin/env php
+
 <?php
 // Set the content type to JSON
-header('Content-Type: application/json');
+// header('Content-Type: application/json');
 
 // Specify the directory you want to list
-$directory = './uploads'; // Replace 'your-directory' with the path to your directory
+$directory = '../../../uploads'; // Replace 'your-directory' with the path to your directory
 
 // Function to get the list of files in the directory
 function listFiles($dir) {
@@ -25,7 +27,10 @@ function listFiles($dir) {
 
 // Get the list of files
 $result = listFiles($directory);
-
+$encoded_result = json_encode($result);
 // Output the result as JSON
-echo json_encode($result);
+header('Content-Type: text/plain');
+header('Connexion: close');
+header('Content-Length: ' . strlen($encoded_result) + 1);
+echo $encoded_result;
 ?>

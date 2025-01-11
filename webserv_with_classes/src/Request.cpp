@@ -17,16 +17,71 @@ Request::~Request ( void ) {
 
 // Methods
 
-void	Request::Parse ( std::string buffer ) {
+int	Request::Parse ( std::string buffer, int clientfd , struct epoll_event *events, int ep) {
 	content = buffer;
+	client_socket = clientfd;
+	(void)events;
+	(void)ep;
 	try {
 		ParseFirstLine();
 		ParseHeader();
 		IsCGI();
+		if (headers["CONTENT-LENGTH"] != "" && static_cast<int>(body_length) != std::atoi(headers["CONTENT-LENGTH"].c_str())) {
+			if (static_cast<int>(body_length) > std::atoi(headers["CONTENT-LENGTH"].c_str()))
+				throw ErrorHttp("400 Bad Request", error["400"]);
+			std::cout << "Content-Length: " << headers["CONTENT-LENGTH"] << std::endl;
+			// ChunkedBody(events, ep);
+			return 2;
+		}
 	} catch (std::exception &e) {
 		throw ;
 	}
+	return 1;
 }
+
+// void	Request::ChunkedBody(struct epoll_event *events, int ep){
+// 	ssize_t bytes_received = 0;
+// 	char buffer[BUFFER_SIZE];
+// 	int content_length = 0;
+// 	std::string length = headers["CONTENT-LENGTH"];
+
+// 	if (length.find_first_not_of(' ') != std::string::npos) {
+// 		size_t start_pos_space = length.find_first_not_of(' ');
+// 		if (start_pos_space != std::string::npos) {
+// 			length.erase(0, start_pos_space);
+// 		}
+// 		size_t end_pos_space = length.find_last_not_of(' ');
+// 		if (end_pos_space != std::string::npos) {
+// 			length.erase(end_pos_space + 1);
+// 		}
+// 	}
+// 	std::cout << "CHUNKED BODY !!!!!!!" << length << "$" << std::endl;
+
+//     content_length = length.length();
+
+// 	// if (ss.fail()) throw ErrorHttp("400 Bad Request", error["400"]);
+
+// 	int nev;
+// 	// struct epoll_event events[MAX_EVENTS];
+// 	while (int(body.size()) < content_length) {
+// 		nev = epoll_wait(ep, events, MAX_EVENTS, 1000); //Poner -1?
+// 		if (nev == -1)
+// 		{
+// 			//std::cout << strerror(errno) << std::endl;
+// 			throw ErrorHttp("400 Bad Request", error["400"]);
+// 		}
+// 		if (nev == client_socket && EPOLLIN) //There's an EPOLLIN event.
+// 		{
+// 			bytes_received = read(client_socket, buffer, sizeof(buffer) - 1);
+// 			if (bytes_received <= 0) throw ErrorHttp("400 Bad Request", error["400"]);
+// 			buffer[bytes_received] = '\0';
+// 			body += buffer;
+// 		}
+// 		else
+// 			throw ErrorHttp("400 Bad Request", error["400"]);
+// 	}
+// 	std::cout << "NEW BODY = " << body << std::endl;
+// }
 
 void	Request::IsCGI() {
 	if (uri.find("/cgi-bin/") != std::string::npos)
@@ -80,6 +135,7 @@ void	Request::ParseFirstLine ( void ) {
 	uri = firstLine.substr(pos, pos2 - pos);
 	//	Looking for arguments
 	if (uri.find('?') != std::string::npos) {
+		query_string = uri.substr(uri.find('?') + 1);
 		try {
 			get_args(uri.substr(uri.find('?') + 1));
 		} catch (std::invalid_argument &e) {
@@ -88,6 +144,7 @@ void	Request::ParseFirstLine ( void ) {
 		uri = uri.substr(0, uri.find('?'));
 	}
 	else {
+		query_string = "";
 		nb_args = 0;
 	}
 
@@ -118,6 +175,19 @@ void Request::ParseHeader( void ) {
 		}
 		if (headerLine.find(':') + 1 == headerLine.size()) throw ErrorHttp("400 Bad Request", error["400"]);
 		std::string value = headerLine.substr(headerLine.find(':') + 1, headerLine.size() - headerLine.find(':') - 1);
+		
+		//	Removing leading and trailing spaces
+		// if (value.find_first_not_of(' ') != std::string::npos) {
+		// 	size_t start_pos_space = value.find_first_not_of(' ');
+		// 	if (start_pos_space != std::string::npos) {
+		// 		value.erase(0, start_pos_space);
+		// 	}
+		// 	size_t end_pos_space = value.find_last_not_of(' ');
+		// 	if (end_pos_space != std::string::npos) {
+		// 		value.erase(end_pos_space + 1);
+		// 	}
+		// }
+
 		headers.insert(std::pair<std::string, std::string>(key, value));
 
 		pos1 = pos2 + 1;
@@ -131,6 +201,7 @@ void Request::ParseHeader( void ) {
 
 //	Overload operator<<
 std::ostream& operator<<(std::ostream& os, const Request& request) {
+	os << "-FULL URI:" << request.GetFullUri() << std::endl;
 	os << "-Method: " << request.GetMethod() << std::endl;
 	os << "-URI: " << request.GetUri() << std::endl;
 	os << "-Version: " << request.GetVersion() << std::endl;
