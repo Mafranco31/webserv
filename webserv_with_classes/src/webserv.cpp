@@ -31,7 +31,7 @@ int main(int argc, char **argv, char **env) {
 		server.env = env;
 		//server.sender._ws = &server;
 
-		server.parse(std::string("linux.conf"));
+		server.parse(std::string("conf/3.conf"));
 		server.data_structure();
 		//server.check();
 		std::cout << "parsing done" << std::endl;

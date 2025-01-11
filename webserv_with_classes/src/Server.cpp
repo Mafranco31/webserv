@@ -20,25 +20,25 @@ Webserv::Webserv () : serv(NULL), serv_n(0){
 	valid_directives.insert("listen");
 	valid_directives.insert("root");
 	valid_directives.insert("index");
+	valid_directives.insert("autoindex");
 	valid_directives.insert("server_name");
 	valid_directives.insert("error_page");
-	valid_directives.insert("client_body_buffer_size");
+	valid_directives.insert("client_max_body_size");
 
 	valid_directives_location.insert("root");
 	valid_directives_location.insert("return");
-	valid_directives_location.insert("alias");
-	valid_directives_location.insert("allow_methods"); //allow methods
-	valid_directives_location.insert("error_page");
-	valid_directives_location.insert("client_body_buffer_size");
 	valid_directives_location.insert("index");
-	valid_directives_location.insert("cgi_pass");
+	valid_directives_location.insert("autoindex");
+	valid_directives_location.insert("limit_except"); //allow methods
+	valid_directives_location.insert("error_page");
+	valid_directives_location.insert("client_max_body_size");
 	//proxy_pass?
 	// Setting the timeout for the kqueue
 
 	//KQUEUE
     //timeout.tv_sec = 5;
     //timeout.tv_nsec = 0;
-	
+
 	std::cout << "Default Server constructor called" << std::endl;
 }
 //	Destructor
@@ -93,12 +93,12 @@ void	Server::Start( void ) {
         close(serverfd);
 		throw Webserv::ErrorInitializeKqueue();
     }*/
-	
+
 	//EPOLL
 	//change_event = {};
 	ft_memset(&change_event, 0, sizeof(change_event));
 	change_event.data.fd = serverfd;
-	change_event.events = EPOLLIN;
+	change_event.events = EPOLLIN | EPOLLOUT;
 	if (epoll_ctl(ep, EPOLL_CTL_ADD, serverfd, &change_event) == -1)
 	{
 		close(serverfd);
@@ -176,6 +176,7 @@ void	Server::ManageConnexion( struct epoll_event *events) {
 				std::cout << buffer << "$" << std::endl;
 				_ws->Send(events[i].data.fd, data, _env);
 			}
+			break ;
 		}
 	}
 }

@@ -35,6 +35,8 @@ class Request {
 		//Configuration parameters:
 		std::string root;
 		std::string index;
+		std::string redir;
+		std::string autoindex;
 		int limit_size;
 
 		std::map<std::string, std::string> error;

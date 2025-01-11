@@ -24,7 +24,7 @@ class Server
 		//KQUEUE
 		//struct kevent change_event;//, events[MAX_EVENTS];
 		//void ManageConnexion(struct kevent *events);
-		
+
 		//EPOLL
 		struct epoll_event change_event; //events[MAX_EVENTS];
 		void ManageConnexion(struct epoll_event *events);
@@ -126,6 +126,10 @@ class Webserv {
 		void choose_location_block(Request &request);
 		void recursive_location(Location &loc, Request &request);
 		void location_configuration(Request &request);
+
+	//	Autoindex
+		std::string createLink(std::string const &dirEntry, Request &request);
+		std::string CreateAutoIndex(Request &request);
 
 	//	Exceptions
 		class ErrorCreatingSocket: public std::exception	{	const char	*what() const throw ();	};
