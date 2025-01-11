@@ -36,8 +36,8 @@ Webserv::Webserv () : serv(NULL), serv_n(0){
 	// Setting the timeout for the kqueue
 
 	//KQUEUE
-    timeout.tv_sec = 5;
-    timeout.tv_nsec = 0;
+    //timeout.tv_sec = 5;
+    //timeout.tv_nsec = 0;
 	
 	std::cout << "Default Server constructor called" << std::endl;
 }
@@ -88,26 +88,25 @@ void	Server::Start( void ) {
     }
 	//KQUEUE
     // Macro to set the kqueue evenet as read and write
-	EV_SET(&change_event, serverfd, EVFILT_READ | EVFILT_WRITE, EV_ADD, 0, 0, NULL);
+	/*EV_SET(&change_event, serverfd, EVFILT_READ | EVFILT_WRITE, EV_ADD, 0, 0, NULL);
     if (kevent(ep, &change_event, 1, NULL, 0, NULL) == -1) {
         close(serverfd);
 		throw Webserv::ErrorInitializeKqueue();
-    }
+    }*/
 	
 	//EPOLL
 	//change_event = {};
-	/*ft_memset(&change_event, 0, sizeof(change_event));
+	ft_memset(&change_event, 0, sizeof(change_event));
 	change_event.data.fd = serverfd;
 	change_event.events = EPOLLIN;
 	if (epoll_ctl(ep, EPOLL_CTL_ADD, serverfd, &change_event) == -1)
 	{
 		close(serverfd);
 		throw Webserv::ErrorInitializeKqueue(); //Change name.
-	}*/
+	}
 	std::cout << "\033[1;32mServer started on port " << _port << "...\033[0m" << std::endl;
 }
 
-/*
 void	Webserv::Wait( void ) {
 	nev = epoll_wait(ep, events, MAX_EVENTS, 1000); //Poner -1?
 	if (nev == -1)
@@ -161,6 +160,8 @@ void	Server::ManageConnexion( struct epoll_event *events) {
 				change_event.events = EPOLLIN;
 				if (epoll_ctl(ep, EPOLL_CTL_DEL, events[i].data.fd, &change_event) == -1)
 					std::cout << "Couldn't delete event" << std::endl;
+				// _ws->Send(events[i].data.fd, epmap[events[i].data.fd], _env);
+				epmap[events[i].data.fd] = "";
 				close(events[i].data.fd);
 			}
 			else if (bytes_read < 0)
@@ -170,16 +171,30 @@ void	Server::ManageConnexion( struct epoll_event *events) {
 			}
 			else
 			{
-				buffer[bytes_read] = '\0';
-				std::string data = std::string(buffer);
+				std::string data = "";
+				while (bytes_read > 0){
+					buffer[bytes_read] = '\0';
+					data.append(buffer);
+					bytes_read = read(events[i].data.fd, buffer, sizeof(buffer) - 1);
+				}
 				std::cout << "Received from client " << events[i].data.fd << ": " << std::endl; //Create a structure for clients to identify them by a number, and not its fd.
-				std::cout << buffer << "$" << std::endl;
-				_ws->Send(events[i].data.fd, data, _env);
+				std::cout << data << "$" << std::endl;
+				if (epmap[events[i].data.fd] != ""){
+					data = epmap[events[i].data.fd] + data;
+				}
+				std::cout << data << "$" << std::endl;
+				// epmap[events[i].data.fd].append(data);
+				// if ((events[i].events & EPOLLET)){
+				// 	std::cout << "EPOLLEEEEET" << std::endl;}
+				if (_ws->Send(events[i].data.fd, data, _env, events, ep) == 2)
+					epmap[events[i].data.fd] = data;
+				else
+					epmap[events[i].data.fd] = "";
 			}
 		}
 	}
-}*/
-
+}
+/*
 void	Webserv::Wait( void ) {
 	// waiting for event
 	nev = kevent(ep, NULL, 0, events, MAX_EVENTS, &timeout);
@@ -232,7 +247,7 @@ void	Server::ManageConnexion( struct kevent *events) {
 		}
 	}
 }
-
+*/
 void	Server::Stop( void ) {
 	close(serverfd);
 	std::cout << "\033[1;32mServer stopped on port " << _port << "...\033[0m" << std::endl;

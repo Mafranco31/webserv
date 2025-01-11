@@ -22,12 +22,12 @@ class Server
 		struct sockaddr_in serveraddr;
 
 		//KQUEUE
-		struct kevent change_event;//, events[MAX_EVENTS];
-		void ManageConnexion(struct kevent *events);
+		//struct kevent change_event;//, events[MAX_EVENTS];
+		//void ManageConnexion(struct kevent *events);
 		
 		//EPOLL
-		//struct epoll_event change_event; //events[MAX_EVENTS];
-		//void ManageConnexion(struct epoll_event *events);
+		struct epoll_event change_event; //events[MAX_EVENTS];
+		void ManageConnexion(struct epoll_event *events);
 
 		char **_env;
 		Webserv *_ws;
@@ -43,6 +43,8 @@ class Server
 		//void Wait( void );
 		void Start( void );
 		void Stop( void );
+		void handle_chunked_request(int client_fd);
+		std::map<int, std::string> epmap;
 };
 
 class Webserv {
@@ -60,11 +62,11 @@ class Webserv {
 		int nev;
 
 		//EPOLL
-		//struct epoll_event events[MAX_EVENTS];
+		struct epoll_event events[MAX_EVENTS];
 
 		//KQUEUE
-		struct kevent events[MAX_EVENTS];
-		struct timespec timeout;
+		//struct kevent events[MAX_EVENTS];
+		//struct timespec timeout;
 
 		Webserv();
 		~Webserv();
@@ -115,7 +117,7 @@ class Webserv {
 
 		void initialize_path( const std::string &path_to_html, const std::string &path_to_err );
 
-		void	Send(int clientfd, std::string buffer, char **env);
+		int	Send(int clientfd, std::string buffer, char **env, struct epoll_event *events, int ep);
 		void	ReadPath( std::string path , std::string last_path );
 		void	ReadFile( std::string file , std::string last_path );
 		std::string Post( int clientfd, Request &request );

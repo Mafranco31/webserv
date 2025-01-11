@@ -251,13 +251,14 @@ void Webserv::location_configuration(Request &request)
 	}
 }
 
-void	Webserv::Send(int clientfd, std::string buffer, char **env) {
+int	Webserv::Send(int clientfd, std::string buffer, char **env, struct epoll_event *events, int ep) {
 	Request request = Request();
 	std::string response = "";
 	std::string body = "";
 
 	try {
-		request.Parse(buffer, clientfd);
+		if (request.Parse(buffer, clientfd, events, ep) == 2)
+			return 2;
 		//std::cout << "\033[34m" << request << "\033[0m" << std::endl;
 		choose_server_block(request);
 		//std::cout << "arrives here1" << std::endl;
@@ -278,9 +279,10 @@ void	Webserv::Send(int clientfd, std::string buffer, char **env) {
 			if (request.GetIsCgi()) {
 				response = ft_ex_cgi(clientfd, env, request);
 				std::cout << std::endl << "CGI : " << request.GetFullUri() << " response :" << std::endl << response << std::endl;
+				std::cout << "END OF CGI" << std::endl;
 				if (send(clientfd, response.c_str(), response.size(), 0) == -1)
 					throw Webserv::ErrorSendingData();
-				return;
+				return 1;
 			}
 			else if (_html_map[request.GetUri()] != "") {
 				body = _html_map[request.GetUri()];
@@ -294,9 +296,10 @@ void	Webserv::Send(int clientfd, std::string buffer, char **env) {
 			if (request.GetIsCgi()) {
 				response = ft_ex_cgi(clientfd, env, request);
 				std::cout << std::endl << "CGI : " << request.GetFullUri() << " response :" << std::endl << response << std::endl;
+				std::cout << "END OF CGI" << std::endl;
 				if (send(clientfd, response.c_str(), response.size(), 0) == -1)
 					throw Webserv::ErrorSendingData();
-				return;
+				return 1;
 			}
 			else if (request.GetUri() == "/www/1serv/uploads") {
 				response = Post(clientfd, request);
@@ -322,6 +325,7 @@ void	Webserv::Send(int clientfd, std::string buffer, char **env) {
 	}
 	if (send(clientfd, response.c_str(), response.size(), 0) == -1)
 		throw Webserv::ErrorSendingData();
+	return 1;
 }
 
 std::string	Webserv::Post(int clientfd, Request &request) {

@@ -17,51 +17,71 @@ Request::~Request ( void ) {
 
 // Methods
 
-void	Request::Parse ( std::string buffer, int clientfd ) {
+int	Request::Parse ( std::string buffer, int clientfd , struct epoll_event *events, int ep) {
 	content = buffer;
 	client_socket = clientfd;
+	(void)events;
+	(void)ep;
 	try {
 		ParseFirstLine();
 		ParseHeader();
 		IsCGI();
-		if (headers["CONTENT-LENGTH"] != "") {
+		if (headers["CONTENT-LENGTH"] != "" && static_cast<int>(body_length) != std::atoi(headers["CONTENT-LENGTH"].c_str())) {
+			if (static_cast<int>(body_length) > std::atoi(headers["CONTENT-LENGTH"].c_str()))
+				throw ErrorHttp("400 Bad Request", error["400"]);
 			std::cout << "Content-Length: " << headers["CONTENT-LENGTH"] << std::endl;
-			ChunkedBody();
+			// ChunkedBody(events, ep);
+			return 2;
 		}
 	} catch (std::exception &e) {
 		throw ;
 	}
+	return 1;
 }
 
-void	Request::ChunkedBody(){
-	ssize_t bytes_received = 0;
-	char buffer[BUFFER_SIZE];
-	int content_length = 0;
-	std::string length = headers["CONTENT-LENGTH"];
+// void	Request::ChunkedBody(struct epoll_event *events, int ep){
+// 	ssize_t bytes_received = 0;
+// 	char buffer[BUFFER_SIZE];
+// 	int content_length = 0;
+// 	std::string length = headers["CONTENT-LENGTH"];
 
-	if (length.find_first_not_of(' ') != std::string::npos) {
-		size_t start_pos_space = length.find_first_not_of(' ');
-		if (start_pos_space != std::string::npos) {
-			length.erase(0, start_pos_space);
-		}
-		size_t end_pos_space = length.find_last_not_of(' ');
-		if (end_pos_space != std::string::npos) {
-			length.erase(end_pos_space + 1);
-		}
-	}
+// 	if (length.find_first_not_of(' ') != std::string::npos) {
+// 		size_t start_pos_space = length.find_first_not_of(' ');
+// 		if (start_pos_space != std::string::npos) {
+// 			length.erase(0, start_pos_space);
+// 		}
+// 		size_t end_pos_space = length.find_last_not_of(' ');
+// 		if (end_pos_space != std::string::npos) {
+// 			length.erase(end_pos_space + 1);
+// 		}
+// 	}
+// 	std::cout << "CHUNKED BODY !!!!!!!" << length << "$" << std::endl;
 
-    std::stringstream ss(length.c_str()); // Initialize stringstream with the char*
-    ss >> content_length;
+//     content_length = length.length();
 
-	if (ss.fail()) throw ErrorHttp("400 Bad Request", error["400"]);
+// 	// if (ss.fail()) throw ErrorHttp("400 Bad Request", error["400"]);
 
-	while (int(body.size()) < content_length) {
-		bytes_received = recv(client_socket, buffer, BUFFER_SIZE - 1, 0);
-		if (bytes_received <= 0) break;
-		buffer[bytes_received] = '\0';
-		body += buffer;
-	}
-}
+// 	int nev;
+// 	// struct epoll_event events[MAX_EVENTS];
+// 	while (int(body.size()) < content_length) {
+// 		nev = epoll_wait(ep, events, MAX_EVENTS, 1000); //Poner -1?
+// 		if (nev == -1)
+// 		{
+// 			//std::cout << strerror(errno) << std::endl;
+// 			throw ErrorHttp("400 Bad Request", error["400"]);
+// 		}
+// 		if (nev == client_socket && EPOLLIN) //There's an EPOLLIN event.
+// 		{
+// 			bytes_received = read(client_socket, buffer, sizeof(buffer) - 1);
+// 			if (bytes_received <= 0) throw ErrorHttp("400 Bad Request", error["400"]);
+// 			buffer[bytes_received] = '\0';
+// 			body += buffer;
+// 		}
+// 		else
+// 			throw ErrorHttp("400 Bad Request", error["400"]);
+// 	}
+// 	std::cout << "NEW BODY = " << body << std::endl;
+// }
 
 void	Request::IsCGI() {
 	if (uri.find("/cgi-bin/") != std::string::npos)

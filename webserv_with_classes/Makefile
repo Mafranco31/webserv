@@ -43,7 +43,7 @@ $(OBJ_DIR)/%.o: $(SRC_DIR)/%.cpp Makefile $(HTML_FILES) $(CGI_FILES) | $(OBJ_DIR
 	$(CC) $(CFLAGS) $(DEPFLAGS) -I$(INCLUDE_DIR) -c $< -o $@
 
 clean:
-	$(RM) $(OBJ_DIR) $(UPL_DIR)/* $(TMP_DIR)/*
+	$(RM) $(OBJ_DIR)
 
 fclean: clean
 	$(RM) $(NAME)
