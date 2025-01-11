@@ -146,11 +146,12 @@ std::string ft_ex_cgi(int fd, char **env2, Request & request) {
 //  BUILDING PROGRAM
     std::string language = request.GetCgiExt();
     std::string program;
+    // if (language == ".php")
+    //     program = "/usr/bin/php-cgi";
     if (language == ".php")
         program = "/usr/bin/php-cgi";
     else
         throw ErrorHttp("404 Not Found", request.error["404"]);
-
 
 // //  BUILDING ARGUMENTS
 //     std::vector<std::string> v_args;
@@ -195,29 +196,31 @@ std::string ft_ex_cgi(int fd, char **env2, Request & request) {
 
 
     if (pid == 0) {
-        dup2(fd_response, STDOUT_FILENO);
-        // close(input_pipe[1]); // Close unused write end of input pipe
-        // close(output_pipe[0]); // Close unused read end of output pipe
-        // // Redirect stdin and stdout to the pipes
-        dup2(input_pipe[0], STDIN_FILENO);
-        // dup2(output_pipe[1], STDOUT_FILENO);
+        dup2(fd_response, 1);
+         close(input_pipe[1]); // Close unused write end of input pipe
+        // // close(output_pipe[0]); // Close unused read end of output pipe
+        // // // Redirect stdin and stdout to the pipes
+         dup2(input_pipe[0], 0);
+        // // dup2(output_pipe[1], STDOUT_FILENO);
 
-        close(STDIN_FILENO);
-        // close(STDOUT_FILENO);
-        // close(input_pipe[0]);
-        close(input_pipe[1]);
-
+        // // close(STDIN_FILENO);
+        // // close(STDOUT_FILENO);
+         close(input_pipe[0]);
+         close(fd_response);
+        // close(input_pipe[1]);
+        // sleep(10);
         if (execve(program.c_str(), envp2, envc) == -1) exit(500);
     } else {
-        close(input_pipe[0]);
-        // close(output_pipe[1]);
+          close(input_pipe[0]);
+        // // close(output_pipe[1]);
         
-        // dup2(STDIN_FILENO, output_pipe[0]);
-        // dup2(STDOUT_FILENO, input_pipe[1]);
-
+        // // dup2(STDIN_FILENO, output_pipe[0]);
+        sleep(1);
         // if (request.GetMethod() == "POST")
-        write(input_pipe[1], request.GetBody().c_str(), request.GetBody().length()+1);
-        // close(input_pipe[1]);
+        // write(input_pipe[1], request.GetBody().c_str(), request.GetBody().length()+1);
+
+        write(input_pipe[1], "Hola", 5);
+        write(input_pipe[1], "Helo", 5);
 
         // char buffer[1024];
         // ssize_t bytes_read;

@@ -3,3 +3,65 @@
 Stack trace:
 #0 {main}
   thrown in /home/mafranco/Desktop/webservCGI/webserv_with_classes/www/1serv/cgi-bin/upload.php on line 9
+[11-Jan-2025 16:12:38 Europe/Berlin] PHP Warning:  Undefined array key "QUERY_STRING" in /home/mafranco/Desktop/webservCGI/webserv_with_classes/www/1serv/cgi-bin/upload.php on line 5
+[11-Jan-2025 16:16:03 Europe/Berlin] PHP Warning:  Undefined array key "QUERY_STRING" in /home/mafranco/Desktop/webservCGI/webserv_with_classes/www/1serv/cgi-bin/upload.php on line 5
+[11-Jan-2025 16:17:26 Europe/Berlin] PHP Warning:  Undefined array key "QUERY_STRING" in /home/mafranco/Desktop/webservCGI/webserv_with_classes/www/1serv/cgi-bin/upload.php on line 5
+[11-Jan-2025 16:17:56 Europe/Berlin] PHP Warning:  Undefined array key "QUERY_STRING" in /home/mafranco/Desktop/webservCGI/webserv_with_classes/www/1serv/cgi-bin/upload.php on line 5
+[11-Jan-2025 16:18:19 Europe/Berlin] PHP Warning:  Undefined array key "QUERY_STRING" in /home/mafranco/Desktop/webservCGI/webserv_with_classes/www/1serv/cgi-bin/upload.php on line 5
+[11-Jan-2025 16:25:18 Europe/Berlin] PHP Warning:  Undefined array key "QUERY_STRING" in /home/mafranco/Desktop/webservCGI/webserv_with_classes/www/1serv/cgi-bin/upload.php on line 5
+[11-Jan-2025 16:25:47 Europe/Berlin] PHP Warning:  Undefined array key "QUERY_STRING" in /home/mafranco/Desktop/webservCGI/webserv_with_classes/www/1serv/cgi-bin/upload.php on line 5
+[11-Jan-2025 16:26:28 Europe/Berlin] PHP Warning:  Undefined array key "QUERY_STRING" in /home/mafranco/Desktop/webservCGI/webserv_with_classes/www/1serv/cgi-bin/upload.php on line 5
+[11-Jan-2025 16:29:24 Europe/Berlin] PHP Warning:  Undefined array key "QUERY_STRING" in /home/mafranco/Desktop/webservCGI/webserv_with_classes/www/1serv/cgi-bin/upload.php on line 5
+[11-Jan-2025 16:29:24 Europe/Berlin] PHP Warning:  Undefined variable $stdin in /home/mafranco/Desktop/webservCGI/webserv_with_classes/www/1serv/cgi-bin/upload.php on line 19
+[11-Jan-2025 16:29:24 Europe/Berlin] PHP Fatal error:  Uncaught TypeError: fgets(): Argument #1 ($stream) must be of type resource, null given in /home/mafranco/Desktop/webservCGI/webserv_with_classes/www/1serv/cgi-bin/upload.php:19
+Stack trace:
+#0 /home/mafranco/Desktop/webservCGI/webserv_with_classes/www/1serv/cgi-bin/upload.php(19): fgets()
+#1 {main}
+  thrown in /home/mafranco/Desktop/webservCGI/webserv_with_classes/www/1serv/cgi-bin/upload.php on line 19
+[11-Jan-2025 16:32:22 Europe/Berlin] PHP Warning:  Undefined array key "QUERY_STRING" in /home/mafranco/Desktop/webservCGI/webserv_with_classes/www/1serv/cgi-bin/upload.php on line 5
+[11-Jan-2025 16:32:22 Europe/Berlin] PHP Warning:  Undefined variable $stdin in /home/mafranco/Desktop/webservCGI/webserv_with_classes/www/1serv/cgi-bin/upload.php on line 19
+[11-Jan-2025 16:32:22 Europe/Berlin] PHP Fatal error:  Uncaught TypeError: fgets(): Argument #1 ($stream) must be of type resource, null given in /home/mafranco/Desktop/webservCGI/webserv_with_classes/www/1serv/cgi-bin/upload.php:19
+Stack trace:
+#0 /home/mafranco/Desktop/webservCGI/webserv_with_classes/www/1serv/cgi-bin/upload.php(19): fgets()
+#1 {main}
+  thrown in /home/mafranco/Desktop/webservCGI/webserv_with_classes/www/1serv/cgi-bin/upload.php on line 19
+[11-Jan-2025 16:38:24 Europe/Berlin] PHP Warning:  Undefined array key "QUERY_STRING" in /home/mafranco/Desktop/webservCGI/webserv_with_classes/www/1serv/cgi-bin/upload.php on line 5
+[11-Jan-2025 16:38:24 Europe/Berlin] PHP Warning:  Undefined variable $stdin in /home/mafranco/Desktop/webservCGI/webserv_with_classes/www/1serv/cgi-bin/upload.php on line 19
+[11-Jan-2025 16:38:24 Europe/Berlin] PHP Fatal error:  Uncaught TypeError: fgets(): Argument #1 ($stream) must be of type resource, null given in /home/mafranco/Desktop/webservCGI/webserv_with_classes/www/1serv/cgi-bin/upload.php:19
+Stack trace:
+#0 /home/mafranco/Desktop/webservCGI/webserv_with_classes/www/1serv/cgi-bin/upload.php(19): fgets()
+#1 {main}
+  thrown in /home/mafranco/Desktop/webservCGI/webserv_with_classes/www/1serv/cgi-bin/upload.php on line 19
+[11-Jan-2025 16:41:24 Europe/Berlin] PHP Warning:  Undefined array key "QUERY_STRING" in /home/mafranco/Desktop/webservCGI/webserv_with_classes/www/1serv/cgi-bin/upload.php on line 5
+[11-Jan-2025 16:41:24 Europe/Berlin] PHP Fatal error:  Uncaught Error: Undefined constant "PHP_EOF" in /home/mafranco/Desktop/webservCGI/webserv_with_classes/www/1serv/cgi-bin/upload.php:8
+Stack trace:
+#0 {main}
+  thrown in /home/mafranco/Desktop/webservCGI/webserv_with_classes/www/1serv/cgi-bin/upload.php on line 8
+[11-Jan-2025 16:43:34 Europe/Berlin] PHP Warning:  Undefined array key "QUERY_STRING" in /home/mafranco/Desktop/webservCGI/webserv_with_classes/www/1serv/cgi-bin/upload.php on line 5
+[11-Jan-2025 16:43:34 Europe/Berlin] PHP Fatal error:  Uncaught Error: Undefined constant "PHP_EOF" in /home/mafranco/Desktop/webservCGI/webserv_with_classes/www/1serv/cgi-bin/upload.php:8
+Stack trace:
+#0 {main}
+  thrown in /home/mafranco/Desktop/webservCGI/webserv_with_classes/www/1serv/cgi-bin/upload.php on line 8
+[11-Jan-2025 16:44:15 Europe/Berlin] PHP Warning:  Undefined array key "QUERY_STRING" in /home/mafranco/Desktop/webservCGI/webserv_with_classes/www/1serv/cgi-bin/upload.php on line 5
+[11-Jan-2025 16:44:15 Europe/Berlin] PHP Warning:  Undefined variable $stdin in /home/mafranco/Desktop/webservCGI/webserv_with_classes/www/1serv/cgi-bin/upload.php on line 19
+[11-Jan-2025 16:44:15 Europe/Berlin] PHP Fatal error:  Uncaught TypeError: fgets(): Argument #1 ($stream) must be of type resource, null given in /home/mafranco/Desktop/webservCGI/webserv_with_classes/www/1serv/cgi-bin/upload.php:19
+Stack trace:
+#0 /home/mafranco/Desktop/webservCGI/webserv_with_classes/www/1serv/cgi-bin/upload.php(19): fgets()
+#1 {main}
+  thrown in /home/mafranco/Desktop/webservCGI/webserv_with_classes/www/1serv/cgi-bin/upload.php on line 19
+[11-Jan-2025 16:45:00 Europe/Berlin] PHP Warning:  Undefined array key "QUERY_STRING" in /home/mafranco/Desktop/webservCGI/webserv_with_classes/www/1serv/cgi-bin/upload.php on line 5
+[11-Jan-2025 16:45:00 Europe/Berlin] PHP Warning:  Undefined variable $stdin in /home/mafranco/Desktop/webservCGI/webserv_with_classes/www/1serv/cgi-bin/upload.php on line 19
+[11-Jan-2025 16:45:00 Europe/Berlin] PHP Fatal error:  Uncaught TypeError: fgets(): Argument #1 ($stream) must be of type resource, null given in /home/mafranco/Desktop/webservCGI/webserv_with_classes/www/1serv/cgi-bin/upload.php:19
+Stack trace:
+#0 /home/mafranco/Desktop/webservCGI/webserv_with_classes/www/1serv/cgi-bin/upload.php(19): fgets()
+#1 {main}
+  thrown in /home/mafranco/Desktop/webservCGI/webserv_with_classes/www/1serv/cgi-bin/upload.php on line 19
+[11-Jan-2025 16:46:35 Europe/Berlin] PHP Warning:  Undefined array key "QUERY_STRING" in /home/mafranco/Desktop/webservCGI/webserv_with_classes/www/1serv/cgi-bin/upload.php on line 5
+[11-Jan-2025 16:46:35 Europe/Berlin] PHP Warning:  Undefined variable $stdin in /home/mafranco/Desktop/webservCGI/webserv_with_classes/www/1serv/cgi-bin/upload.php on line 19
+[11-Jan-2025 16:46:35 Europe/Berlin] PHP Fatal error:  Uncaught TypeError: fgets(): Argument #1 ($stream) must be of type resource, null given in /home/mafranco/Desktop/webservCGI/webserv_with_classes/www/1serv/cgi-bin/upload.php:19
+Stack trace:
+#0 /home/mafranco/Desktop/webservCGI/webserv_with_classes/www/1serv/cgi-bin/upload.php(19): fgets()
+#1 {main}
+  thrown in /home/mafranco/Desktop/webservCGI/webserv_with_classes/www/1serv/cgi-bin/upload.php on line 19
+[11-Jan-2025 16:47:36 Europe/Berlin] PHP Warning:  Undefined array key "QUERY_STRING" in /home/mafranco/Desktop/webservCGI/webserv_with_classes/www/1serv/cgi-bin/upload.php on line 5
+[11-Jan-2025 16:48:20 Europe/Berlin] PHP Warning:  Undefined array key "QUERY_STRING" in /home/mafranco/Desktop/webservCGI/webserv_with_classes/www/1serv/cgi-bin/upload.php on line 5
