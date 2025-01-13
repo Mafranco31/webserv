@@ -1,40 +1,38 @@
 #!/usr/bin/env php
 
 <?php
-// Print query string
-echo "QUERY_STRING: " . $_SERVER['QUERY_STRING'] . PHP_EOL;
-// Print raw POST data
-$input = file_get_contents("php://input");
-echo "RAW_INPUT: " . $input . PHP_EOL;
-// Print all server variables (optional)
-echo "SERVER VARIABLES:" . PHP_EOL;
-print_r($_SERVER);
-if ($handle = fopen(0, "r")) {
-    echo "Waiting for input from stdin...\n";
-    
-    // Read the input until EOF is reached
-    $input_data = "";
-    while (true) {
-        // Append the received line to the input data
-        $line = fgets($handle);
-        if ($line === "Helo") {
-            echo "Stdin closed. Exiting.\n";
-            break;
-        }
-        echo "Received: " . $line;
+// Set content type to plain text for easier debugging
+header('Content-Type: text/plain');
 
-    // Flush the output buffer to ensure immediate printing
-        ob_flush();
-        flush();
-    }
-    
-    // Close the stdin stream
-    fclose($handle);
-    
-    // Output the received data
-    echo "Received data from stdin:\n";
-    echo $input_data;
-} else {
-    echo "Failed to open stdin.\n";
+// Get the raw input data from the request body
+$rawInput = file_get_contents('php://input');
+
+// Print the raw input
+echo "Raw Input:\n";
+echo $rawInput . "\n";  // Ensure there's a newline after the raw input
+
+// Optionally, you can also print some debugging information
+echo "\n\n--- Debugging Information ---\n";
+
+// Print request method
+echo "REQUEST_METHOD: " . $_SERVER['REQUEST_METHOD'] . "\n";
+
+// Print query parameters if present
+if (!empty($_GET)) {
+    echo "\nGET Parameters:\n";
+    print_r($_GET);
+}
+
+// Print POST parameters if present
+if (!empty($_POST)) {
+    echo "\nPOST Parameters:\n";
+    print_r($_POST);
+}
+
+// Print uploaded files if present
+if (!empty($_FILES)) {
+    echo "\nUploaded Files:\n";
+    print_r($_FILES);
 }
 ?>
+

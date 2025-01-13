@@ -25,7 +25,7 @@ std::string readFileToString(const std::string& filename) {
 
 // char **create_arguments(const Request & request, std::string program) {
 //     std::string language = request.GetCgiExt();
-    
+
 //     std::vector<std::string> v_args;
 //     v_args.push_back(program);
 //     v_args.push_back("." + request.GetFullUri());
@@ -59,7 +59,7 @@ std::string readFileToString(const std::string& filename) {
 //     env.push_back("REDIRECT_STATUS=1");
 
 //     // env.push_back("PATH=/Library/Frameworks/Python.framework/Versions/3.12/bin:/usr/local/bin:/usr/local/sbin:/Library/Frameworks/Python.framework/Versions/3.11/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/opt/X11/bin:/Library/Apple/usr/bin:/Users/mathis/anaconda3/bin:/Users/mathis/anaconda3/condabin:/Library/Frameworks/Python.framework/Versions/3.12/bin:/usr/local/sbin:/Library/Frameworks/Python.framework/Versions/3.11/bin");
-    
+
 //     std::cout << "ENV:" << std::endl;
 //     std::vector<char*> envp;
 //     for (std::vector<std::string>::iterator it = env.begin(); it != env.end(); ++it) {
@@ -74,7 +74,7 @@ std::vector<std::string> create_environment(const Request & request) {
     std::vector<std::string> env;
 
     env.push_back("REQUEST_METHOD=" + request.GetMethod());
-    env.push_back("SCRIPT_FILENAME=." + request.GetFullUri());
+    env.push_back("SCRIPT_FILENAME=." + request.GetFullUri() + request.GetCgiExt());
     if (request.GetMethod() == "POST") {
         env.push_back("CONTENT_TYPE=" + request.GetHeaders()["CONTENT-TYPE"]);
         env.push_back("CONTENT_LENGTH=" + request.GetHeaders()["CONTENT-LENGTH"]);
@@ -98,7 +98,7 @@ std::vector<std::string> create_environment(const Request & request) {
 
 //     int fd_response = open("tmp/response", O_CREAT | O_WRONLY | O_TRUNC, S_IRWXU);
 //     if (fd_response == -1)  throw ErrorHttp("500 Internal Server Error", "/500");
-    
+
 //     if (request.GetMethod() == "POST") {
 //         int fd_body = open("tmp/body", O_CREAT | O_WRONLY | O_TRUNC, S_IRWXU);
 //         if (fd_body == -1)  throw ErrorHttp("500 Internal Server Error", "/500");
@@ -124,7 +124,7 @@ std::string ft_ex_cgi(int fd, char **env2, Request & request) {
 //     (void)env2;
 
     std::vector<std::string> env = create_environment(request);
-    
+
     //Convert environment vector to char* array
     // std::cout << "ENV:" << std::endl;
     // std::vector<char*> envp;
@@ -148,6 +148,7 @@ std::string ft_ex_cgi(int fd, char **env2, Request & request) {
     std::string program;
     // if (language == ".php")
     //     program = "/usr/bin/php-cgi";
+	//std::cout << language << std::endl;
     if (language == ".php")
         program = "/usr/bin/php-cgi";
     else
@@ -205,26 +206,29 @@ std::string ft_ex_cgi(int fd, char **env2, Request & request) {
 
         // // close(STDIN_FILENO);
         // // close(STDOUT_FILENO);
-         close(input_pipe[0]);
-         close(fd_response);
+        close(input_pipe[0]);
+        close(fd_response);
         // close(input_pipe[1]);
         // sleep(10);
+		std::cout << program.c_str() << std::endl;
         if (execve(program.c_str(), envp2, envc) == -1) exit(500);
+		std::cout << "should not happen" << std::cout;
     } else {
-          close(input_pipe[0]);
+        close(input_pipe[0]);
         // // close(output_pipe[1]);
-        
+
         // // dup2(STDIN_FILENO, output_pipe[0]);
-        sleep(1);
+        //sleep(1);
         // if (request.GetMethod() == "POST")
         // write(input_pipe[1], request.GetBody().c_str(), request.GetBody().length()+1);
 
-        write(input_pipe[1], "Hola", 5);
-        write(input_pipe[1], "Helo", 5);
+        write(input_pipe[1], request.GetBody().c_str(), request.GetBody().size());
+        //write(input_pipe[1], "Helo", 5);
+		close(input_pipe[1]);
 
         // char buffer[1024];
         // ssize_t bytes_read;
-        
+
         // while ((bytes_read = read(output_pipe[0], buffer, sizeof(buffer))) > 0) {
         //     std::cout << "Read " << bytes_read << " bytes from output_pipe[0]." << std::endl;
         //     std::cout << buffer << std::endl;
@@ -232,16 +236,21 @@ std::string ft_ex_cgi(int fd, char **env2, Request & request) {
         //         throw ErrorHttp("500 Internal Server Error", "/500");
         //     }
         // }
-
-        // close(output_pipe[0]);
-        if (waitpid(pid, &status, 0) == -1) {
-            throw ErrorHttp("500 Internal Server Error", "/500");
-        }
+		if (waitpid(pid, &status, 0) == -1) {
+			throw ErrorHttp("500 Internal Server Error", "/500");
     }
-    close(fd_response);
+	if (waitpid(pid, &status, 0) == -1) {
+		throw ErrorHttp("500 Internal Server Error", "/500");
+    }
+        // close(output_pipe[0]);
+    }
+    //close(fd_response);
     if (status == 500)
+	{
+		std::cout << "holaaa" << std::endl;
         throw ErrorHttp("500 Internal Server Error", "/500");
-
+	}
+	//std::cout << "Alguno llega aquí" << std::endl;
     std::string fd_response_body = "HTTP/1.1 200 OK\n" + readFileToString("tmp/response");
     return fd_response_body;
 

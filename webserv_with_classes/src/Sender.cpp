@@ -331,8 +331,8 @@ int	Webserv::Send(int clientfd, std::string buffer, char **env, struct epoll_eve
 	std::string body = "";
 
 	try {
-		std::cout << "\033[34m";
-		request.Parse(buffer);
+		//std::cout << "\033[34m";
+		request.Parse(buffer, clientfd, events, ep);
 		choose_server_block(request);
 		//std::cout << "arrives here1" << std::endl;
 		server_configuration(request);
@@ -377,7 +377,7 @@ int	Webserv::Send(int clientfd, std::string buffer, char **env, struct epoll_eve
 				throw ErrorHttp("413 Request Entity Too Large", request.error["413"]);
 			if (request.GetIsCgi()) {
 				response = ft_ex_cgi(clientfd, env, request);
-				std::cout << std::endl << "CGI : " << request.GetFullUri() << " response :" << std::endl << response << std::endl;
+				std::cout << std::endl << "\033[35m" << "CGI : " << request.GetFullUri() << " response :\n" << response << "\033[0m" << std::endl;
 				std::cout << "END OF CGI" << std::endl;
 				if (send(clientfd, response.c_str(), response.size(), 0) == -1)
 					throw Webserv::ErrorSendingData();
@@ -401,7 +401,7 @@ int	Webserv::Send(int clientfd, std::string buffer, char **env, struct epoll_eve
 		else {
 			throw ErrorHttp("501 Not Implemented", request.error["501"]);
 		}
-	std::cout << "\033[0m";
+	//std::cout << "\033[0m";
 	} catch (ErrorHttp &e) {
 		body = _html_map[e.get_errcode()];
 		std::cout << body << std::endl;
