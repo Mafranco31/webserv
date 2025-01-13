@@ -17,11 +17,9 @@ Request::~Request ( void ) {
 
 // Methods
 
-int	Request::Parse ( std::string buffer, int clientfd , struct epoll_event *events, int ep) {
+int	Request::Parse ( std::string buffer, int clientfd) {
 	content = buffer;
 	client_socket = clientfd;
-	(void)events;
-	(void)ep;
 	try {
 		ParseFirstLine();
 		ParseHeader();
@@ -216,6 +214,7 @@ std::ostream& operator<<(std::ostream& os, const Request& request) {
 		os << it->first << ": " << it->second << std::endl;
 	}
 	os << "-Body: " << request.GetBody() << std::endl;
+	os << "-Body length: " << request.GetBodyLength() << "-Calculated body length:" << request.GetBody().size() << std::endl;
 	return os;
 }
 

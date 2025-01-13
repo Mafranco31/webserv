@@ -14,8 +14,6 @@ echo $rawInput . "\n";  // Ensure there's a newline after the raw input
 // Optionally, you can also print some debugging information
 echo "\n\n--- Debugging Information ---\n";
 
-print_r($_SERVER);
-
 // Print request method
 echo "REQUEST_METHOD: " . $_SERVER['REQUEST_METHOD'] . "\n";
 

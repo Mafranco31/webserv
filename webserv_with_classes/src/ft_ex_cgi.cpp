@@ -150,7 +150,7 @@ std::string ft_ex_cgi(int fd, char **env2, Request & request) {
     //     program = "/usr/bin/php-cgi";
 	//std::cout << language << std::endl;
     if (language == ".php")
-        program = "/usr/bin/php-cgi";
+        program = "/usr/local/bin/php-cgi";
     else
         throw ErrorHttp("404 Not Found", request.error["404"]);
 
@@ -198,10 +198,10 @@ std::string ft_ex_cgi(int fd, char **env2, Request & request) {
 
     if (pid == 0) {
         dup2(fd_response, 1);
-         close(input_pipe[1]); // Close unused write end of input pipe
+        close(input_pipe[1]); // Close unused write end of input pipe
         // // close(output_pipe[0]); // Close unused read end of output pipe
         // // // Redirect stdin and stdout to the pipes
-         dup2(input_pipe[0], 0);
+        dup2(input_pipe[0], 0);
         // // dup2(output_pipe[1], STDOUT_FILENO);
 
         // // close(STDIN_FILENO);
@@ -210,9 +210,10 @@ std::string ft_ex_cgi(int fd, char **env2, Request & request) {
         close(fd_response);
         // close(input_pipe[1]);
         // sleep(10);
-		std::cout << program.c_str() << std::endl;
+		//std::cout << program.c_str() << std::endl;
+        write(1, request.GetBody().c_str(), request.GetBody().size());
         if (execve(program.c_str(), envp2, envc) == -1) exit(500);
-		std::cout << "should not happen" << std::cout;
+		// std::cout << "should not happen" << std::cout;
     } else {
         close(input_pipe[0]);
         // // close(output_pipe[1]);
@@ -222,7 +223,7 @@ std::string ft_ex_cgi(int fd, char **env2, Request & request) {
         // if (request.GetMethod() == "POST")
         // write(input_pipe[1], request.GetBody().c_str(), request.GetBody().length()+1);
 
-        write(input_pipe[1], request.GetBody().c_str(), request.GetBody().size());
+        
         //write(input_pipe[1], "Helo", 5);
 		close(input_pipe[1]);
 
