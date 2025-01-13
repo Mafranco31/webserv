@@ -325,25 +325,23 @@ void Webserv::location_configuration(Request &request)
 	}
 }
 
-int	Webserv::Send(int clientfd, std::string buffer, char **env, struct epoll_event *events, int ep) {
+int	Webserv::Send(int clientfd, std::string buffer, char **env) {
 	Request request = Request();
 	std::string response = "";
 	std::string body = "";
 
 	try {
 		//std::cout << "\033[34m";
-		request.Parse(buffer, clientfd, events, ep);
+		if (request.Parse(buffer, clientfd) == 2)
+			return 2;
 		choose_server_block(request);
 		//std::cout << "arrives here1" << std::endl;
 		server_configuration(request);
 		choose_location_block(request);
-		std::cout << "location block: " << request.serv_block->location_blocks << std::endl;
 		if (request.serv_block->location_blocks != 0 && request.location_block != NULL)
 			location_configuration(request);
-		std::cout << "NO DEBERÍA LLEGAR AQUÍ" << std::endl;
 		if (request.uri[request.uri.size() - 1] != '/') //If it's /, it stays like that because / is been linked to the index. I
 			request.uri = "/www" + request.root + request.GetUri();
-		std::cout << "LLega: " << request.uri << std::endl;
 		if (request.GetMethod() == "GET") {
 			if (request.redir != "")
 			{
