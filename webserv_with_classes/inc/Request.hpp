@@ -49,7 +49,7 @@ class Request {
 		~Request();
 
 	//	Methods
-		int	Parse( std::string buffer, int clientfd , struct epoll_event *events, int ep);
+		int	Parse( std::string buffer, int clientfd);
 		void	ParseFirstLine( void );
 		void	ParseHeader( void );
 		void	IsCGI();

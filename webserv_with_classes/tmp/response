@@ -1,0 +1,9 @@
+/usr/bin/php-cgi
+------WebKitFormBoundarypwU7QDV3czBcGsB6
+Content-Disposition: form-data; name="file"; filename="test.txt"
+Content-Type: text/plain
+
+yooo
+yooo
+
+------WebKitFormBoundarypwU7QDV3czBcGsB6--

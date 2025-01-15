@@ -6,8 +6,8 @@
 # include <unistd.h>
 # include <fcntl.h>
 # include <dirent.h>
-# include <sys/socket.h>
-//# include <sys/event.h> //kqueue
+//# include <sys/socket.h>
+# include <sys/event.h> //kqueue
 # include <sys/epoll.h> //epoll
 # include <sys/time.h>
 # include <sys/stat.h>
@@ -37,14 +37,14 @@
 
 void	    *ft_memset(void *s, int c, size_t n);
 
-std::string ft_ex_cgi(int fd, char **env, Request & request);
+std::string ft_ex_cgi2(Request request );
+
+std::string	ft_itoa(int n);
 
 std::string	ft_strlen( std::string s);
 
 size_t	ft_strlcpy(char *dest, std::string src, size_t size);
 
 std::string decodePercentEncoding(const std::string &encoded);
-
-void executeCGI(const std::string &scriptPath, const std::string &requestMethod, const std::string &queryString, const std::string &requestBody);
 
 #endif

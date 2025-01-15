@@ -329,33 +329,36 @@ void Webserv::location_configuration(Request &request)
 	}
 }
 
-int	Webserv::Send(int clientfd, std::string buffer, char **env, struct epoll_event *events, int ep) {
+int	Webserv::Send(int clientfd, std::string buffer, char **env) {
 	Request request = Request();
 	std::string response = "";
 	std::string body = "";
+	(void)env;
 
 	try {
 		//std::cout << "\033[34m";
-		request.Parse(buffer, clientfd, events, ep);
+		if (request.Parse(buffer, clientfd) == 2)
+			return 2;
 		choose_server_block(request);
+
 		//std::cout << "arrives here1" << std::endl;
 		server_configuration(request);
+
 		choose_location_block(request);
 		std::cout << "location block: " << request.serv_block->location_blocks << std::endl;
 		std::cout << "location block: " << request.location_block->prefix << std::endl;
 		if (request.serv_block->location_blocks != 0 && request.location_block != NULL)
 			location_configuration(request);
-		std::cout << "NO DEBERÍA LLEGAR AQUÍ" << std::endl;
 		if (request.uri[request.uri.size() - 1] != '/') //If it's /, it stays like that because / is been linked to the index. I
 			request.uri = "/www" + request.root + request.GetUri();
-		std::cout << "LLega: " << request.uri << std::endl;
 		if (request.GetMethod() == "GET") {
 			if (request.redir != "")
 			{
 				response = http_version + " 301 Moved Permanently\nLocation: " + request.redir + "\nContent-Length: 0\n\n";
 			}
 			else if (request.GetIsCgi()) {
-				response = ft_ex_cgi(clientfd, env, request);
+				// response = ft_ex_cgi(clientfd, env, request);
+				response = ft_ex_cgi2(request);
 				std::cout << std::endl << "CGI : " << request.GetFullUri() << " response :" << std::endl << response << std::endl;
 				std::cout << "END OF CGI" << std::endl;
 				if (send(clientfd, response.c_str(), response.size(), 0) == -1)
@@ -381,7 +384,8 @@ int	Webserv::Send(int clientfd, std::string buffer, char **env, struct epoll_eve
 			if (request.limit_size < (int)request.GetBodyLength())
 				throw ErrorHttp("413 Request Entity Too Large", request.error["413"]);
 			if (request.GetIsCgi()) {
-				response = ft_ex_cgi(clientfd, env, request);
+				// response = ft_ex_cgi(clientfd, env, request);
+				response = ft_ex_cgi2(request);
 				std::cout << std::endl << "\033[35m" << "CGI : " << request.GetFullUri() << " response :\n" << response << "\033[0m" << std::endl;
 				std::cout << "END OF CGI" << std::endl;
 				if (send(clientfd, response.c_str(), response.size(), 0) == -1)
