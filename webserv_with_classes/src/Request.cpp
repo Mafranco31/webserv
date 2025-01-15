@@ -88,6 +88,7 @@ void	Request::ParseFirstLine ( void ) {
 	if (pos2 == std::string::npos) throw ErrorHttp("400 Bad Request", error["400"]);
 	uri = firstLine.substr(pos, pos2 - pos);
 	//	Looking for arguments
+	uri2 = uri;
 	if (uri.find('?') != std::string::npos) {
 		query_string = uri.substr(uri.find('?') + 1);
 		try {

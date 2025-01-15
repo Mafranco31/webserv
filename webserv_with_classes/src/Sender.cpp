@@ -407,7 +407,8 @@ int	Webserv::Send(int clientfd, std::string buffer, char **env) {
 
 std::string Webserv::Delete(Request &request) {
 	std::string response = "";
-	std::string name = "." + request.GetFullUri() + request.GetCgiExt();
+	std::string name = "./www" + request.root + request.GetFullUri2();// + request.GetCgiExt();
+	std::cout << "DELEETE name: " << name << std::endl;
 	if (std::remove(name.c_str())) {
 		throw ErrorHttp("500 Internal Server Error", request.error["500"]);
 	}
