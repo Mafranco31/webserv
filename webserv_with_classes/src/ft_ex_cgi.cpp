@@ -9,7 +9,7 @@ std::string ft_ex_cgi_get(Request request ) {
     envVars["REQUEST_METHOD"] = request.GetMethod();
     envVars["REDIRECT_STATUS"] = "1";
     envVars["SCRIPT_FILENAME"] = scriptPath;
-    envVars["QUERY_STRING"] = "";
+    envVars["QUERY_STRING"] = request.GetQueryString();
 
 
     int pfd[2];
