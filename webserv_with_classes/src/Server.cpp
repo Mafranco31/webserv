@@ -16,7 +16,7 @@ Server::~Server()
 }
 
 //	Constructor
-Webserv::Webserv () : serv(NULL), serv_n(0){
+Webserv::Webserv () : serv(NULL), serv_n(0), tmp_prefix("") {
 	valid_directives.insert("listen");
 	valid_directives.insert("root");
 	valid_directives.insert("index");
@@ -138,7 +138,8 @@ void	Server::ManageConnexion( struct epoll_event *events) {
 			std::cout << "\033[1;32mNew client connected: " << clientfd << "\033[0m" << std::endl;
 			//	Add the new client socket to kqueue for monitoring
 			change_event.data.fd = clientfd;
-			change_event.events = EPOLLIN;
+			change_event.events = EPOLLIN | EPOLLOUT;
+			epmap[events[clientfd].data.fd] = "";
 			if (epoll_ctl(ep, EPOLL_CTL_ADD, clientfd, &change_event) == -1)
 			{
 				close(clientfd);
@@ -157,7 +158,7 @@ void	Server::ManageConnexion( struct epoll_event *events) {
 			{
 				std::cout << "\033[1;31mClient " << events[i].data.fd << " disconnected\033[0m" << std::endl;
 				change_event.data.fd = events[i].data.fd;
-				change_event.events = EPOLLIN;
+				change_event.events = EPOLLIN | EPOLLOUT;
 				if (epoll_ctl(ep, EPOLL_CTL_DEL, events[i].data.fd, &change_event) == -1)
 					std::cout << "Couldn't delete event" << std::endl;
 				// _ws->Send(events[i].data.fd, epmap[events[i].data.fd], _env);
@@ -179,18 +180,24 @@ void	Server::ManageConnexion( struct epoll_event *events) {
 				}
 				std::cout << "Received from client " << events[i].data.fd << ": " << std::endl; //Create a structure for clients to identify them by a number, and not its fd.
 				std::cout << data << "$" << std::endl;
-				if (epmap[events[i].data.fd] != ""){
-					data = epmap[events[i].data.fd] + data;
-				}
+				//if (epmap[events[i].data.fd] != ""){
+					epmap[events[i].data.fd] = epmap[events[i].data.fd] + data;
+				//}
 				std::cout << data << "$" << std::endl;
+				std::cout << "still arrives here." << std::endl;
+				break ;
 				// epmap[events[i].data.fd].append(data);
 				// if ((events[i].events & EPOLLET)){
 				// 	std::cout << "EPOLLEEEEET" << std::endl;}
-				if (_ws->Send(events[i].data.fd, data, _env, events, ep) == 2)
-					epmap[events[i].data.fd] = data;
-				else
-					epmap[events[i].data.fd] = "";
 			}
+		}
+		else if ((events[i].events & EPOLLOUT) && epmap[events[i].data.fd] != "" && std::find(fds.begin(), fds.end(), events[i].data.fd) != fds.end())
+		{
+			std::cout << "Ready to write!!!!!" << std::endl;
+			if (_ws->Send(events[i].data.fd, epmap[events[i].data.fd] , _env, events, ep) == 2)
+				continue ;
+			else
+				epmap[events[i].data.fd] = "";
 			break ;
 		}
 	}

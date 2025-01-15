@@ -151,8 +151,11 @@ void Webserv::recursive_location(Location &loc, Request &request)
 	std::cout << "URI: " << request.uri << std::endl;
 
 	std::string uri_prefix = request.uri.substr(0, loc.prefix.length());
-	if (loc.prefix == uri_prefix)
+	std::cout << "size uri_prefix: " << uri_prefix.length() << std::endl;
+	std::cout << "size tmp_prefix: " << tmp_prefix.length() << std::endl;
+	if (request.uri.substr(0, tmp_prefix.length()).length() < uri_prefix.length() && request.uri.length() <= loc.prefix.length())
 	{
+		tmp_prefix = loc.prefix;
 		request.location_block = &loc;
 		//std::cout << "request.location_block: " << request.location_block->prefix << std::endl;
 		if (loc.eq == 1 || loc.sub_location_blocks == 0)
@@ -165,6 +168,7 @@ void Webserv::recursive_location(Location &loc, Request &request)
 
 void Webserv::choose_location_block(Request &request)
 {
+	tmp_prefix = "";
 	for (int i = 0; i < request.serv_block->location_blocks; i++)
 	{
 		recursive_location(request.serv_block->location[i], request);
@@ -338,6 +342,7 @@ int	Webserv::Send(int clientfd, std::string buffer, char **env, struct epoll_eve
 		server_configuration(request);
 		choose_location_block(request);
 		std::cout << "location block: " << request.serv_block->location_blocks << std::endl;
+		std::cout << "location block: " << request.location_block->prefix << std::endl;
 		if (request.serv_block->location_blocks != 0 && request.location_block != NULL)
 			location_configuration(request);
 		std::cout << "NO DEBERÍA LLEGAR AQUÍ" << std::endl;
@@ -366,7 +371,7 @@ int	Webserv::Send(int clientfd, std::string buffer, char **env, struct epoll_eve
 				std::cout << "inside autoindex" << std::endl;
 				body = CreateAutoIndex(request);
 				response = http_version  + " 200 OK\nContent-Type: text/html\nContent-Length: " + ft_strlen(body) + "\n\n" + body;
-				std::cout << response << std::endl;
+				//std::cout << response << std::endl;
 			}
 			else {
 				throw ErrorHttp("404 Not Found", request.error["404"]);
@@ -407,9 +412,9 @@ int	Webserv::Send(int clientfd, std::string buffer, char **env, struct epoll_eve
 		std::cout << body << std::endl;
 		std::cout << "yoooo" << std::endl;
 		response = http_version + " " + e.what() + "\nContent-Type: text/html\nContent-Length: " + ft_strlen(body) + "\n\n" + body;
-		std::cout << response << std::endl;
+		//std::cout << response << std::endl;
 	}
-	std::cout << response << std::endl;
+	//std::cout << response << std::endl;
 	if (send(clientfd, response.c_str(), response.size(), 0) == -1)
 		throw Webserv::ErrorSendingData();
 	return 1;

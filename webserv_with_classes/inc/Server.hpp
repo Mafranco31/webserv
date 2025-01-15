@@ -125,6 +125,8 @@ class Webserv {
 
 		void choose_server_block(Request &request);
 		void server_configuration(Request &request);
+
+		std::string tmp_prefix;
 		void choose_location_block(Request &request);
 		void recursive_location(Location &loc, Request &request);
 		void location_configuration(Request &request);
