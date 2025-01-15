@@ -180,7 +180,8 @@
                 return;
             }
 
-            fetch(selectedFile, {
+            const path_to_delete = '/cgi-bin/uploads/' + selectedFile;
+            fetch(path_to_delete, {
                 method: 'DELETE',
                 headers: {
                     'Content-Type': 'application/json'
