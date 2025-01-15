@@ -3,8 +3,7 @@
 <?php
 // Ensure the script is being run via CGI
 if (php_sapi_name() !== 'cgi-fcgi') {
-    echo "This script must be run as a CGI application.\n";
-    exit(1);
+    exit(5);
 }
 
 // Define the upload directory
@@ -27,13 +26,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if (move_uploaded_file($file['tmp_name'], $destination)) {
             exit(0);
         } else {
-            exit(1);
+            exit(2);
         }
     } else {
-        exit(1);
+        exit(3);
     }
 } else {
-    exit(1);
+    exit(4);
 }
 
 ?>

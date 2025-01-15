@@ -375,14 +375,19 @@ int	Webserv::Send(int clientfd, std::string buffer, char **env) {
 			if (request.limit_size < (int)request.GetBodyLength())
 				throw ErrorHttp("413 Request Entity Too Large", request.error["413"]);
 			if (request.GetIsCgi()) {
-				if (!ft_ex_cgi_post(request)) {
-					body = _html_map["upload_success.html"];
-					response = http_version + " 200 Ok\nContent-Type: text/html\nContent-Length: " + ft_strlen(body) +  "\n\n" + body;
+				try {
+					if (!ft_ex_cgi_post(request)) {
+						body = _html_map["upload_success.html"];
+						response = http_version + " 200 Ok\nContent-Type: text/html\nContent-Length: " + ft_strlen(body) +  "\n\n" + body;
+					}
+					else {
+						body = _html_map["upload_fail.html"];
+						response = http_version + " 400 Bad Request\nContent-Type: text/html\nContent-Length: " + ft_strlen(body) +  "\n\n" + body;
+					}
+				} catch (ErrorHttp &e) {
+					throw;
 				}
-				else {
-					body = _html_map["upload_fail.html"];
-					response = http_version + "400 Bad Request\nContent-Type: text/html\nContent-Length: " + ft_strlen(body) +  "\n\n" + body;
-				}
+				// std::cout << response << std::endl;
 				if (send(clientfd, response.c_str(), response.size(), 0) == -1)
 					throw Webserv::ErrorSendingData();
 				return 1;

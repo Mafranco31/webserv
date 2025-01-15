@@ -83,6 +83,7 @@ int ft_ex_cgi_post(Request request ) {
     pid_t pid = fork();
     if (pid < 0) {
         throw ErrorHttp("500 Internal Server Error", request.error["500"]);
+
     } else if (pid == 0) {
         dup2(inPipe[0], STDIN_FILENO);
         dup2(outPipe[1], STDOUT_FILENO);
@@ -93,7 +94,6 @@ int ft_ex_cgi_post(Request request ) {
         std::vector<std::string> envVec;
         for (std::map<std::string, std::string>::const_iterator it = envVars.begin(); it != envVars.end(); ++it) {
             envVec.push_back(it->first + "=" + it->second);
-            std::cout << it->first << " = " << it->second << std::endl;
         }
         std::vector<char*> envp;
         for (size_t i = 0; i < envVec.size(); ++i) {
@@ -118,6 +118,9 @@ int ft_ex_cgi_post(Request request ) {
         std::string response;
         ssize_t bytesRead;
         while ((bytesRead = read(outPipe[0], buffer, BUFFER_SIZE)) > 0) {
+            if (bytesRead == -1) {
+                throw ErrorHttp("500 Internal Server Error", request.error["500"]);
+            }
             response.append(buffer, bytesRead);
         }
         close(outPipe[0]);
@@ -125,8 +128,11 @@ int ft_ex_cgi_post(Request request ) {
         int statut;
         // Wait for the child process to finish
         waitpid(pid, &statut, 0);
-        if (statut != 1 && statut != 0)
+        // if (statut != 256 && statut != 0){
+        if (statut != 0){
+            // std::cout << "statut: " << statut << std::endl;
             throw ErrorHttp("500 Internal Server Error", request.error["500"]);
+        }
         return statut;
     }
 }
