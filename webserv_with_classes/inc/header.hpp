@@ -8,7 +8,7 @@
 # include <dirent.h>
 //# include <sys/socket.h>
 # include <sys/event.h> //kqueue
-# include <sys/epoll.h> //epoll
+//# include <sys/epoll.h> //epoll
 # include <sys/time.h>
 # include <sys/stat.h>
 # include <netinet/in.h>
@@ -37,7 +37,7 @@
 
 void	    *ft_memset(void *s, int c, size_t n);
 
-std::string ft_ex_cgi2(Request request );
+int ft_ex_cgi2(Request request );
 
 std::string	ft_itoa(int n);
 

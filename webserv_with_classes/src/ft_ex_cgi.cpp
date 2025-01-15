@@ -2,8 +2,8 @@
 
 class ErrorHttp;
 
-std::string ft_ex_cgi2(Request request ) {
-    std::cout << request << std::endl;
+int ft_ex_cgi2(Request request ) {
+    // std::cout << request << std::endl;
     std::string scriptPath = "." + request.GetUri() + request.GetCgiExt();
     std::string postData = request.GetBody();
     std::map<std::string, std::string> envVars;
@@ -45,7 +45,7 @@ std::string ft_ex_cgi2(Request request ) {
         const char* args[] = {"php-cgi", scriptPath.c_str(), NULL};
 
         execve("/usr/local/bin/php-cgi", const_cast<char* const*>(args), envp.data());
-        exit(1);
+        exit(2);
     } else {
         close(inPipe[0]);
         close(outPipe[1]);
@@ -66,8 +66,8 @@ std::string ft_ex_cgi2(Request request ) {
         int statut;
         // Wait for the child process to finish
         waitpid(pid, &statut, 0);
-        if (statut != 0)
+        if (statut != 1 && statut != 0)
             throw ErrorHttp("500 Internal Server Error", request.error["500"]);
-        return response;
+        return statut;
     }
 }

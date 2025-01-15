@@ -353,9 +353,14 @@ int	Webserv::Send(int clientfd, std::string buffer, char **env) {
 			}
 			else if (request.GetIsCgi()) {
 				// response = ft_ex_cgi(clientfd, env, request);
-				response = ft_ex_cgi2(request);
-				std::cout << std::endl << "CGI : " << request.GetFullUri() << " response :" << std::endl << response << std::endl;
-				std::cout << "END OF CGI" << std::endl;
+				// response = ft_ex_cgi2(request);
+				try {
+					response = ft_ex_cgi2(request);
+				} catch (ErrorHttp &e) {
+					throw;
+				}
+				// std::cout << std::endl << "CGI : " << request.GetFullUri() << " response :" << std::endl << response << std::endl;
+				// std::cout << "END OF CGI" << std::endl;
 				if (send(clientfd, response.c_str(), response.size(), 0) == -1)
 					throw Webserv::ErrorSendingData();
 				return 1;
@@ -380,18 +385,22 @@ int	Webserv::Send(int clientfd, std::string buffer, char **env) {
 				throw ErrorHttp("413 Request Entity Too Large", request.error["413"]);
 			if (request.GetIsCgi()) {
 				// response = ft_ex_cgi(clientfd, env, request);
-				response = ft_ex_cgi2(request);
-				std::cout << std::endl << "\033[35m" << "CGI : " << request.GetFullUri() << " response :\n" << response << "\033[0m" << std::endl;
-				std::cout << "END OF CGI" << std::endl;
+				if (!ft_ex_cgi2(request)) {
+					body = _html_map["upload_success.html"];
+					response = http_version + " 200 Ok\nContent-Type: text/html\nContent-Length: " + ft_strlen(body) +  "\n\n" + body;
+				}
+				else {
+					body = _html_map["upload_fail.html"];
+					response = http_version + "400 Bad Request\nContent-Type: text/html\nContent-Length: " + ft_strlen(body) +  "\n\n" + body;
+				}
+				// std::cout << std::endl << "\033[35m" << "CGI : " << request.GetFullUri() << " response :\n" << response << "\033[0m" << std::endl;
+				// std::cout << "END OF CGI" << std::endl;
 				if (send(clientfd, response.c_str(), response.size(), 0) == -1)
 					throw Webserv::ErrorSendingData();
 				return 1;
 			}
-			else if (request.GetUri() == "/www/1serv/uploads") {
-				response = Post(clientfd, request);
-			}
 			else
-				throw ErrorHttp("404 Not Found", request.error["404"]);
+				throw ErrorHttp("400 Bad Request", request.error["400"]);
 		}
 		else if (request.GetMethod() == "DELETE") {
 			response = Delete(request);

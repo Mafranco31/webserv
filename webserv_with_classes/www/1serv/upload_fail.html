@@ -1,0 +1,53 @@
+<!-- failure.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Upload Failed</title>
+    <style>
+        body {
+            font-family: "Courier New", Courier, monospace;
+            text-align: center;
+            background-color: #000;
+            color: #ff0000;
+            margin: 0;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .message {
+            padding: 20px;
+            border: 2px solid #ff0000;
+            border-radius: 5px;
+            background: radial-gradient(circle, #3e0000, #000000);
+            box-shadow: 0 0 15px #ff0000;
+        }
+        h1 {
+            font-size: 2.5em;
+            text-shadow: 0 0 10px #ff0000;
+        }
+        p {
+            font-size: 1.2em;
+        }
+    </style>
+</head>
+<body>
+    <div class="message">
+        <h1>Upload Failed</h1>
+        <p>Something went terribly wrong... 💀</p>
+    </div>
+    <button id="back-home-btn">Back to Home</button>
+
+    <script>
+        // Récupère l'origine actuelle (protocole + domaine + port)
+        const baseUrl = window.location.origin;
+
+        // Redirection dynamique vers la page d'accueil
+        document.getElementById('back-home-btn').addEventListener('click', function() {
+            window.location.href = `${baseUrl}/`;
+        });
+    </script>
+</body>
+</html>
