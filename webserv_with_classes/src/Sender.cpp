@@ -355,7 +355,7 @@ int	Webserv::Send(int clientfd, std::string buffer, char **env) {
 				// response = ft_ex_cgi(clientfd, env, request);
 				// response = ft_ex_cgi2(request);
 				try {
-					response = ft_ex_cgi2(request);
+					response = ft_ex_cgi_get(request);
 				} catch (ErrorHttp &e) {
 					throw;
 				}
@@ -385,7 +385,7 @@ int	Webserv::Send(int clientfd, std::string buffer, char **env) {
 				throw ErrorHttp("413 Request Entity Too Large", request.error["413"]);
 			if (request.GetIsCgi()) {
 				// response = ft_ex_cgi(clientfd, env, request);
-				if (!ft_ex_cgi2(request)) {
+				if (!ft_ex_cgi_post(request)) {
 					body = _html_map["upload_success.html"];
 					response = http_version + " 200 Ok\nContent-Type: text/html\nContent-Length: " + ft_strlen(body) +  "\n\n" + body;
 				}

@@ -37,7 +37,9 @@
 
 void	    *ft_memset(void *s, int c, size_t n);
 
-int ft_ex_cgi2(Request request );
+int ft_ex_cgi_post(Request request );
+
+std::string ft_ex_cgi_get(Request request );
 
 std::string	ft_itoa(int n);
 
