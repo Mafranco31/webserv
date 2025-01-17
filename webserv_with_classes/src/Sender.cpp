@@ -359,16 +359,17 @@ int	Webserv::Send(int clientfd, std::string buffer, char **env) {
 			location_configuration(request);
 		if (request.uri[request.uri.size() - 1] != '/') //If it's /, it stays like that because / is been linked to the index. I
 			request.uri = "/www" + request.root + request.GetUri();
-		if (request.GetMethod() == "GET") {
+			if (request.GetMethod() == "GET") {
 			if (request.redir != "")
 			{
 				response = http_version + " 301 Moved Permanently\nLocation: " + request.redir + "\nContent-Length: 0\n\n";
 			}
 			else if (request.GetIsCgi()) {
-				// response = ft_ex_cgi(clientfd, env, request);
-				response = ft_ex_cgi2(request);
-				std::cout << std::endl << "CGI : " << request.GetFullUri() << " response :" << std::endl << response << std::endl;
-				std::cout << "END OF CGI" << std::endl;
+				try {
+					response = ft_ex_cgi_get(request);
+				} catch (ErrorHttp &e) {
+					throw;
+				}
 				if (send(clientfd, response.c_str(), response.size(), 0) == -1)
 					throw Webserv::ErrorSendingData();
 				return 1;
@@ -381,7 +382,6 @@ int	Webserv::Send(int clientfd, std::string buffer, char **env) {
 			{
 				body = CreateAutoIndex(request);
 				response = http_version  + " 200 OK\nContent-Type: text/html\nContent-Length: " + ft_strlen(body) + "\n\n" + body;
-				//std::cout << response << std::endl;
 			}
 			else {
 				throw ErrorHttp("404 Not Found", request.error["404"]);
@@ -391,10 +391,19 @@ int	Webserv::Send(int clientfd, std::string buffer, char **env) {
 			if (request.limit_size < (int)request.GetBodyLength())
 				throw ErrorHttp("413 Request Entity Too Large", request.error["413"]);
 			if (request.GetIsCgi()) {
-				// response = ft_ex_cgi(clientfd, env, request);
-				response = ft_ex_cgi2(request);
-				std::cout << std::endl << "\033[35m" << "CGI : " << request.GetFullUri() << " response :\n" << response << "\033[0m" << std::endl;
-				std::cout << "END OF CGI" << std::endl;
+				try {
+					if (!ft_ex_cgi_post(request)) {
+						body = _html_map["upload_success.html"];
+						response = http_version + " 200 Ok\nContent-Type: text/html\nContent-Length: " + ft_strlen(body) +  "\n\n" + body;
+					}
+					else {
+						body = _html_map["upload_fail.html"];
+						response = http_version + " 400 Bad Request\nContent-Type: text/html\nContent-Length: " + ft_strlen(body) +  "\n\n" + body;
+					}
+				} catch (ErrorHttp &e) {
+					throw;
+				}
+				// std::cout << response << std::endl;
 				if (send(clientfd, response.c_str(), response.size(), 0) == -1)
 					throw Webserv::ErrorSendingData();
 				return 1;
@@ -411,13 +420,70 @@ int	Webserv::Send(int clientfd, std::string buffer, char **env) {
 	} catch (ErrorHttp &e) {
 		body = _html_map[e.get_errcode()];
 		response = http_version + " " + e.what() + "\nContent-Type: text/html\nContent-Length: " + ft_strlen(body) + "\n\n" + body;
-		//std::cout << response << std::endl;
 	}
-	//std::cout << response << std::endl;
 	if (send(clientfd, response.c_str(), response.size(), 0) == -1)
 		throw Webserv::ErrorSendingData();
 	return 1;
 }
+// 		if (request.GetMethod() == "GET") {
+// 			if (request.redir != "")
+// 			{
+// 				response = http_version + " 301 Moved Permanently\nLocation: " + request.redir + "\nContent-Length: 0\n\n";
+// 			}
+// 			else if (request.GetIsCgi()) {
+// 				// response = ft_ex_cgi(clientfd, env, request);
+// 				response = ft_ex_cgi2(request);
+// 				std::cout << std::endl << "CGI : " << request.GetFullUri() << " response :" << std::endl << response << std::endl;
+// 				std::cout << "END OF CGI" << std::endl;
+// 				if (send(clientfd, response.c_str(), response.size(), 0) == -1)
+// 					throw Webserv::ErrorSendingData();
+// 				return 1;
+// 			}
+// 			else if (_html_map[request.GetUri()] != "") {
+// 				body = _html_map[request.GetUri()];
+// 				response = http_version  + " 200 OK\nContent-Type: text/html\nContent-Length: " + ft_strlen(body) + "\n\n" + body;
+// 			}
+// 			else if (request.autoindex == "on")
+// 			{
+// 				body = CreateAutoIndex(request);
+// 				response = http_version  + " 200 OK\nContent-Type: text/html\nContent-Length: " + ft_strlen(body) + "\n\n" + body;
+// 				//std::cout << response << std::endl;
+// 			}
+// 			else {
+// 				throw ErrorHttp("404 Not Found", request.error["404"]);
+// 			}
+// 		}
+// 		else if (request.GetMethod() == "POST") {
+// 			if (request.limit_size < (int)request.GetBodyLength())
+// 				throw ErrorHttp("413 Request Entity Too Large", request.error["413"]);
+// 			if (request.GetIsCgi()) {
+// 				// response = ft_ex_cgi(clientfd, env, request);
+// 				response = ft_ex_cgi2(request);
+// 				std::cout << std::endl << "\033[35m" << "CGI : " << request.GetFullUri() << " response :\n" << response << "\033[0m" << std::endl;
+// 				std::cout << "END OF CGI" << std::endl;
+// 				if (send(clientfd, response.c_str(), response.size(), 0) == -1)
+// 					throw Webserv::ErrorSendingData();
+// 				return 1;
+// 			}
+// 			else
+// 				throw ErrorHttp("400 Bad Request", request.error["400"]);
+// 		}
+// 		else if (request.GetMethod() == "DELETE") {
+// 			response = Delete(request);
+// 		}
+// 		else {
+// 			throw ErrorHttp("501 Not Implemented", request.error["501"]);
+// 		}
+// 	} catch (ErrorHttp &e) {
+// 		body = _html_map[e.get_errcode()];
+// 		response = http_version + " " + e.what() + "\nContent-Type: text/html\nContent-Length: " + ft_strlen(body) + "\n\n" + body;
+// 		//std::cout << response << std::endl;
+// 	}
+// 	//std::cout << response << std::endl;
+// 	if (send(clientfd, response.c_str(), response.size(), 0) == -1)
+// 		throw Webserv::ErrorSendingData();
+// 	return 1;
+// }
 
 std::string Webserv::Delete(Request &request) {
 	std::string response = "";
