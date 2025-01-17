@@ -20,6 +20,7 @@ int main(int argc, char **argv, char **env) {
 	signal(SIGINT,  handler);
 	signal(SIGQUIT, handler);
     if (argc < 2) {
+		std::cout << "keee" << std::endl;
         argv[1] = (char *)"../web_parse/linux.conf";
     }
 	if (argc > 2)

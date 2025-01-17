@@ -312,15 +312,14 @@ void Webserv::location_configuration(Request &request)
 			throw Webserv::InvalidConfigurationFile();
 		request.limit_size =  n;
 	}
-	std::cout << "arrives" << std::endl;
 	if (map.find("return") != map.end())
 	{
+		std::cout << "there's a redirection." << std::endl;
 		if (map["return"].size() < 1)
 			throw Webserv::InvalidConfigurationFile();
 		std::cout << map["return"][0] << std::endl;
 		request.redir = map["return"][0];
 	}
-	std::cout << "arrives" << std::endl;
 	if (map.find("limit_except") != map.end())
 	{
 		std::cout << "\033[32mThe method: \033[0m" << request.GetMethod() << std::endl;
@@ -354,12 +353,12 @@ int	Webserv::Send(int clientfd, std::string buffer, char **env) {
 
 		choose_location_block(request);
 		std::cout << "location block: " << request.serv_block->location_blocks << std::endl;
-		std::cout << "location block: " << request.location_block->prefix << std::endl;
+		//std::cout << "location block: " << request.location_block->prefix << std::endl;
 		if (request.serv_block->location_blocks != 0 && request.location_block != NULL)
 			location_configuration(request);
 		if (request.uri[request.uri.size() - 1] != '/') //If it's /, it stays like that because / is been linked to the index. I
 			request.uri = "/www" + request.root + request.GetUri();
-			if (request.GetMethod() == "GET") {
+		if (request.GetMethod() == "GET") {
 			if (request.redir != "")
 			{
 				response = http_version + " 301 Moved Permanently\nLocation: " + request.redir + "\nContent-Length: 0\n\n";
