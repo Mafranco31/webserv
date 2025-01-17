@@ -1,36 +1,37 @@
 #!/usr/bin/env php
 
 <?php
-// Set the content type to JSON
-// header('Content-Type: application/json');
+// Set the content type to application/json
+header('Content-Type: application/json');
 
-// Specify the directory you want to list
-$directory = '../../../uploads'; // Replace 'your-directory' with the path to your directory
+// Specify the uploads directory
+$uploadDir = __DIR__ . '/uploads';
 
-// Function to get the list of files in the directory
-function listFiles($dir) {
-    if (!is_dir($dir)) {
-        return ['error' => 'Directory not found'];
-    }
-
-    // Get an array of all files and directories in the specified directory
-    $files = scandir($dir);
-
-    // Filter out the special entries "." and ".."
-    $files = array_filter($files, function($file) use ($dir) {
-        return $file !== '.' && $file !== '..' && is_file($dir . DIRECTORY_SEPARATOR . $file);
-    });
-
-    // Return the filtered list of files
-    return array_values($files); // Use array_values to reindex the array
+// Check if the directory exists
+if (!is_dir($uploadDir)) {
+    // Return an error response if the directory does not exist
+    echo json_encode(['error' => 'Uploads directory does not exist.']);
+    exit;
 }
 
-// Get the list of files
-$result = listFiles($directory);
-$encoded_result = json_encode($result);
-// Output the result as JSON
-header('Content-Type: text/plain');
-header('Connexion: close');
-header('Content-Length: ' . strlen($encoded_result) + 1);
-echo $encoded_result;
+// Initialize an array to hold the list of files
+$fileList = [];
+
+// Open the directory
+if ($handle = opendir($uploadDir)) {
+    // Loop through the files in the directory
+    while (false !== ($entry = readdir($handle))) {
+        // Skip the current directory (.) and parent directory (..)
+        if ($entry != '.' && $entry != '..') {
+            $fileList[] = $entry; // Add file name to the list
+        }
+    }
+    closedir($handle); // Close the directory handle
+}
+
+// Return the list of files in JSON format
+$encoded = json_encode($fileList);
+header('Content-Type: application/json');
+header('Content-Length: ' . strlen($encoded) + 1);
+echo $encoded;
 ?>

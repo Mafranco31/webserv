@@ -33,6 +33,7 @@ class Request {
 		Location *location_block;
 
 		std::string	uri;
+		std::string uri2;
 
 		//Configuration parameters:
 		std::string root;
@@ -61,6 +62,7 @@ class Request {
 		std::string	GetMethod( void ) const {	return method;	}
 		std::string	GetUri( void ) const ;
 		std::string GetFullUri( void ) const {	return uri;	}
+		std::string GetFullUri2( void ) const {	return uri2;	}
 		std::string	GetVersion( void ) const {	return version;	}
 		std::string GetContent( void ) const {	return content;}
 		std::string	GetQueryString( void ) const {	return query_string;	}

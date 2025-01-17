@@ -349,7 +349,6 @@ int	Webserv::Send(int clientfd, std::string buffer, char **env) {
 		if (request.Parse(buffer, clientfd) == 2)
 			return 2;
 		choose_server_block(request);
-
 		//std::cout << "arrives here1" << std::endl;
 		server_configuration(request);
 
@@ -380,7 +379,6 @@ int	Webserv::Send(int clientfd, std::string buffer, char **env) {
 			}
 			else if (request.autoindex == "on")
 			{
-				std::cout << "inside autoindex" << std::endl;
 				body = CreateAutoIndex(request);
 				response = http_version  + " 200 OK\nContent-Type: text/html\nContent-Length: " + ft_strlen(body) + "\n\n" + body;
 				//std::cout << response << std::endl;
@@ -401,29 +399,17 @@ int	Webserv::Send(int clientfd, std::string buffer, char **env) {
 					throw Webserv::ErrorSendingData();
 				return 1;
 			}
-			else if (request.GetUri() == "/www/1serv/uploads") {
-				response = Post(clientfd, request);
-			}
 			else
-				throw ErrorHttp("404 Not Found", request.error["404"]);
+				throw ErrorHttp("400 Bad Request", request.error["400"]);
 		}
 		else if (request.GetMethod() == "DELETE") {
 			response = Delete(request);
 		}
-		// else if (request.GetMethod() == "PUT") {	Put(clientfd, request);	}
-		// else if (request.GetMethod() == "HEAD") {	Head(clientfd, request);	}
-		// else if (request.GetMethod() == "OPTIONS") {	Options(clientfd, request);	}
-		// else if (request.GetMethod() == "TRACE") {	Trace(clientfd, request);	}
-		// else if (request.GetMethod() == "CONNECT") {	Connect(clientfd, request);	}
-		// else if (request.GetMethod() == "PATCH") {	Patch(clientfd, request);	}
 		else {
 			throw ErrorHttp("501 Not Implemented", request.error["501"]);
 		}
-	//std::cout << "\033[0m";
 	} catch (ErrorHttp &e) {
 		body = _html_map[e.get_errcode()];
-		std::cout << body << std::endl;
-		std::cout << "yoooo" << std::endl;
 		response = http_version + " " + e.what() + "\nContent-Type: text/html\nContent-Length: " + ft_strlen(body) + "\n\n" + body;
 		//std::cout << response << std::endl;
 	}
@@ -433,81 +419,10 @@ int	Webserv::Send(int clientfd, std::string buffer, char **env) {
 	return 1;
 }
 
-std::string	Webserv::Post(int clientfd, Request &request) {
-	std::string response = "";
-	std::string data = "";
-	std::string content = "";
-	std::string name = "";
-	(void)clientfd;
-
-	std::cout << "DENTRO POST " << std::endl;
-
-	std::cout << "BODY LENGTH: " << request.GetBodyLength() << " , ALLOWED LENGTH: " << request.limit_size << std::endl;
-	if (request.GetBodyLength() < 10)
-		throw ErrorHttp("400 Bad Request", request.error["400"]);
-	else if ((int)request.GetBodyLength() > request.limit_size)
-	{
-		std::cout << "Too big" << std::endl;
-		throw ErrorHttp("413 Payload Too Large", request.error["413"]);
-	}
-	data = request.GetBody();
-
-	if (data.find("------WebKitFormBoundary") == std::string::npos) {
-		if (data.find("filename=") != std::string::npos) {
-			size_t name_start = data.find("filename=") + 10;
-			size_t name_end = data.find("\"", name_start);
-			name = data.substr(name_start, name_end - name_start );
-			content = data.substr(name_end + 1);
-		}
-		else
-			throw ErrorHttp("400 Bad Request", request.error["400"]);
-	}
-	else {
-		if (data.find("filename=") == std::string::npos)
-			throw ErrorHttp("400 Bad Request", request.error["400"]);
-		size_t name_start = data.find("filename=") + 10;
-		name = data.substr(name_start, data.find("\"", name_start) - name_start);
-
-		size_t content_type_start = data.find("\n\r\n") + 3;
-		size_t content_type_end = data.find("------WebKitFormBoundary", content_type_start);
-		content = data.substr(content_type_start, content_type_end - content_type_start - 2);
-	}
-
-	std::cout << "filename = " << name << "  content = " << content << std::endl;
-
-	if (name.find('.') == std::string::npos)
-		throw ErrorHttp("400 Bad Request", request.error["400"]);
-	if (name.substr(name.find('.')) != ".txt")
-		throw ErrorHttp("415 Unsupported Media Type", "/415");
-
-	if (request.GetHeaders()["CONTENT-TYPE"] != "") {
-
-		std::cout << "File received : " << std::endl;
-		std::string file_path = "./uploads/" + name;
-		std::cout <<  content << "$" << std::endl << "at" << file_path << "$" << std::endl;
-		std::ofstream ofs(file_path.c_str());
-		if (ofs.is_open()) {
-			ofs << content;
-			ofs.close();
-		} else {
-			std::cout << "error ici 2" << std::endl;
-			throw ErrorHttp("500 Internal Server Error", request.error["500"]);
-		}
-	}
-	else {
-		throw ErrorHttp("415 Unsupported Media Type", request.error["415"]);
-	}
-
-	std::string body_uploaded = _html_map[request.GetUri()];
-	return response = http_version + " 200 OK\nContent-Type: text/html\nContent-Length: " + ft_strlen(body_uploaded) +  "\n\n" + body_uploaded;
-}
-
 std::string Webserv::Delete(Request &request) {
 	std::string response = "";
-	std::string body = "";
-	std::string name = "./uploads/" + request.GetFullUri().substr(request.GetFullUri().rfind('/'));
-
-	std::cout << "Delete de : " << name << "$" << std::endl;
+	std::string name = "./www" + request.root + request.GetFullUri2();// + request.GetCgiExt();
+	std::cout << "DELEETE name: " << name << std::endl;
 	if (std::remove(name.c_str())) {
 		throw ErrorHttp("500 Internal Server Error", request.error["500"]);
 	}
