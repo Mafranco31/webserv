@@ -145,16 +145,25 @@ void Webserv::choose_server_block(Request &request)
 	}
 }
 
+
+
 void Webserv::recursive_location(Location &loc, Request &request)
 {
-	std::cout << "prefix: " << loc.prefix << std::endl;
-	std::cout << "URI: " << request.uri << std::endl;
+	//std::cout << "prefix: " << loc.prefix << std::endl;
+	//std::cout << "URI: " << request.uri << std::endl;
 
-	std::string uri_prefix = request.uri.substr(0, loc.prefix.length());
-	std::cout << "size uri_prefix: " << uri_prefix.length() << std::endl;
-	std::cout << "size tmp_prefix: " << tmp_prefix.length() << std::endl;
-	if (request.uri.substr(0, tmp_prefix.length()).length() < uri_prefix.length() && request.uri.length() <= loc.prefix.length())
+	//std::string uri_prefix = request.uri.substr(0, loc.prefix.length());
+	//std::cout << "size uri_prefix: " << uri_prefix.length() << std::endl;
+	//std::cout << "size tmp_prefix: " << tmp_prefix.length() << std::endl;
+	std::cout << "A veeer: " << request.uri << std::endl;
+	if (request.uri.find(loc.prefix) == 0 && loc.prefix.length() > tmp_prefix.length())
 	{
+		//std::cout << "size uri_prefix: " << uri_prefix.length() << std::endl;
+		//std::cout << "size tmp_prefix: " << tmp_prefix.length() << std::endl;
+		std::cout << "prefix: " << loc.prefix << std::endl;
+		std::cout << "URI: " << request.uri << std::endl;
+		std::string s1 = "hola";
+		std::cout << "Por probar: " << s1.find(s1) << std::endl;
 		tmp_prefix = loc.prefix;
 		request.location_block = &loc;
 		//std::cout << "request.location_block: " << request.location_block->prefix << std::endl;
@@ -287,7 +296,7 @@ void Webserv::location_configuration(Request &request)
 			std::string tmp = *((*it1).begin() + (*it1).size() - 1);
 			for (std::vector<std::string>::iterator it2 = (*it1).begin(); it2 != ((*it1).end() -1); it2++)
 			{
-				request.error[*it2] = request.root + tmp.substr(0, tmp.find("."));
+				request.error[*it2] =  "/www" + request.root + tmp.substr(0, tmp.find("."));
 				//std::cout << "path: " << request.error[*it2] << " error: " << *it2 << std::endl;
 			}
 		}

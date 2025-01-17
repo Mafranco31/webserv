@@ -22,12 +22,12 @@ class Server
 		struct sockaddr_in serveraddr;
 
 		//KQUEUE
-		struct kevent change_event;//, events[MAX_EVENTS];
-		void ManageConnexion(struct kevent *events);
+		//struct kevent change_event;//, events[MAX_EVENTS];
+		//void ManageConnexion(struct kevent *events);
 
 		//EPOLL
-		// struct epoll_event change_event; //events[MAX_EVENTS];
-		// void ManageConnexion(struct epoll_event *events);
+		 struct epoll_event change_event; //events[MAX_EVENTS];
+		 void ManageConnexion(struct epoll_event *events);
 
 		char **_env;
 		Webserv *_ws;
@@ -62,11 +62,11 @@ class Webserv {
 		int nev;
 
 		//EPOLL
-		//struct epoll_event events[MAX_EVENTS];
+		struct epoll_event events[MAX_EVENTS];
 
 		//KQUEUE
-		struct kevent events[MAX_EVENTS];
-		struct timespec timeout;
+		//struct kevent events[MAX_EVENTS];
+		//struct timespec timeout;
 
 		Webserv();
 		~Webserv();

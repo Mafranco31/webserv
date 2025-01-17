@@ -36,8 +36,8 @@ Webserv::Webserv () : serv(NULL), serv_n(0), tmp_prefix("") {
 	// Setting the timeout for the kqueue
 
 	//KQUEUE
-    timeout.tv_sec = 5;
-    timeout.tv_nsec = 0;
+	//timeout.tv_sec = 5;
+	//timeout.tv_nsec = 0;
 
 	std::cout << "Default Server constructor called" << std::endl;
 }
@@ -87,27 +87,28 @@ void	Server::Start( void ) {
 		throw Webserv::ErrorListeningSocket();
     }
 	//KQUEUE
+	/*
     // Macro to set the kqueue evenet as read and write
 	EV_SET(&change_event, serverfd, EVFILT_READ | EVFILT_WRITE, EV_ADD, 0, 0, NULL);
     if (kevent(ep, &change_event, 1, NULL, 0, NULL) == -1) {
         close(serverfd);
 		throw Webserv::ErrorInitializeKqueue();
     }
-
+	*/
 	//EPOLL
 	//change_event = {};
-	/*ft_memset(&change_event, 0, sizeof(change_event));
+	ft_memset(&change_event, 0, sizeof(change_event));
 	change_event.data.fd = serverfd;
 	change_event.events = EPOLLIN | EPOLLOUT;
 	if (epoll_ctl(ep, EPOLL_CTL_ADD, serverfd, &change_event) == -1)
 	{
 		close(serverfd);
 		throw Webserv::ErrorInitializeKqueue(); //Change name.
-	}*/
+	}
 	std::cout << "\033[1;32mServer started on port " << _port << "...\033[0m" << std::endl;
 }
 
-/*void	Webserv::Wait( void ) {
+void	Webserv::Wait( void ) {
 	nev = epoll_wait(ep, events, MAX_EVENTS, 1000); //Poner -1?
 	if (nev == -1)
 	{
@@ -194,15 +195,15 @@ void	Server::ManageConnexion( struct epoll_event *events) {
 		else if ((events[i].events & EPOLLOUT) && epmap[events[i].data.fd] != "" && std::find(fds.begin(), fds.end(), events[i].data.fd) != fds.end())
 		{
 			std::cout << "Ready to write!!!!!" << std::endl;
-			if (_ws->Send(events[i].data.fd, epmap[events[i].data.fd] , _env, events, ep) == 2)
+			if (_ws->Send(events[i].data.fd, epmap[events[i].data.fd] , _env) == 2)
 				continue ;
 			else
 				epmap[events[i].data.fd] = "";
 			break ;
 		}
 	}
-}*/
-
+}
+/*
 void	Webserv::Wait( void ) {
 	// waiting for event
 	nev = kevent(ep, NULL, 0, events, MAX_EVENTS, &timeout);
@@ -268,12 +269,11 @@ void	Server::ManageConnexion( struct kevent *events) {
 		}
 	}
 }
-
+*/
 void	Server::Stop( void ) {
 	close(serverfd);
 	std::cout << "\033[1;32mServer stopped on port " << _port << "...\033[0m" << std::endl;
 }
-
 //	Exceptions
 const char *Webserv::ErrorReadingHtmlPath::what()		const throw()	{	return "Error: could not access to the html directory.";	}
 
