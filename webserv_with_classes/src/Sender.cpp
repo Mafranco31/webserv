@@ -372,13 +372,15 @@ int	Webserv::Send(int clientfd, std::string buffer, char **env) {
 			else if (request.GetIsCgi()) {
 
 				if (_html_map[request.GetUri()] != "") {
+					std::cout << "PQTH : " << request.GetUri() << std::endl;
 					try {
 						response = ft_ex_cgi_get(request);
 					} catch (ErrorHttp &e) {
 						throw ;
 					}
-					if (send(clientfd, response.c_str(), response.size(), 0) == -1)
-						throw Webserv::ErrorSendingData();
+					if (send(clientfd, response.c_str(), response.size(), 0) == -1){
+						return 3;
+					}
 					return 1;
 				}
 				else
@@ -414,9 +416,9 @@ int	Webserv::Send(int clientfd, std::string buffer, char **env) {
 					} catch (ErrorHttp &e) {
 						throw ;
 					}
-					// std::cout << response << std::endl;
-					if (send(clientfd, response.c_str(), response.size(), 0) == -1)
-						throw Webserv::ErrorSendingData();
+					if (send(clientfd, response.c_str(), response.size(), 0) == -1){
+						return 3;
+					}
 					return 1;
 				}
 				else
@@ -436,8 +438,9 @@ int	Webserv::Send(int clientfd, std::string buffer, char **env) {
 		response = http_version + " " + e.what() + "\nContent-Type: text/html\nContent-Length: " + ft_strlen(body) + "\n\n" + body;
 		std::cout << "response: " << response << std::endl;
 	}
-	if (send(clientfd, response.c_str(), response.size(), 0) == -1)
-		throw Webserv::ErrorSendingData();
+	if (send(clientfd, response.c_str(), response.size(), 0) == -1){
+		return 3;
+	}
 	return 1;
 }
 

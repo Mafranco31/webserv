@@ -174,11 +174,11 @@ void	Server::ManageConnexion( struct epoll_event *events) {
 			else
 			{
 				std::string data = "";
-				while (bytes_read > 0){
+				// while (bytes_read > 0){
 					buffer[bytes_read] = '\0';
 					data.append(buffer);
-					bytes_read = read(events[i].data.fd, buffer, sizeof(buffer) - 1);
-				}
+				// 	bytes_read = read(events[i].data.fd, buffer, sizeof(buffer) - 1);
+				// }
 				std::cout << "Received from client " << events[i].data.fd << ": " << std::endl; //Create a structure for clients to identify them by a number, and not its fd.
 				std::cout << data << "$" << std::endl;
 				//if (epmap[events[i].data.fd] != ""){
@@ -195,10 +195,13 @@ void	Server::ManageConnexion( struct epoll_event *events) {
 		else if ((events[i].events & EPOLLOUT) && epmap[events[i].data.fd] != "" && std::find(fds.begin(), fds.end(), events[i].data.fd) != fds.end())
 		{
 			std::cout << "Ready to write!!!!!" << std::endl;
-			if (_ws->Send(events[i].data.fd, epmap[events[i].data.fd] , _env) == 2)
+			int ret =_ws->Send(events[i].data.fd, epmap[events[i].data.fd] , _env);
+			if (ret == 2)
 				continue ;
-			else
+			else if (ret == 1)
 				epmap[events[i].data.fd] = "";
+			else
+				close(events[i].events);
 			break ;
 		}
 	}

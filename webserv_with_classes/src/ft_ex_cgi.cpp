@@ -164,12 +164,12 @@ int ft_ex_cgi_post(Request request ) {
         int select_result = select(outPipe[0] + 1, &read_fds, NULL, NULL, &timeout);
         if (select_result < 0) {
             close(outPipe[0]);
-            return EXIT_FAILURE;
+            return 1;
         } else if (select_result == 0) {
             // Timeout occurred
             terminate_child(pid); // Kill the child process
             close(outPipe[0]);
-            return EXIT_FAILURE;
+            return 1;
         }
 
         // Read from the pipe to check if the child terminated

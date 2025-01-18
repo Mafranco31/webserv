@@ -35,7 +35,7 @@
 
 
 # define MAX_EVENTS 100
-# define BUFFER_SIZE 1000000
+# define BUFFER_SIZE 1000
 
 void	    *ft_memset(void *s, int c, size_t n);
 
