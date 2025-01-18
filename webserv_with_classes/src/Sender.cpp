@@ -378,7 +378,7 @@ int	Webserv::Send(int clientfd, std::string buffer, char **env) {
 					} catch (ErrorHttp &e) {
 						throw ;
 					}
-					if (send(clientfd, response.c_str(), response.size(), 0) == -1){
+					if (send(clientfd, response.c_str(), response.size(), 0) < 1){
 						return 3;
 					}
 					return 1;
@@ -416,7 +416,7 @@ int	Webserv::Send(int clientfd, std::string buffer, char **env) {
 					} catch (ErrorHttp &e) {
 						throw ;
 					}
-					if (send(clientfd, response.c_str(), response.size(), 0) == -1){
+					if (send(clientfd, response.c_str(), response.size(), 0) < 1){
 						return 3;
 					}
 					return 1;
@@ -438,7 +438,7 @@ int	Webserv::Send(int clientfd, std::string buffer, char **env) {
 		response = http_version + " " + e.what() + "\nContent-Type: text/html\nContent-Length: " + ft_strlen(body) + "\n\n" + body;
 		std::cout << "response: " << response << std::endl;
 	}
-	if (send(clientfd, response.c_str(), response.size(), 0) == -1){
+	if (send(clientfd, response.c_str(), response.size(), 0) < 1){
 		return 3;
 	}
 	return 1;
