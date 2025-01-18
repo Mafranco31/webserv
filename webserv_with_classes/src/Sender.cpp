@@ -38,6 +38,7 @@ void	Webserv::ReadFile( std::string file, std::string last_path) {
 	std::stringstream buffer;
     buffer << ifs.rdbuf();
 	ifs.close();
+	buffer << '\0';
 	if (file.find(".") != std::string::npos) {
 		_html_map[last_path + file.substr(0, file.find("."))] = buffer.str();
 	}
