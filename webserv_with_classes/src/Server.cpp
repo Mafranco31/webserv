@@ -140,7 +140,7 @@ void	Server::ManageConnexion( struct epoll_event *events) {
 			//	Add the new client socket to kqueue for monitoring
 			change_event.data.fd = clientfd;
 			change_event.events = EPOLLIN | EPOLLOUT;
-			epmap[events[clientfd].data.fd] = "";
+			epmap[clientfd] = "";
 			if (epoll_ctl(ep, EPOLL_CTL_ADD, clientfd, &change_event) == -1)
 			{
 				close(clientfd);
