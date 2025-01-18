@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Directory Files</title>
+    <style>
+        /* Basic Reset */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f7fc;
+            color: #333;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        h1 {
+            color: #4CAF50;
+            margin-bottom: 20px;
+        }
+
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            font-size: 16px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-bottom: 20px;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+
+        label {
+            font-size: 16px;
+            margin-right: 10px;
+        }
+
+        select {
+            padding: 8px;
+            font-size: 16px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            margin-bottom: 20px;
+        }
+
+        ul {
+            list-style-type: none;
+            padding: 0;
+            width: 80%;
+            max-width: 500px;
+            margin-top: 20px;
+        }
+
+        li {
+            background-color: #ffffff;
+            padding: 10px;
+            margin: 5px 0;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        li:hover {
+            background-color: #f1f1f1;
+        }
+
+        .file-item {
+            flex-grow: 1;
+        }
+
+        /* Error and info messages */
+        .error-message {
+            color: red;
+            font-size: 14px;
+            margin-top: 20px;
+        }
+
+        .info-message {
+            color: #444;
+            font-size: 14px;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Directory Files</h1>
+    <button id="loadFiles">Load Files</button>
+    
+    <!-- Dropdown list to select a file -->
+    <label for="fileDropdown">Choose a file:</label>
+    <select id="fileDropdown">
+        <option value="">-- Select a file --</option>
+    </select>
+
+    <ul id="fileList">
+        <!-- The file list will be dynamically populated here -->
+    </ul>
+
+    <button id="deleteFile">Delete Selected File</button>
+
+    <div class="error-message" id="errorMessage"></div>
+    <div class="info-message" id="infoMessage"></div>
+
+    <script>
+        // Load files from the server
+        document.getElementById('loadFiles').addEventListener('click', function() {
+            fetch('/cgi-bin/list.php') // Replace with the actual URL to your PHP script
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.json(); // Parse the response as JSON
+                })
+                .then(data => {
+                    const fileList = document.getElementById('fileList');
+                    const fileDropdown = document.getElementById('fileDropdown');
+                    const errorMessage = document.getElementById('errorMessage');
+                    const infoMessage = document.getElementById('infoMessage');
+
+                    // Clear existing content in the list and dropdown
+                    fileList.innerHTML = '';
+                    fileDropdown.innerHTML = '<option value="">-- Select a file --</option>';
+                    errorMessage.textContent = '';
+                    infoMessage.textContent = '';
+
+                    if (Array.isArray(data)) {
+                        // Populate the unordered list
+                        data.forEach(file => {
+                            const listItem = document.createElement('li');
+                            const fileText = document.createElement('span');
+                            fileText.className = 'file-item';
+                            fileText.textContent = file;
+                            listItem.appendChild(fileText);
+                            fileList.appendChild(listItem);
+
+                            // Populate the dropdown
+                            const option = document.createElement('option');
+                            option.value = file;
+                            option.textContent = file;
+                            fileDropdown.appendChild(option);
+                        });
+                        infoMessage.textContent = 'Files loaded successfully.';
+                    } else if (data.error) {
+                        errorMessage.textContent = `Error: ${data.error}`;
+                    }
+                })
+                .catch(error => {
+                    const errorMessage = document.getElementById('errorMessage');
+                    const fileList = document.getElementById('fileList');
+                    const fileDropdown = document.getElementById('fileDropdown');
+                    fileList.innerHTML = '';
+                    fileDropdown.innerHTML = '<option value="">-- Select a file --</option>';
+                    errorMessage.textContent = `Error fetching files: ${error.message}`;
+                });
+        });
+
+        // Delete the selected file
+        document.getElementById('deleteFile').addEventListener('click', function() {
+            const fileDropdown = document.getElementById('fileDropdown');
+            const selectedFile = fileDropdown.value;
+            const errorMessage = document.getElementById('errorMessage');
+            const infoMessage = document.getElementById('infoMessage');
+
+            if (!selectedFile) {
+                errorMessage.textContent = 'Please select a file to delete.';
+                return;
+            }
+
+            const path_to_delete = '/cgi-bin/uploads/' + selectedFile;
+            fetch(path_to_delete, {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(() => {
+                infoMessage.textContent = `File "${selectedFile}" deleted successfully.`;
+                location.reload(); // Refresh the page
+            })
+            .catch(error => {
+                errorMessage.textContent = `Error deleting file: ${error.message}`;
+            });
+        });
+    </script>
+
+    <button id="back-home-btn">Back to Home</button>
+
+    <script>
+        // Récupère l'origine actuelle (protocole + domaine + port)
+        const baseUrl = window.location.origin;
+
+        // Redirection dynamique vers la page d'accueil
+        document.getElementById('back-home-btn').addEventListener('click', function() {
+            window.location.href = `${baseUrl}/`;
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Story Book</title>
+    <link rel="icon" type="image/x-icon" href="favicon.ico">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin-top: 100px;
+        }
+
+        h1 {
+            color: #333;
+        }
+
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            background-color: #FFBF00;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #FFBF00;
+        }
+    </style>
+</head>
+<body>
+<!--
+    <h1>Story Book</h1>
+    <button onclick="window.location.href='http://localhost/story';">See First Story</button>
+    <h1>Send Platform</h1>
+    <button onclick="window.location.href='http://localhost/send';">Send us files &#9829</button>
+    <h1>List of files</h1>
+    <button onclick="window.location.href='http://localhost/file-list';">See files &#9829</button> -->
+
+    <h1>Story Book</h1>
+    <button id="story-btn">See First Story</button>
+
+    <h1>Send Platform</h1>
+    <button id="send-btn">Send us files &#9829;</button>
+
+    <h1>List of files</h1>
+    <button id="file-list-btn">Delete files &#9829;</button>
+
+    <script>
+        // Récupère l'origine actuelle (protocole + domaine + port)
+        const baseUrl = window.location.origin;
+
+        // Redirection dynamique pour le bouton "See First Story"
+        document.getElementById('story-btn').addEventListener('click', function() {
+            window.location.href = `${baseUrl}/story`;
+        });
+
+        // Redirection dynamique pour le bouton "Send us files"
+        document.getElementById('send-btn').addEventListener('click', function() {
+            window.location.href = `${baseUrl}/send`;
+        });
+
+        // Redirection dynamique pour le bouton "See files"
+        document.getElementById('file-list-btn').addEventListener('click', function() {
+            window.location.href = `${baseUrl}/delete`;
+        });
+    </script>
+</body>
+</html>
