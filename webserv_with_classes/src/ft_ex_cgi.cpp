@@ -152,6 +152,8 @@ int ft_ex_cgi_post(Request request ) {
 
         close(inPipe[1]);
 
+      
+
         fd_set read_fds;
         FD_ZERO(&read_fds);
         FD_SET(outPipe[0], &read_fds);
@@ -171,7 +173,6 @@ int ft_ex_cgi_post(Request request ) {
             close(outPipe[0]);
             return 1;
         }
-
         // Read from the pipe to check if the child terminated
         int status;
         waitpid(pid, &status, 0);

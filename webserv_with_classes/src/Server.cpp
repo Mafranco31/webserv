@@ -1,7 +1,4 @@
 #include "Server.hpp"
-#include <arpa/inet.h>
-#include <cerrno>
-#include <cstring>
 
 Server::Server(char **env, Webserv *ws, std::string host,std::string port, int &serv_ep, int &serv_nev): _env(env), _ws(ws), _host(host), ep(serv_ep), nev(serv_nev)
 {
@@ -75,7 +72,6 @@ void	Server::Start( void ) {
 
 	// Binding the socket to the address
 	if (bind(serverfd, (const struct sockaddr *)&serveraddr, sizeof(serveraddr)) == -1){
-		std::cout << strerror(errno) << std::endl;
         close(serverfd);
 		std::cout << "port = " << this->_port << std::endl;
 		throw  Webserv::ErrorBindingSocket();

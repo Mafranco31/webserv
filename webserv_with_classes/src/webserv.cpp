@@ -1,8 +1,5 @@
 #include "../inc/header.hpp"
 #include "../inc/Server.hpp"
-#include <cerrno>
-#include <cstring>
-
 int g_finish;
 
 void handler(int)

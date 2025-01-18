@@ -1,40 +1,67 @@
 #!/usr/bin/env php
-
 <?php
-// Set content type to plain text for easier debugging
-header('Content-Type: text/plain');
-
-// Get the raw input data from the request body
-$rawInput = file_get_contents('php://input');
-
-// Print the raw input
-echo "Raw Input:\n";
-echo $rawInput . "\n";  // Ensure there's a newline after the raw input
-
-// Optionally, you can also print some debugging information
-echo "\n\n--- Debugging Information ---\n";
-
-print_r($_SERVER);
-
-// Print request method
-echo "REQUEST_METHOD: " . $_SERVER['REQUEST_METHOD'] . "\n";
-
-// Print query parameters if present
-if (!empty($_GET)) {
-    echo "\nGET Parameters:\n";
-    print_r($_GET);
+// Ensure the script is being run via CGI
+if (php_sapi_name() !== 'cgi-fcgi') {
+    exit(5);
 }
 
-// Print POST parameters if present
-if (!empty($_POST)) {
-    echo "\nPOST Parameters:\n";
-    print_r($_POST);
+// Define the upload directory
+$uploadDir = __DIR__ . '/uploads/';
+if (!is_dir($uploadDir)) {
+    mkdir($uploadDir, 0755, true);
 }
 
-// Print uploaded files if present
-if (!empty($_FILES)) {
-    echo "\nUploaded Files:\n";
-    print_r($_FILES);
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    if (isset($_FILES['file'])) {
+        $file = $_FILES['file'];
+
+        // Check for upload errors
+        if ($file['error'] !== UPLOAD_ERR_OK) {
+            switch ($file['error']) {
+                case UPLOAD_ERR_OK:
+                    echo "No errors. The file uploaded successfully.<br>";
+                    break;
+                case UPLOAD_ERR_INI_SIZE:
+                    echo "Error: The uploaded file exceeds the 'upload_max_filesize' directive in php.ini.<br>";
+                    break;
+                case UPLOAD_ERR_FORM_SIZE:
+                    echo "Error: The uploaded file exceeds the 'MAX_FILE_SIZE' directive that was specified in the HTML form.<br>";
+                    break;
+                case UPLOAD_ERR_PARTIAL:
+                    echo "Error: The uploaded file was only partially uploaded.<br>";
+                    break;
+                case UPLOAD_ERR_NO_FILE:
+                    echo "Error: No file was uploaded.<br>";
+                    break;
+                case UPLOAD_ERR_NO_TMP_DIR:
+                    echo "Error: Missing a temporary folder.<br>";
+                    break;
+                case UPLOAD_ERR_CANT_WRITE:
+                    echo "Error: Failed to write file to disk.<br>";
+                    break;
+                case UPLOAD_ERR_EXTENSION:
+                    echo "Error: A PHP extension stopped the file upload.<br>";
+                    break;
+                default:
+                    echo "Unknown error occurred.<br>";
+            }
+            
+            exit(1);
+        }
+
+        // Move the uploaded file to the target directory
+        $destination = $uploadDir . basename($file['name']);
+        if (move_uploaded_file($file['tmp_name'], $destination)) {
+            exit(0);
+        } else {
+            exit(2);
+        }
+    } else {
+        exit(3);
+    }
+} else {
+    exit(4);
 }
+
 ?>
 

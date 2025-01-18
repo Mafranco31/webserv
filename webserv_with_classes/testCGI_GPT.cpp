@@ -129,7 +129,7 @@ std::string executePhpCgi(const std::string& scriptPath, const std::string& post
         std::vector<std::string> envVec;
         for (std::map<std::string, std::string>::const_iterator it = envVars.begin(); it != envVars.end(); ++it) {
             envVec.push_back(it->first + "=" + it->second);
-            std::cout << it->first << " = " << it->second << std::endl;
+            // std::cout << it->first << " = " << it->second << std::endl;
         }
         std::vector<char*> envp;
         for (size_t i = 0; i < envVec.size(); ++i) {
@@ -141,7 +141,7 @@ std::string executePhpCgi(const std::string& scriptPath, const std::string& post
         const char* args[] = {"php-cgi", scriptPath.c_str(), NULL};
 
         // Execute PHP-CGI
-        execve("/usr/local/bin/php-cgi", const_cast<char* const*>(args), envp.data());
+        execve("/usr/bin/php-cgi", const_cast<char* const*>(args), envp.data());
         perror("execve");
         exit(1);
     } else { // Parent process
@@ -173,11 +173,11 @@ std::string executePhpCgi(const std::string& scriptPath, const std::string& post
 
 int main(int argc, char **argv) {
     // Simulate receiving HTTP headers and POST data
-    std::string postData = "------WebKitFormBoundarypwU7QDV3czBcGsB6\nContent-Disposition: form-data; name=\"file\"; filename=\"test.txt\"\nContent-Type: text/plain\n\nyooo\nyooo\n\n------WebKitFormBoundarypwU7QDV3czBcGsB6--\n";
+    // std::string postData = "------WebKitFormBoundarypwU7QDV3czBcGsB6\nContent-Disposition: form-data; name=\"file\"; filename=\"test.txt\"\nContent-Type: text/plain\n\nyooo\nyooo\n\n------WebKitFormBoundarypwU7QDV3czBcGsB6--\n";
     (void)argc;
-    (void)argv;
-    // std::string postData = std::string(argv[1]);
-    std::string headers = "Content-Type: multipart/form-data;boundary=----WebKitFormBoundarypwU7QDV3czBcGsB6\r\nContent-Length: "+std::string(ft_itoa(postData.size()))+"\r\n\r\n";
+    // (void)argv;
+    std::string postData = std::string(argv[1]);
+    std::string headers = "Content-Type: multipart/form-data;boundary=----WebKitFormBoundarypwU7QDV3czBcGsB6\r\nContent-Length: 55670\r\n\r\n";
     
     std::cout << "PostData = " << postData << "$" << std::endl;
     // std::cout << "PostData2= " << postData2 << "$" << std::endl;
