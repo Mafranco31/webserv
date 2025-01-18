@@ -144,6 +144,10 @@ void Webserv::choose_server_block(Request &request)
 			return ;
 		}
 	}
+	if (request.serv_block == NULL)
+	{
+		throw ErrorHttp("400 Bad Request", request.error["400"]);
+	}
 }
 
 
@@ -352,14 +356,14 @@ int	Webserv::Send(int clientfd, std::string buffer, char **env) {
 		choose_server_block(request);
 		//std::cout << "arrives here1" << std::endl;
 		server_configuration(request);
-
+		std::cout << "1" << std::endl;
 		choose_location_block(request);
-
+		std::cout << "2" << std::endl;
 		// for (std::map<std::string, std::string>::iterator it = _html_map.begin(); it != _html_map.end(); it++) {
 		// 	std::cout << it->first << " : "  << std::endl;
 		// }
 
-		std::cout << "location block: " << request.serv_block->location_blocks << std::endl;
+		//std::cout << "location block: " << request.serv_block->location_blocks << std::endl;
 		//std::cout << "location block: " << request.location_block->prefix << std::endl;
 		if (request.serv_block->location_blocks != 0 && request.location_block != NULL)
 			location_configuration(request);
