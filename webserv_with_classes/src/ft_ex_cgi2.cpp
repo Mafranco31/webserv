@@ -2,13 +2,7 @@
 
 class ErrorHttp;
 
-const int TIMEOUT = 2; // Timeout in seconds
-
-void terminate_child(pid_t child_pid) {
-    kill(child_pid, SIGKILL); // Kill the child process
-}
-
-std::string ft_ex_cgi_get(Request request ) {
+std::string ft_ex_cgi_get2(Request request ) {
     std::string scriptPath = "." + request.GetUri() + request.GetCgiExt();
     std::string postData = request.GetBody();
     std::map<std::string, std::string> envVars;
@@ -32,6 +26,7 @@ std::string ft_ex_cgi_get(Request request ) {
         std::vector<std::string> envVec;
         for (std::map<std::string, std::string>::const_iterator it = envVars.begin(); it != envVars.end(); ++it) {
             envVec.push_back(it->first + "=" + it->second);
+            std::cout << it->first << " = " << it->second << std::endl;
         }
         std::vector<char*> envp;
         for (size_t i = 0; i < envVec.size(); ++i) {
@@ -45,54 +40,20 @@ std::string ft_ex_cgi_get(Request request ) {
         exit(1);
     } else {
         // Parent process
-        close(pfd[1]); // Close write end
+        close(pfd[1]);  // Close write end
         char buffer[BUFFER_SIZE];
         std::string response;
         ssize_t bytesRead;
-
-        // Timeout monitoring
-        fd_set read_fds;
-        struct timeval timeout;
-        timeout.tv_sec = TIMEOUT;
-        timeout.tv_usec = 0;
-
-        FD_ZERO(&read_fds);
-        FD_SET(pfd[0], &read_fds);
-
-        bool timeout_reached = false;
-        while (true) {
-            int ret = select(pfd[0] + 1, &read_fds, NULL, NULL, &timeout);
-            if (ret > 0) {
-                if (FD_ISSET(pfd[0], &read_fds)) {
-                    bytesRead = read(pfd[0], buffer, BUFFER_SIZE);
-                    if (bytesRead > 0) {
-                        response.append(buffer, bytesRead);
-                    } else {
-                        break; // Finished reading
-                    }
-                }
-            } else if (ret == 0) {
-                // Timeout reached
-                timeout_reached = true;
-                break;
-            } else {
-                // Error in select()
-                throw ErrorHttp("500 Internal Server Error", request.error["500"]);
-            }
+        while ((bytesRead = read(pfd[0], buffer, BUFFER_SIZE)) > 0) {
+            response.append(buffer, bytesRead);
         }
 
-        close(pfd[0]); // Close read end
-        int status;
-
-        if (timeout_reached) {
-            terminate_child(pid);
+        close(pfd[0]); // Close read end after done
+        int statut;
+        // Wait for the child process to finish
+        waitpid(pid, &statut, 0);
+        if (statut != 0)
             throw ErrorHttp("500 Internal Server Error", request.error["500"]);
-        }
-
-        waitpid(pid, &status, 0); // Wait for the child process
-        if (WIFEXITED(status) && WEXITSTATUS(status) != 0) {
-            throw ErrorHttp("500 Internal Server Error", request.error["500"]);
-        }
 
         std::string tot_response = "HTTP/1.1 200 OK\r\n" + response;
         std::cout << "Response: " << tot_response << std::endl;
@@ -101,7 +62,7 @@ std::string ft_ex_cgi_get(Request request ) {
     }
 }
 
-int ft_ex_cgi_post(Request request ) {
+int ft_ex_cgi_post2(Request request ) {
     std::string scriptPath = "." + request.GetUri() + request.GetCgiExt();
     std::string postData = request.GetBody();
     std::map<std::string, std::string> envVars;
@@ -143,7 +104,7 @@ int ft_ex_cgi_post(Request request ) {
         const char* args[] = {"php-cgi", scriptPath.c_str(), NULL};
 
         execve("/usr/bin/php-cgi", const_cast<char* const*>(args), envp.data());
-        exit(1);
+        exit(2);
     } else {
         close(inPipe[0]);
         close(outPipe[1]);
@@ -152,30 +113,26 @@ int ft_ex_cgi_post(Request request ) {
 
         close(inPipe[1]);
 
-        fd_set read_fds;
-        FD_ZERO(&read_fds);
-        FD_SET(outPipe[0], &read_fds);
-
-        struct timeval timeout;
-        timeout.tv_sec = TIMEOUT;
-        timeout.tv_usec = 0;
-
-        // Wait for either the pipe to receive data or the timeout
-        int select_result = select(outPipe[0] + 1, &read_fds, NULL, NULL, &timeout);
-        if (select_result < 0) {
-            close(outPipe[0]);
-            return EXIT_FAILURE;
-        } else if (select_result == 0) {
-            // Timeout occurred
-            terminate_child(pid); // Kill the child process
-            close(outPipe[0]);
-            return EXIT_FAILURE;
+        // Read response from PHP-CGI
+        char buffer[BUFFER_SIZE];
+        std::string response;
+        ssize_t bytesRead;
+        while ((bytesRead = read(outPipe[0], buffer, BUFFER_SIZE)) > 0) {
+            if (bytesRead == -1) {
+                throw ErrorHttp("500 Internal Server Error", request.error["500"]);
+            }
+            response.append(buffer, bytesRead);
         }
-
-        // Read from the pipe to check if the child terminated
-        int status;
-        waitpid(pid, &status, 0);
         close(outPipe[0]);
-        return status;
+
+        int statut;
+        // Wait for the child process to finish
+        waitpid(pid, &statut, 0);
+        // if (statut != 256 && statut != 0){
+        if (statut != 0){
+            // std::cout << "statut: " << statut << std::endl;
+            throw ErrorHttp("500 Internal Server Error", request.error["500"]);
+        }
+        return statut;
     }
 }
