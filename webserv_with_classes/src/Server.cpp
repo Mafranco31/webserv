@@ -157,6 +157,8 @@ void	Server::ManageConnexion( struct epoll_event *events) {
 			ssize_t bytes_read = read(events[i].data.fd, buffer, sizeof(buffer) - 1);
 			if (bytes_read == 0)
 			{
+				std::vector<int>::iterator pos_fd = std::find(fds.begin(), fds.end(), events[i].data.fd);
+				fds.erase(pos_fd);
 				std::cout << "\033[1;31mClient " << events[i].data.fd << " disconnected\033[0m" << std::endl;
 				change_event.data.fd = events[i].data.fd;
 				change_event.events = EPOLLIN | EPOLLOUT;

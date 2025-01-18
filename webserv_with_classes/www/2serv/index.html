@@ -19,7 +19,7 @@
         button {
             padding: 10px 20px;
             font-size: 16px;
-            background-color: #4CAF50;
+            background-color: #FFBF00;
             color: white;
             border: none;
             border-radius: 5px;
@@ -27,12 +27,12 @@
         }
 
         button:hover {
-            background-color: #45a049;
+            background-color: #FFBF00;
         }
     </style>
 </head>
 <body>
-<!-- 
+<!--
     <h1>Story Book</h1>
     <button onclick="window.location.href='http://localhost/story';">See First Story</button>
     <h1>Send Platform</h1>
@@ -47,7 +47,7 @@
     <button id="send-btn">Send us files &#9829;</button>
 
     <h1>List of files</h1>
-    <button id="file-list-btn">See files &#9829;</button>
+    <button id="file-list-btn">Delete files &#9829;</button>
 
     <script>
         // Récupère l'origine actuelle (protocole + domaine + port)
@@ -65,7 +65,7 @@
 
         // Redirection dynamique pour le bouton "See files"
         document.getElementById('file-list-btn').addEventListener('click', function() {
-            window.location.href = `${baseUrl}/file-list`;
+            window.location.href = `${baseUrl}/delete`;
         });
     </script>
 </body>

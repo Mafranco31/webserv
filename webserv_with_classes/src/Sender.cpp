@@ -323,6 +323,7 @@ void Webserv::location_configuration(Request &request)
 	if (map.find("limit_except") != map.end())
 	{
 		std::cout << "\033[32mThe method: \033[0m" << request.GetMethod() << std::endl;
+		std::cout << "map " << map["limit_except"][0] << std::endl;
 		if (std::find(map["limit_except"].begin(), map["limit_except"].end(), request.GetMethod()) == map["limit_except"].end())
 		{
 			std::cout << "method not allowed" << std::endl;
