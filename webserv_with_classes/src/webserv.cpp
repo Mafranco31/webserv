@@ -19,13 +19,15 @@ int main(int argc, char **argv, char **env) {
 	signal(SIGSTOP, handler);
 	signal(SIGINT,  handler);
 	signal(SIGQUIT, handler);
-    if (argc < 2) {
-        argv[1] = (char *)"../web_parse/linux.conf";
-    }
+	std::string file("./conf/3.conf");
 	if (argc > 2)
 	{
 		std::cout << "Error: Too many arguments." << std::endl;
 		return (0);
+	}
+	else if (argc == 2)
+	{
+		file = std::string(argv[1]);
 	}
 	Webserv server;
 	try
@@ -36,7 +38,7 @@ int main(int argc, char **argv, char **env) {
 		server.env = env;
 		//server.sender._ws = &server;
 
-		server.parse(std::string(argv[1]));
+		server.parse(file);
 		server.data_structure();
 		//server.check();
 		std::cout << "parsing done" << std::endl;
