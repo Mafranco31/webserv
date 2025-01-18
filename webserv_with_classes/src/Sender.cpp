@@ -68,7 +68,7 @@ std::string	Webserv::CreateAutoIndex(Request &request)
 
 	if (dir == NULL) {
 		std::cerr << "\033[31m" << "Error: could not open " << dirName << "\033[0m" << std::endl;
-		return "";
+		throw ErrorHttp("404 Not Found", request.error["404"]);
 	}
 	if (dirName[0] != '/')
 		dirName = "/" + dirName;
@@ -217,9 +217,9 @@ void Webserv::server_configuration(Request &request)
 			//std::cout << "Index again: " << request.index << std::endl;
 			if (_html_map.find(request.index) != _html_map.end())
 			{
-				_html_map[("/")] = _html_map[request.index]; //Si el request a "/" redirige al contenido de index.
+				 //Si el request a "/" redirige al contenido de index.
 				if (request.uri[request.uri.size() - 1] == '/')
-					request.uri = "/";
+					request.index_uri = _html_map[request.index];
 				break ;
 			}
 		}
@@ -279,9 +279,8 @@ void Webserv::location_configuration(Request &request)
 			if (_html_map.find(request.index) != _html_map.end())
 			{
 				//std::cout << "inside: " << request.index << std::endl;
-				_html_map["/"] = _html_map[request.index];
 				if (request.uri[request.uri.size() - 1] == '/')
-					request.uri = "/";
+					request.index_uri = _html_map[request.index];
 				break ;
 			}
 		}
@@ -370,6 +369,18 @@ int	Webserv::Send(int clientfd, std::string buffer, char **env) {
 			{
 				response = http_version + " 301 Moved Permanently\nLocation: " + request.redir + "\nContent-Length: 0\n\n";
 			}
+			else if (request.uri[request.uri.size() - 1] == '/')
+			{
+				std::cout << "AUTODINDEEEEEEX" << std::endl;
+				std::cout << request.autoindex << std::endl;
+				if (request.index_uri != "")
+					body = request.index_uri;
+				else if (request.autoindex == "on")
+					body = CreateAutoIndex(request);
+				else
+					throw ErrorHttp("404 Not Found", request.error["404"]);
+				response = http_version  + " 200 OK\nContent-Type: text/html\nContent-Length: " + ft_strlen(body) + "\n\n" + body;
+			}
 			else if (request.GetIsCgi()) {
 
 				if (_html_map[request.GetUri()] != "") {
@@ -389,11 +400,6 @@ int	Webserv::Send(int clientfd, std::string buffer, char **env) {
 			}
 			else if (_html_map[request.GetUri()] != "") {
 				body = _html_map[request.GetUri()];
-				response = http_version  + " 200 OK\nContent-Type: text/html\nContent-Length: " + ft_strlen(body) + "\n\n" + body;
-			}
-			else if (request.autoindex == "on")
-			{
-				body = CreateAutoIndex(request);
 				response = http_version  + " 200 OK\nContent-Type: text/html\nContent-Length: " + ft_strlen(body) + "\n\n" + body;
 			}
 			else

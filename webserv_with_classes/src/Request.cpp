@@ -1,6 +1,6 @@
 #include "Request.hpp"
 
-Request::Request ( void ) : body(""), body_length(0), serv_block(NULL), location_block(NULL), root(""), index(""), redir(""), autoindex("off"), limit_size(100000) {
+Request::Request ( void ) : body(""), body_length(0), serv_block(NULL), location_block(NULL), root(""), index(""), redir(""), autoindex("off"), index_uri(""), limit_size(100000) {
 	error["400"] = "";
 	error["404"] = "";
 	error["405"] = "";
