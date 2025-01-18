@@ -345,6 +345,7 @@ int	Webserv::Send(int clientfd, std::string buffer, char **env) {
 
 	try {
 		//std::cout << "\033[34m";
+		
 		if (request.Parse(buffer, clientfd) == 2)
 			return 2;
 		choose_server_block(request);
@@ -352,6 +353,11 @@ int	Webserv::Send(int clientfd, std::string buffer, char **env) {
 		server_configuration(request);
 
 		choose_location_block(request);
+
+		// for (std::map<std::string, std::string>::iterator it = _html_map.begin(); it != _html_map.end(); it++) {
+		// 	std::cout << it->first << " : "  << std::endl;
+		// }
+
 		std::cout << "location block: " << request.serv_block->location_blocks << std::endl;
 		//std::cout << "location block: " << request.location_block->prefix << std::endl;
 		if (request.serv_block->location_blocks != 0 && request.location_block != NULL)
@@ -364,14 +370,19 @@ int	Webserv::Send(int clientfd, std::string buffer, char **env) {
 				response = http_version + " 301 Moved Permanently\nLocation: " + request.redir + "\nContent-Length: 0\n\n";
 			}
 			else if (request.GetIsCgi()) {
-				try {
-					response = ft_ex_cgi_get(request);
-				} catch (ErrorHttp &e) {
-					throw ;
+
+				if (_html_map[request.GetUri()] != "") {
+					try {
+						response = ft_ex_cgi_get(request);
+					} catch (ErrorHttp &e) {
+						throw ;
+					}
+					if (send(clientfd, response.c_str(), response.size(), 0) == -1)
+						throw Webserv::ErrorSendingData();
+					return 1;
 				}
-				if (send(clientfd, response.c_str(), response.size(), 0) == -1)
-					throw Webserv::ErrorSendingData();
-				return 1;
+				else
+					throw ErrorHttp("404 Not Found", request.error["404"]);
 			}
 			else if (_html_map[request.GetUri()] != "") {
 				body = _html_map[request.GetUri()];
@@ -390,22 +401,26 @@ int	Webserv::Send(int clientfd, std::string buffer, char **env) {
 			if (request.limit_size < (int)request.GetBodyLength())
 				throw ErrorHttp("413 Request Entity Too Large", request.error["413"]);
 			if (request.GetIsCgi()) {
-				try {
-					if (!ft_ex_cgi_post(request)) {
-						body = _html_map["upload_success.html"];
-						response = http_version + " 200 Ok\nContent-Type: text/html\nContent-Length: " + ft_strlen(body) +  "\n\n" + body;
+				if (_html_map[request.GetUri()] != "") {
+					try {
+						if (!ft_ex_cgi_post(request)) {
+							body = _html_map["upload_success.html"];
+							response = http_version + " 200 Ok\nContent-Type: text/html\nContent-Length: " + ft_strlen(body) +  "\n\n" + body;
+						}
+						else {
+							body = _html_map["upload_fail.html"];
+							response = http_version + " 400 Bad Request\nContent-Type: text/html\nContent-Length: " + ft_strlen(body) +  "\n\n" + body;
+						}
+					} catch (ErrorHttp &e) {
+						throw ;
 					}
-					else {
-						body = _html_map["upload_fail.html"];
-						response = http_version + " 400 Bad Request\nContent-Type: text/html\nContent-Length: " + ft_strlen(body) +  "\n\n" + body;
-					}
-				} catch (ErrorHttp &e) {
-					throw ;
+					// std::cout << response << std::endl;
+					if (send(clientfd, response.c_str(), response.size(), 0) == -1)
+						throw Webserv::ErrorSendingData();
+					return 1;
 				}
-				// std::cout << response << std::endl;
-				if (send(clientfd, response.c_str(), response.size(), 0) == -1)
-					throw Webserv::ErrorSendingData();
-				return 1;
+				else
+					throw ErrorHttp("404 Not Found", request.error["404"]);
 			}
 			else
 				throw ErrorHttp("400 Bad Request", request.error["400"]);

@@ -1,7 +1,7 @@
 #include "Request.hpp"
 
 Request::Request ( void ) : body(""), body_length(0), serv_block(NULL), location_block(NULL), root(""), index(""), redir(""), autoindex("off"), limit_size(100000) {
-	error["400"] = "/errwww/400";
+	error["400"] = "";
 	error["404"] = "";
 	error["405"] = "";
 	error["415"] = "";
@@ -21,6 +21,7 @@ int	Request::Parse ( std::string buffer, int clientfd) {
 	content = buffer;
 	client_socket = clientfd;
 	try {
+		
 		ParseFirstLine();
 		ParseHeader();
 		IsCGI();
@@ -41,11 +42,15 @@ void	Request::IsCGI() {
 	if (uri.find("/cgi-bin/") != std::string::npos)
 	{
 		is_cgi = 1;
-		cgi_ext = uri.substr(uri.rfind('.'));
+		// size_t pos_point = uri.rfind('.');
+		// if (pos_point != std::string::npos)
+		// 	cgi_ext = uri.substr(pos_point);
+		// else
+		// 	throw ErrorHttp("404 Not Found", error["404"]);
 	}
 	else {
 		is_cgi = 0;
-		cgi_ext = "";
+		// cgi_ext = "";
 	}
 }
 

@@ -9,7 +9,7 @@ void terminate_child(pid_t child_pid) {
 }
 
 std::string ft_ex_cgi_get(Request request ) {
-    std::string scriptPath = "." + request.GetUri() + request.GetCgiExt();
+    std::string scriptPath = "." + request.GetUri() + ".php";//request.GetCgiExt();
     std::string postData = request.GetBody();
     std::map<std::string, std::string> envVars;
     envVars["REQUEST_METHOD"] = request.GetMethod();
@@ -102,7 +102,7 @@ std::string ft_ex_cgi_get(Request request ) {
 }
 
 int ft_ex_cgi_post(Request request ) {
-    std::string scriptPath = "." + request.GetUri() + request.GetCgiExt();
+    std::string scriptPath = "." + request.GetUri() + ".php";//request.GetCgiExt();
     std::string postData = request.GetBody();
     std::map<std::string, std::string> envVars;
     std::string contentType1 = request.GetHeaders()["CONTENT-TYPE"];

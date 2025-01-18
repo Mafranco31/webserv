@@ -19,7 +19,7 @@ class Request {
 		size_t body_length;
 		std::map<std::string, std::string> headers;
 		int is_cgi;
-		std::string cgi_ext;
+		// std::string cgi_ext;
 		std::map<std::string, std::string>  _marg;
 		int	nb_args;
 		int client_socket;
@@ -70,7 +70,7 @@ class Request {
 		std::string GetBody( void ) const {	return body;	}
 		size_t GetBodyLength( void ) const {	return body_length;	}
 		int GetIsCgi( void ) const { return is_cgi; }
-		std::string GetCgiExt (void) const {return cgi_ext;}
+		// std::string GetCgiExt (void) const {return cgi_ext;}
 		int GetNbArgs( void ) const { return nb_args; }
 		std::map<std::string, std::string> GetMarg( void ) const {	return _marg;	}
 
