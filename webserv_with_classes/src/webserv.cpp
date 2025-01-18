@@ -19,7 +19,7 @@ int main(int argc, char **argv, char **env) {
 	signal(SIGSTOP, handler);
 	signal(SIGINT,  handler);
 	signal(SIGQUIT, handler);
-	std::string file("./conf/3.conf");
+	std::string file("./conf/1.conf");
 	if (argc > 2)
 	{
 		std::cout << "Error: Too many arguments." << std::endl;
