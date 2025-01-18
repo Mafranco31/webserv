@@ -1,7 +1,4 @@
 #include "Server.hpp"
-#include <arpa/inet.h>
-#include <cerrno>
-#include <cstring>
 
 Server::Server(char **env, Webserv *ws, std::string host,std::string port, int &serv_ep, int &serv_nev): _env(env), _ws(ws), _host(host), ep(serv_ep), nev(serv_nev)
 {
@@ -75,7 +72,6 @@ void	Server::Start( void ) {
 
 	// Binding the socket to the address
 	if (bind(serverfd, (const struct sockaddr *)&serveraddr, sizeof(serveraddr)) == -1){
-		std::cout << strerror(errno) << std::endl;
         close(serverfd);
 		std::cout << "port = " << this->_port << std::endl;
 		throw  Webserv::ErrorBindingSocket();
@@ -172,6 +168,15 @@ void	Server::ManageConnexion( struct epoll_event *events) {
 			{
 				//std::cout << strerror(errno) << std::endl;
 				std::cerr << "Error: Could not read in the socket." << std::endl;
+				std::vector<int>::iterator pos_fd = std::find(fds.begin(), fds.end(), events[i].data.fd);
+				fds.erase(pos_fd);
+				change_event.data.fd = events[i].data.fd;
+				change_event.events = EPOLLIN | EPOLLOUT;
+				if (epoll_ctl(ep, EPOLL_CTL_DEL, events[i].data.fd, &change_event) == -1)
+					std::cout << "Couldn't delete event" << std::endl;
+				// _ws->Send(events[i].data.fd, epmap[events[i].data.fd], _env);
+				epmap[events[i].data.fd] = "";
+				close(events[i].data.fd);
 			}
 			else
 			{
@@ -202,8 +207,17 @@ void	Server::ManageConnexion( struct epoll_event *events) {
 				continue ;
 			else if (ret == 1)
 				epmap[events[i].data.fd] = "";
-			else
-				close(events[i].events);
+			else {
+				std::vector<int>::iterator pos_fd = std::find(fds.begin(), fds.end(), events[i].data.fd);
+				fds.erase(pos_fd);
+				change_event.data.fd = events[i].data.fd;
+				change_event.events = EPOLLIN | EPOLLOUT;
+				if (epoll_ctl(ep, EPOLL_CTL_DEL, events[i].data.fd, &change_event) == -1)
+					std::cout << "Couldn't delete event" << std::endl;
+				// _ws->Send(events[i].data.fd, epmap[events[i].data.fd], _env);
+				epmap[events[i].data.fd] = "";
+				close(events[i].data.fd);
+			}
 			break ;
 		}
 	}

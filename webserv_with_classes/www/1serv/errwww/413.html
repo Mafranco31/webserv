@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>413 Request Entity Too Large</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background: linear-gradient(45deg, #ff006e, #8338ec, #3a86ff);
+            animation: bg-animation 10s infinite;
+            color: white;
+            overflow: hidden;
+        }
+
+        @keyframes bg-animation {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        .error-code {
+            font-size: 10rem;
+            font-weight: bold;
+            margin: 1rem 0;
+            animation: pop 1s infinite alternate;
+        }
+
+        @keyframes pop {
+            0% { transform: scale(1); color: #ffbe0b; }
+            100% { transform: scale(1.2); color: #fb5607; }
+        }
+
+        .message {
+            font-size: 2rem;
+            margin: 1rem 0;
+            text-shadow: 2px 2px 4px #000000;
+        }
+
+        .suggestion {
+            font-size: 1.2rem;
+            margin-top: 2rem;
+        }
+
+        button {
+            font-size: 1.5rem;
+            padding: 1rem 2rem;
+            margin-top: 2rem;
+            background: #06d6a0;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            animation: bounce 2s infinite;
+            color: black;
+            font-weight: bold;
+        }
+
+        button:hover {
+            background: #118ab2;
+            color: white;
+        }
+
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+            40% { transform: translateY(-15px); }
+            60% { transform: translateY(-8px); }
+        }
+
+        .emoji {
+            font-size: 5rem;
+            margin: 2rem 0;
+            animation: spin 4s linear infinite;
+        }
+
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="content">
+        <div class="error-code">413</div>
+        <div class="message">Oops! Your file is TOO LARGE!</div>
+        <div class="emoji">📦💥</div>
+        <div class="suggestion">
+            Try compressing your file, or splitting it into smaller chunks.<br>
+            If you're really stuck, <a href="mailto:support@example.com" style="color: #ffd60a;">contact support</a>.
+        </div>
+        <a href="/">Return to Home</a>
+    </div>
+</body>
+</html>

@@ -41,7 +41,7 @@ class Request {
 		std::string redir;
 		std::string autoindex;
 		std::string index_uri;
-		int limit_size;
+		long int limit_size;
 
 		std::map<std::string, std::string> error;
 

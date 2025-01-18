@@ -1,6 +1,0 @@
-scp -r -P 4233 ./git_repo mafranco@localhost:/home/mafranco/Desktop
-
-mdp carl paswd3
-mdp jhon paswd2
-
-mdp mafranco paswdmafranco

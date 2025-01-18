@@ -408,7 +408,7 @@ int	Webserv::Send(int clientfd, std::string buffer, char **env) {
 
 		}
 		else if (request.GetMethod() == "POST") {
-			if (request.limit_size < (int)request.GetBodyLength())
+			if (request.limit_size < (long int)request.GetBodyLength())
 				throw ErrorHttp("413 Request Entity Too Large", request.error["413"]);
 			if (request.GetIsCgi()) {
 				if (_html_map[request.GetUri()] != "") {
